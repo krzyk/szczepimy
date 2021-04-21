@@ -61,7 +61,8 @@ public class TableFormatter {
                             <thead>
                                 <tr>
                                     <th>Miasto</th>
-                                    <th>Godzina</th>
+                                    <th>Data</th>
+                                    <th>Godz.</th>
                                     <th>Rodzaj</th>
                                     <th>Adres</th>
                                     <th>Umów</th>
@@ -78,6 +79,7 @@ public class TableFormatter {
                                     <tr>
                                         <td>%s</td>
                                         <td data-order="%d" data-slot-id="%s">%s</td>
+                                        <td>%s</td>
                                         <td data-order="%d">%s</td>
                                         <td>%s</td>
                                         <td>
@@ -91,10 +93,13 @@ public class TableFormatter {
                     slot.servicePoint().place(),
                     slot.startAt().getEpochSecond(),
                     slot.id(),
-                    DateTimeFormatter.ofPattern("d MMMM, ;EEEE|HH:mm", Locale.forLanguageTag("pl")).format(
+                    DateTimeFormatter.ofPattern("d MMMM, ;EEEE|", Locale.forLanguageTag("pl")).format(
                         LocalDateTime.ofInstant(slot.startAt(), ZoneId.of("Europe/Warsaw"))
                     ).replace(";", "<small>")
-                        .replace("|", "</small><br/>"),
+                        .replace("|", "</small>"),
+                    DateTimeFormatter.ofPattern("HH:mm", Locale.forLanguageTag("pl")).format(
+                        LocalDateTime.ofInstant(slot.startAt(), ZoneId.of("Europe/Warsaw"))
+                    ),
 //                    slot.startAt().getEpochSecond(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(
 //                        LocalDateTime.ofInstant(slot.startAt(), ZoneId.of("Europe/Warsaw"))
 //                    ),
