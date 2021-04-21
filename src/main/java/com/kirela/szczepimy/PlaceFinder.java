@@ -5,8 +5,12 @@ import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class PlaceFinder {
+    private static final Logger LOG = LogManager.getLogger(PlaceFinder.class);
+
     private final Map<NormalizedPlaceVoivodeship, String> places;
 
     public PlaceFinder() {
@@ -30,13 +34,13 @@ public class PlaceFinder {
     }
 
     public String findInAddress(String name, Voivodeship voivodeship) {
+        final String maybeCity = name.substring(name.lastIndexOf(',') + 1).trim();
 
-        NormalizedPlaceVoivodeship normalizedPlace = key(
-            name.substring(name.lastIndexOf(',') + 1).trim(),
-            voivodeship
-        );
+        NormalizedPlaceVoivodeship normalizedPlace = key(maybeCity, voivodeship);
         if (!places.containsKey(normalizedPlace)) {
-            throw new IllegalArgumentException("Can't find place %s in %s".formatted(name, voivodeship.readable()));
+            LOG.error("Can't find place %s in %s".formatted(name, voivodeship.readable()));
+            return maybeCity;
+//            throw new IllegalArgumentException("Can't find place %s in %s".formatted(name, voivodeship.readable()));
         }
         return places.get(normalizedPlace);
     }
@@ -47,6 +51,7 @@ public class PlaceFinder {
                 .replace("m. st. ", "")
                 .replace("pawlowice/pniowek", "pniowek")
                 .replaceAll("([^ ]+) [0-9]+$", "$1")
+                .replaceAll("czerwiensk odrzanski", "czerwiensk")
                 .replaceAll("gdansk .+", "gdansk")
                 .replaceAll("krakow-.+", "krakow")
                 .replaceAll("warszawa .+", "warszawa")

@@ -152,6 +152,9 @@ public class Main {
             new SearchCity("Gorzów Wielkopolski", Voivodeship.LUBUSKIE, 7),
             new SearchCity("Łódź", Voivodeship.ŁÓDZKIE, 7),
             new SearchCity("Białystok", Voivodeship.PODLASKIE, 7),
+            new SearchCity("Łomża", Voivodeship.PODLASKIE, 7),
+            new SearchCity("Jedwabne", Voivodeship.PODLASKIE, 7),
+            new SearchCity("Piątnica", Voivodeship.PODLASKIE, 7),
             new SearchCity("Gdańsk", Voivodeship.POMORSKIE, 7),
             new SearchCity("Sopot", Voivodeship.POMORSKIE, 7*2),
             new SearchCity("Gdynia", Voivodeship.POMORSKIE, 7*2),
@@ -174,8 +177,8 @@ public class Main {
                     VaccineType.AZ
                     //                    VaccineType.JJ
                 )) {
-                    for (int weeks = 1; weeks <= 5; weeks++) {
-                        Thread.sleep(3000);
+                    for (int weeks = 1; weeks <= 5; weeks += 2) {
+                        Thread.sleep(2000 + (int)(Math.random() * 3000));
                         var search = new Search(
                             new DateRange(LocalDate.now(), LocalDate.now().plusWeeks(weeks)),
                             new TimeRange(
@@ -190,7 +193,7 @@ public class Main {
                         );
                         final List<Result.BasicSlot> list =
                             webSearch(options, creds, client, mapper, searchCity, vaccine, search);
-                        if (!list.isEmpty()) {
+                        if (!list.isEmpty() || vaccine != VaccineType.PFIZER) {
                             LOG.info("Found ({} weeks) for {}, {}: {} slots", weeks, searchCity.name, vaccine, list.size());
                             results.addAll(
                                 list.stream()
@@ -199,6 +202,7 @@ public class Main {
                             );
                             break;
                         }
+                        LOG.debug("+n weeks");
                     }
                 }
             }
