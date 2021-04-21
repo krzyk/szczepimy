@@ -1,7 +1,9 @@
 package com.kirela.szczepimy;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
 import java.net.URI;
@@ -10,20 +12,34 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import picocli.CommandLine;
 
 public class Main {
-
-    // https://www.gov.pl/api/data/covid-vaccination-point/246801
+    private static final Logger LOG = LogManager.getLogger(Main.class);
     // https://www.gov.pl/api/data/covid-vaccination-point   -> service-points.json
 
     // punkty adresowe z https://eteryt.stat.gov.pl/eTeryt/rejestr_teryt/udostepnianie_danych/baza_teryt/uzytkownicy_indywidualni/pobieranie/pliki_pelne.aspx?contrast=default
     // albo z https://pacjent.erejestracja.ezdrowie.gov.pl/teryt/api/woj/06/simc?namePrefix=Krak
+
+
+    // https://pacjent.erejestracja.ezdrowie.gov.pl/api/servicePoints/find
+    // "{"voiID":"12","geoID":"1261011"}
     private static final ExecutorService exec = Executors.newFixedThreadPool(1);
 
 //    public static record FoundAppointment(String id, LocalDateTime date, Specialization specialization, Clinic clinic, String  doctor) implements Comparable<FoundAppointment> {
@@ -34,34 +50,23 @@ public class Main {
 //    }
 
 
-    public static record Range(String from, String to) {}
+    record SlotWithVoivodeship(Result.BasicSlot slot, Voivodeship voivodeship) {};
+    public static record DateRange(LocalDate from, LocalDate to) {}
 
-    @JsonDeserialize(using = VaccineTypeDeserializer.class)
-    public enum VaccineType {
-        PFIZER("cov19.pfizer"),
-        MODERNA("cov19.moderna"),
-        AZ("cov19.astra_zeneca"),
-        JJ("cov19.johnson_and_johnson");
-
-        private final String name;
-
-        VaccineType(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public String toString() {
-            return name;
-        }
-    }
+    public static record TimeRange(
+        @JsonSerialize(using = LocalTimeSerializer.class)
+        LocalTime from,
+        @JsonSerialize(using = LocalTimeSerializer.class)
+        LocalTime to
+    ) {}
 
     private static record Creds(String csrf, String sid, String prescriptionId) {}
-    public static record Search(Range dayRange, Range hourRange, String prescriptionId, List<String> vaccineTypes, String voiId, String geoId) {}
 
-    public static record Result(String geoDepth, List<Result.Slot> list) {
-        public static record Slot(UUID id, Instant startAt, String duration, ServicePoint servicePoint, VaccineType vaccineType, int dose, String status) {}
-        public static record ServicePoint(UUID id, String name, String addressText) {}
-    }
+    public static record Search(
+        DateRange dayRange,
+        TimeRange hourRange,
+        String prescriptionId, List<VaccineType> vaccineTypes, Voivodeship voiId, String geoId, UUID servicePointId
+    ) {}
 
     private static final String CHROME = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36";
     private static final String USER_AGENT = "User-Agent";
@@ -73,8 +78,10 @@ public class Main {
             CommandLine.usage(options, System.out);
             return;
         }
-//        final CookieManager cookies = new CookieManager();
-//        cookies.getCookieStore().add(URI.create("https://pacjent.erejestracja.ezdrowie.gov.pl"), new HttpCookie("patient_sid", creds.sid()));
+
+        GminaFinder gminaFinder = new GminaFinder();
+        PlaceFinder placeFinder = new PlaceFinder();
+//        System.out.println(gminaFinder.find("Rzeszów", Voivodeship.PODKARPACKIE));
 
         var creds = new Creds(options.csrf, options.sid, options.prescriptionId);
         HttpClient client = HttpClient.newBuilder()
@@ -82,17 +89,120 @@ public class Main {
             .followRedirects(HttpClient.Redirect.ALWAYS)
             .build();
 
-        var mapper = new ObjectMapper().registerModule(new JavaTimeModule());
-        HttpResponse<String> out = client.send(
-            requestBuilder(creds).uri(URI.create("https://pacjent.erejestracja.ezdrowie.gov.pl/api/calendarSlots/find"))
-                .POST(HttpRequest.BodyPublishers.ofString("""
-                        {"dayRange":{"from":"2021-04-15","to":"2021-05-30"},"prescriptionId":"%s","vaccineTypes":["cov19.pfizer"],"voiId":"18"}
-                        """.formatted(creds.prescriptionId())
-                )).build(),
+        ObjectMapper mapper = getMapper();
 
-            HttpResponse.BodyHandlers.ofString()
+        //        mapper.setDefaultSetterInfo(JsonSetter.Value.forContentNulls(Nulls.AS_EMPTY));
+
+//        for (City city : Set.of(City.KRAKÓW, City.RZESZÓW)) {
+        record SearchCity(String name, Voivodeship voivodeship, int days) {}
+
+        List<SearchCity> find = List.of(
+            new SearchCity("Rzeszów", Voivodeship.PODKARPACKIE, 7),
+            new SearchCity("Mielec", Voivodeship.PODKARPACKIE, 7*2),
+            new SearchCity("Tarnobrzeg", Voivodeship.PODKARPACKIE, 7*2),
+            new SearchCity("Przemyśl", Voivodeship.PODKARPACKIE, 7*2),
+            new SearchCity("Krosno", Voivodeship.PODKARPACKIE, 7*2),
+            new SearchCity("Kraków", Voivodeship.MAŁOPOLSKIE, 7*2),
+            new SearchCity("Tarnów", Voivodeship.MAŁOPOLSKIE, 28),
+            new SearchCity("Nowy Sącz", Voivodeship.MAŁOPOLSKIE, 55),
+            new SearchCity("Warszawa", Voivodeship.MAZOWIECKIE, 7),
+            new SearchCity("Radom", Voivodeship.MAZOWIECKIE, 7),
+            new SearchCity("Lublin", Voivodeship.LUBELSKIE, 7*2),
+            new SearchCity("Zamość", Voivodeship.LUBELSKIE, 7*2),
+            new SearchCity("Świdnik", Voivodeship.LUBELSKIE, 7*2),
+            new SearchCity("Szczecin", Voivodeship.ZACHODNIOPOMORSKIE, 7),
+            new SearchCity("Koszalin", Voivodeship.ZACHODNIOPOMORSKIE, 7*3),
+            new SearchCity("Opole", Voivodeship.OPOLSKIE, 7),
+            new SearchCity("Wrocław", Voivodeship.DOLNOŚLĄSKIE, 7),
+            new SearchCity("Kłodzko", Voivodeship.DOLNOŚLĄSKIE, 7*2),
+            new SearchCity("Katowice", Voivodeship.ŚLĄSKIE, 7*2),
+            new SearchCity("Częstochowa", Voivodeship.ŚLĄSKIE, 7*3),
+            new SearchCity("Gliwice", Voivodeship.ŚLĄSKIE, 7*3),
+            new SearchCity("Czechowice-Dziedzice", Voivodeship.ŚLĄSKIE, 7*4),
+            new SearchCity("Dąbrowa Górnicza", Voivodeship.ŚLĄSKIE, 7*3),
+            new SearchCity("Sosnowiec", Voivodeship.ŚLĄSKIE, 7*3),
+            new SearchCity("Bielsko-Biała", Voivodeship.ŚLĄSKIE, 7*4),
+            new SearchCity("Pszczyna", Voivodeship.ŚLĄSKIE, 7*4),
+            new SearchCity("Chorzów", Voivodeship.ŚLĄSKIE, 7*4),
+            new SearchCity("Kielce", Voivodeship.ŚWIĘTOKRZYSKIE, 7*2),
+            new SearchCity("Bydgoszcz", Voivodeship.KUJAWSKO_POMORSKIE, 7*3),
+            new SearchCity("Toruń", Voivodeship.KUJAWSKO_POMORSKIE, 7*3),
+            new SearchCity("Zielona Góra", Voivodeship.LUBUSKIE, 7),
+            new SearchCity("Gorzów Wielkopolski", Voivodeship.LUBUSKIE, 7),
+            new SearchCity("Łódź", Voivodeship.ŁÓDZKIE, 7),
+            new SearchCity("Białystok", Voivodeship.PODLASKIE, 7),
+            new SearchCity("Gdańsk", Voivodeship.POMORSKIE, 7),
+            new SearchCity("Sopot", Voivodeship.POMORSKIE, 7*2),
+            new SearchCity("Gdynia", Voivodeship.POMORSKIE, 7*2),
+            new SearchCity("Olsztyn", Voivodeship.WARMIŃSKO_MAZURSKIE, 7),
+            new SearchCity("Elbląg", Voivodeship.WARMIŃSKO_MAZURSKIE, 7*3),
+            new SearchCity("Poznań", Voivodeship.WIELKOPOLSKIE, 7),
+            new SearchCity("Jarocin", Voivodeship.WIELKOPOLSKIE, 55),
+            new SearchCity("Ostrów Wielkopolski", Voivodeship.WIELKOPOLSKIE, 55),
+            new SearchCity("Kalisz", Voivodeship.WIELKOPOLSKIE, 28)
         );
-        System.out.println(mapper.readValue(out.body(), Result.class));
+        Set<SlotWithVoivodeship> results = new HashSet<>();
+        try {
+            for (SearchCity searchCity : find) {
+                LOG.info("Processing {}", searchCity);
+                Gmina gmina = gminaFinder.find(searchCity.name(), searchCity.voivodeship);
+                //            for (VaccineType vaccine : Set.of(VaccineType.PFIZER, VaccineType.MODERNA, VaccineType.AZ)) {
+                for (VaccineType vaccine : Set.of(
+                    VaccineType.PFIZER,
+                    VaccineType.MODERNA,
+                    VaccineType.AZ
+//                    VaccineType.JJ
+                )) {
+                    var search = new Search(
+                        new DateRange(LocalDate.now(), LocalDate.now().plusDays(searchCity.days())),
+                        new TimeRange(
+                            LocalTime.of(6, 20),
+                            LocalTime.of(23, 30)
+                        ),
+                        creds.prescriptionId(),
+                        List.of(vaccine),
+                        gmina.voivodeship(),
+                        gmina.terc(),
+                        null
+                    );
+                    String searchStr = mapper.writeValueAsString(search);
+
+                    HttpResponse<String> out = client.send(
+                        requestBuilder(creds).uri(URI.create(
+                            "https://pacjent.erejestracja.ezdrowie.gov.pl/api/calendarSlots/find"))
+                            .POST(HttpRequest.BodyPublishers.ofString(searchStr)).build(),
+
+                        HttpResponse.BodyHandlers.ofString()
+                    );
+                    Files.writeString(
+                        Paths.get(options.output, "logs", "%s_%s.%s.json".formatted(searchCity.name(), vaccine, Instant.now())),
+                        out.body(),
+                        StandardOpenOption.CREATE_NEW
+                    );
+                    final List<Result.BasicSlot> list =
+                        Optional.ofNullable(mapper.readValue(out.body(), Result.class).list()).orElse(List.of());
+                    LOG.info("Found for {}, {}: {} slots", searchCity.name, vaccine, list.size());
+                    results.addAll(
+                        list
+                            .stream()
+                            .map(s -> new SlotWithVoivodeship(s, gmina.voivodeship()))
+                            .collect(Collectors.toSet())
+                    );
+                    Thread.sleep(3000);
+                }
+            }
+        } catch (Exception ex) {
+            LOG.error("Exception", ex);
+        }
+
+        new TableFormatter(options.output, mapper).store(placeFinder, results);
+    }
+
+    public static ObjectMapper getMapper() {
+        var mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        return mapper;
     }
 
     private static HttpRequest.Builder requestBuilder(Creds creds) {

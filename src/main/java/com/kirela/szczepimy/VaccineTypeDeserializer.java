@@ -8,12 +8,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.util.Arrays;
 
-public class VaccineTypeDeserializer extends JsonDeserializer<Main.VaccineType> {
+public class VaccineTypeDeserializer extends JsonDeserializer<VaccineType> {
     @Override
-    public Main.VaccineType deserialize(JsonParser parser, DeserializationContext context)
+    public VaccineType deserialize(JsonParser parser, DeserializationContext context)
         throws IOException, JsonProcessingException {
         JsonNode node = parser.getCodec().readTree(parser);
-        return Arrays.stream(Main.VaccineType.values())
+        return Arrays.stream(VaccineType.values())
             .filter(v -> v.toString().endsWith(node.asText()))
             .findAny()
             .orElseThrow();

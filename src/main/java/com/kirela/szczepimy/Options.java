@@ -1,5 +1,6 @@
 package com.kirela.szczepimy;
 
+import java.nio.file.Path;
 import picocli.CommandLine;
 
 public class Options {
@@ -14,4 +15,7 @@ public class Options {
 
     @CommandLine.Option(names = "-c", description = "CSRF (default: ${DEFAULT-VALUE})")
     String csrf;
+
+    @CommandLine.Option(names = "-t", description = "Target directory for files (default: ${DEFAULT-VALUE})")
+    String output;
 }
