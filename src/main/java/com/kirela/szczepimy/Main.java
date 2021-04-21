@@ -110,9 +110,10 @@ public class Main {
 //        for (City city : Set.of(City.KRAKÓW, City.RZESZÓW)) {
 
         List<SearchCity> findVoi = Arrays.stream(Voivodeship.values())
-            .map(v -> new SearchCity(null, v, 7))
+            .map(v -> new SearchCity(null, v, 10))
             .toList();
 
+//        List<SearchCity> findVoi = List.of();
         List<SearchCity> find = List.of(
             new SearchCity("Grudziądz", Voivodeship.KUJAWSKO_POMORSKIE, 7*5),
             new SearchCity("Świecie", Voivodeship.KUJAWSKO_POMORSKIE, 7*5),
@@ -126,6 +127,7 @@ public class Main {
             new SearchCity("Nowy Sącz", Voivodeship.MAŁOPOLSKIE, 55),
             new SearchCity("Warszawa", Voivodeship.MAZOWIECKIE, 7),
             new SearchCity("Radom", Voivodeship.MAZOWIECKIE, 7),
+            new SearchCity("Ciechanów", Voivodeship.MAZOWIECKIE, 7),
             new SearchCity("Lublin", Voivodeship.LUBELSKIE, 7*2),
             new SearchCity("Zamość", Voivodeship.LUBELSKIE, 7*2),
             new SearchCity("Świdnik", Voivodeship.LUBELSKIE, 7*2),
@@ -158,6 +160,7 @@ public class Main {
             new SearchCity("Gdańsk", Voivodeship.POMORSKIE, 7),
             new SearchCity("Sopot", Voivodeship.POMORSKIE, 7*2),
             new SearchCity("Gdynia", Voivodeship.POMORSKIE, 7*2),
+            new SearchCity("Tczew", Voivodeship.POMORSKIE, 7*2),
             new SearchCity("Olsztyn", Voivodeship.WARMIŃSKO_MAZURSKIE, 7),
             new SearchCity("Elbląg", Voivodeship.WARMIŃSKO_MAZURSKIE, 7*3),
             new SearchCity("Poznań", Voivodeship.WIELKOPOLSKIE, 7),
@@ -177,7 +180,7 @@ public class Main {
                     VaccineType.AZ
                     //                    VaccineType.JJ
                 )) {
-                    for (int weeks = 1; weeks <= 5; weeks += 2) {
+                    for (int weeks = 2; weeks <= 5; weeks += 2) {
                         Thread.sleep(2000 + (int)(Math.random() * 3000));
                         var search = new Search(
                             new DateRange(LocalDate.now(), LocalDate.now().plusWeeks(weeks)),
@@ -193,7 +196,7 @@ public class Main {
                         );
                         final List<Result.BasicSlot> list =
                             webSearch(options, creds, client, mapper, searchCity, vaccine, search);
-                        if (!list.isEmpty() || vaccine != VaccineType.PFIZER) {
+                        if (list.size() < 2 || vaccine != VaccineType.PFIZER) {
                             LOG.info("Found ({} weeks) for {}, {}: {} slots", weeks, searchCity.name, vaccine, list.size());
                             results.addAll(
                                 list.stream()

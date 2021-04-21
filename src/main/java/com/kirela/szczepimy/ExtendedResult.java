@@ -20,10 +20,17 @@ public record ExtendedResult(String geoDepth, List<Slot> list) {
             this(
                 basic.id(),
                 basic.name(),
-                basic.addressText().substring(0, basic.addressText().lastIndexOf(',')),
+                streetAddress(basic),
                 place,
                 voivodeship
             );
+        }
+
+        private static String streetAddress(Result.BasicServicePoint basic) {
+            if (basic.addressText().contains(",")) {
+                return basic.addressText().substring(0, basic.addressText().lastIndexOf(','));
+            }
+            return basic.addressText();
         }
     }
 }

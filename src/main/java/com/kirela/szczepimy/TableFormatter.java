@@ -5,12 +5,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.sql.Time;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -107,6 +109,9 @@ public class TableFormatter {
                          19:30</td>
 
                      */
+
+//                    List<TimeRange> ranges = getRanges(slots, slot);
+//                    System.out.println(ranges);
                     Files.writeString(voiFile, """
                                     <tr>
                                         <td>%s</td>
@@ -151,6 +156,29 @@ public class TableFormatter {
         }
     }
 
+    public static List<TimeRange> getRanges(List<ExtendedResult.Slot> slots, ExtendedResult.Slot slot) {
+        List<TimeRange> ranges = new ArrayList<>();
+        int lastRange = -1;
+        for (LocalTime time : slots.stream()
+            .map(s -> LocalTime.ofInstant(s.startAt(), ZONE))
+            .sorted()
+            .toList()) {
+            if (lastRange == -1) {
+                ranges.add(new TimeRange(time, time));
+                lastRange = 0;
+            } else {
+                TimeRange last = ranges.get(lastRange);
+                if (last.end().plusMinutes(slot.duration()).equals(time)) {
+                    ranges.add(lastRange, new TimeRange(last.start(), time));
+                } else {
+                    ranges.add(new TimeRange(time, time));
+                    lastRange++;
+                }
+            }
+        }
+        return ranges;
+    }
+
     private String getPhone(ExtendedResult.Slot slot) {
         Optional<ExtendedServicePoint> maybe = servicePointFinder.findByAddress(slot.servicePoint());
         if (maybe.isEmpty() || maybe.get().telephone() == null || maybe.get().telephone().isBlank()) {
@@ -183,4 +211,5 @@ public class TableFormatter {
                 """.formatted(found.lat(), found.lon(), slot.servicePoint().addressText());
         }
     }
+    public static record TimeRange(LocalTime start, LocalTime end) {}
 }
