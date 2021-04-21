@@ -32,8 +32,8 @@ public class PlaceFinder {
     public String findInAddress(String name, Voivodeship voivodeship) {
 
         NormalizedPlaceVoivodeship normalizedPlace = key(
-            name
-                .substring(name.lastIndexOf(',') + 1).trim(), voivodeship
+            name.substring(name.lastIndexOf(',') + 1).trim(),
+            voivodeship
         );
         if (!places.containsKey(normalizedPlace)) {
             throw new IllegalArgumentException("Can't find place %s in %s".formatted(name, voivodeship.readable()));
@@ -45,6 +45,8 @@ public class PlaceFinder {
         return new NormalizedPlaceVoivodeship(
             Gmina.normalize(name)
                 .replace("m. st. ", "")
+                .replace("pawlowice/pniowek", "pniowek")
+                .replaceAll("([^ ]+) [0-9]+$", "$1")
                 .replaceAll("gdansk .+", "gdansk")
                 .replaceAll("krakow-.+", "krakow")
                 .replaceAll("warszawa .+", "warszawa")

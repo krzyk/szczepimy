@@ -5,7 +5,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
@@ -17,6 +20,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class TableFormatter {
+    private static final ZoneId ZONE = ZoneId.of("Europe/Warsaw");
     private final String outputDirectory;
     private final ServicePointFinder servicePointFinder;
 
@@ -27,7 +31,9 @@ public class TableFormatter {
 
     public void store(PlaceFinder placeFinder, Set<Main.SlotWithVoivodeship> results)
         throws IOException {
-        Map<Voivodeship, List<ExtendedResult.Slot>> groupByVoi = results.stream()
+//        Map<Voivodeship, List<ExtendedResult.Slot>> groupByVoi = results.stream()
+
+        Map<Voivodeship, Map<LocalDate, Map<ExtendedResult.ServicePoint, List<ExtendedResult.Slot>>>> groupByVoi = results.stream()
             .map(
                 s -> new ExtendedResult.Slot(
                     s.slot(),
@@ -43,12 +49,16 @@ public class TableFormatter {
                     .thenComparing(ExtendedResult.Slot::startAt)
             )
             .collect(
-                Collectors.groupingBy(k -> k.servicePoint().voivodeship())
+                Collectors.groupingBy(
+                    k -> k.servicePoint().voivodeship(),
+                    Collectors.groupingBy(k -> LocalDate.ofInstant(k.startAt(), ZONE),
+                        Collectors.groupingBy(ExtendedResult.Slot::servicePoint)
+                    )
+                )
             );
 
-        for (Map.Entry<Voivodeship, List<ExtendedResult.Slot>> entry : groupByVoi.entrySet()) {
+        for (Map.Entry<Voivodeship, Map<LocalDate, Map<ExtendedResult.ServicePoint, List<ExtendedResult.Slot>>>> entry : groupByVoi.entrySet()) {
             Voivodeship voivodeship = entry.getKey();
-            List<ExtendedResult.Slot> slots = entry.getValue();
             var voiFile = Paths.get(outputDirectory, "%s.html".formatted(voivodeship.urlName()));
             voiFile.toFile().delete();
             Files.writeString(voiFile, """
@@ -74,12 +84,34 @@ public class TableFormatter {
                 StandardOpenOption.APPEND, StandardOpenOption.CREATE
             );
 
-            for (ExtendedResult.Slot slot : slots) {
-                Files.writeString(voiFile, """
+            for (Map.Entry<LocalDate, Map<ExtendedResult.ServicePoint, List<ExtendedResult.Slot>>> mapEntry : entry.getValue().entrySet()) {
+                LocalDate date = mapEntry.getKey();
+                for (Map.Entry<ExtendedResult.ServicePoint, List<ExtendedResult.Slot>> listEntry : mapEntry.getValue().entrySet()) {
+                    ExtendedResult.ServicePoint servicePoint = listEntry.getKey();
+                    List<ExtendedResult.Slot> slots = listEntry.getValue();
+                    ExtendedResult.Slot slot = slots.get(0);
+                    final String times = slots.stream()
+                        .map(s -> LocalTime.ofInstant(s.startAt(), ZONE))
+                        .sorted()
+                        .map(t -> DateTimeFormatter.ofPattern("HH:mm", Locale.forLanguageTag("pl")).format(t))
+                        .collect(Collectors.joining("<br/>"));
+                    /**
+                     <td class="dt-body-center">(co&nbsp;5&nbsp;min)<br/>
+                         <hr/>
+                         15:00<br/>
+                         ↓<br/>
+                         16:20<br/>
+                         <hr/>
+                         16:25<br/>
+                         ↓<br/>
+                         19:30</td>
+
+                     */
+                    Files.writeString(voiFile, """
                                     <tr>
                                         <td>%s</td>
-                                        <td data-order="%d" data-slot-id="%s">%s</td>
-                                        <td>%s</td>
+                                        <td data-order="%d">%s</td>
+                                        <td class="dt-body-center">%s</td>
                                         <td data-order="%d">%s</td>
                                         <td>%s</td>
                                         <td>
@@ -90,25 +122,24 @@ public class TableFormatter {
                                     </tr>
                                                 
                             """.formatted(
-                    slot.servicePoint().place(),
-                    slot.startAt().getEpochSecond(),
-                    slot.id(),
-                    DateTimeFormatter.ofPattern("d MMMM, ;EEEE|", Locale.forLanguageTag("pl")).format(
-                        LocalDateTime.ofInstant(slot.startAt(), ZoneId.of("Europe/Warsaw"))
-                    ).replace(";", "<small>")
-                        .replace("|", "</small>"),
-                    DateTimeFormatter.ofPattern("HH:mm", Locale.forLanguageTag("pl")).format(
-                        LocalDateTime.ofInstant(slot.startAt(), ZoneId.of("Europe/Warsaw"))
-                    ),
-//                    slot.startAt().getEpochSecond(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(
-//                        LocalDateTime.ofInstant(slot.startAt(), ZoneId.of("Europe/Warsaw"))
-//                    ),
-                    slot.vaccineType().ordinal(), slot.vaccineType().readable(),
-                    getAddress(slot),
-                    getPhone(slot)
-                    ),
-                    StandardOpenOption.APPEND, StandardOpenOption.CREATE
-                );
+                            slot.servicePoint().place(),
+                            slot.startAt().getEpochSecond(),
+                            DateTimeFormatter.ofPattern("d MMMM, ;EEEE|", Locale.forLanguageTag("pl")).format(
+                                LocalDateTime.ofInstant(slot.startAt(), ZONE)
+                            ).replace(";", "<small>")
+                                .replace("|", "</small>"),
+                        times,
+
+                            //                    slot.startAt().getEpochSecond(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(
+                            //                        LocalDateTime.ofInstant(slot.startAt(), ZoneId.of("Europe/Warsaw"))
+                            //                    ),
+                            slot.vaccineType().ordinal(), slot.vaccineType().readable(),
+                            getAddress(slot),
+                            getPhone(slot)
+                            ),
+                            StandardOpenOption.APPEND, StandardOpenOption.CREATE
+                        );
+                }
             }
 
             Files.writeString(voiFile, """

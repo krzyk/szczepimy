@@ -18,6 +18,7 @@ import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +27,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import picocli.CommandLine;
@@ -66,7 +68,19 @@ public class Main {
         DateRange dayRange,
         TimeRange hourRange,
         String prescriptionId, List<VaccineType> vaccineTypes, Voivodeship voiId, String geoId, UUID servicePointId
-    ) {}
+    ) {
+        public Search withNewDateRange(DateRange newDateRange) {
+            return new Search(
+                newDateRange,
+                hourRange,
+                prescriptionId,
+                vaccineTypes,
+                voiId,
+                geoId,
+                servicePointId
+            );
+        }
+    }
 
     private static final String CHROME = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36";
     private static final String USER_AGENT = "User-Agent";
@@ -94,7 +108,10 @@ public class Main {
         //        mapper.setDefaultSetterInfo(JsonSetter.Value.forContentNulls(Nulls.AS_EMPTY));
 
 //        for (City city : Set.of(City.KRAKÓW, City.RZESZÓW)) {
-        record SearchCity(String name, Voivodeship voivodeship, int days) {}
+
+        List<SearchCity> findVoi = Arrays.stream(Voivodeship.values())
+            .map(v -> new SearchCity(null, v, 7))
+            .toList();
 
         List<SearchCity> find = List.of(
             new SearchCity("Grudziądz", Voivodeship.KUJAWSKO_POMORSKIE, 7*5),
@@ -147,52 +164,42 @@ public class Main {
         );
         Set<SlotWithVoivodeship> results = new HashSet<>();
         try {
-            for (SearchCity searchCity : find) {
+            for (SearchCity searchCity : Stream.concat(findVoi.stream(), find.stream()).toList()) {
                 LOG.info("Processing {}", searchCity);
-                Gmina gmina = gminaFinder.find(searchCity.name(), searchCity.voivodeship);
-                //            for (VaccineType vaccine : Set.of(VaccineType.PFIZER, VaccineType.MODERNA, VaccineType.AZ)) {
+                Optional<Gmina> gmina = Optional.ofNullable(searchCity.name())
+                    .map(n -> gminaFinder.find(n, searchCity.voivodeship));
                 for (VaccineType vaccine : Set.of(
                     VaccineType.PFIZER,
                     VaccineType.MODERNA,
                     VaccineType.AZ
-//                    VaccineType.JJ
+                    //                    VaccineType.JJ
                 )) {
-                    var search = new Search(
-                        new DateRange(LocalDate.now(), LocalDate.now().plusDays(searchCity.days())),
-                        new TimeRange(
-                            LocalTime.of(6, 20),
-                            LocalTime.of(23, 30)
-                        ),
-                        creds.prescriptionId(),
-                        List.of(vaccine),
-                        gmina.voivodeship(),
-                        gmina.terc(),
-                        null
-                    );
-                    String searchStr = mapper.writeValueAsString(search);
-
-                    HttpResponse<String> out = client.send(
-                        requestBuilder(creds).uri(URI.create(
-                            "https://pacjent.erejestracja.ezdrowie.gov.pl/api/calendarSlots/find"))
-                            .POST(HttpRequest.BodyPublishers.ofString(searchStr)).build(),
-
-                        HttpResponse.BodyHandlers.ofString()
-                    );
-                    Files.writeString(
-                        Paths.get(options.output, "logs", "%s_%s.%s.json".formatted(searchCity.name(), vaccine, Instant.now())),
-                        out.body(),
-                        StandardOpenOption.CREATE_NEW
-                    );
-                    final List<Result.BasicSlot> list =
-                        Optional.ofNullable(mapper.readValue(out.body(), Result.class).list()).orElse(List.of());
-                    LOG.info("Found for {}, {}: {} slots", searchCity.name, vaccine, list.size());
-                    results.addAll(
-                        list
-                            .stream()
-                            .map(s -> new SlotWithVoivodeship(s, gmina.voivodeship()))
-                            .collect(Collectors.toSet())
-                    );
-                    Thread.sleep(3000);
+                    for (int weeks = 1; weeks <= 5; weeks++) {
+                        Thread.sleep(3000);
+                        var search = new Search(
+                            new DateRange(LocalDate.now(), LocalDate.now().plusWeeks(weeks)),
+                            new TimeRange(
+                                LocalTime.of(6, 20),
+                                LocalTime.of(23, 30)
+                            ),
+                            creds.prescriptionId(),
+                            List.of(vaccine),
+                            searchCity.voivodeship(),
+                            gmina.map(Gmina::terc).orElse(null),
+                            null
+                        );
+                        final List<Result.BasicSlot> list =
+                            webSearch(options, creds, client, mapper, searchCity, vaccine, search);
+                        if (!list.isEmpty()) {
+                            LOG.info("Found ({} weeks) for {}, {}: {} slots", weeks, searchCity.name, vaccine, list.size());
+                            results.addAll(
+                                list.stream()
+                                    .map(s -> new SlotWithVoivodeship(s, searchCity.voivodeship()))
+                                    .collect(Collectors.toSet())
+                            );
+                            break;
+                        }
+                    }
                 }
             }
         } catch (Exception ex) {
@@ -200,6 +207,27 @@ public class Main {
         }
 
         new TableFormatter(options.output, mapper).store(placeFinder, results);
+    }
+
+    private static List<Result.BasicSlot> webSearch(Options options, Creds creds, HttpClient client, ObjectMapper mapper,
+        SearchCity searchCity, VaccineType vaccine, Search search) throws IOException, InterruptedException {
+        String searchStr = mapper.writeValueAsString(search);
+
+        HttpResponse<String> out = client.send(
+            requestBuilder(creds).uri(URI.create(
+                "https://pacjent.erejestracja.ezdrowie.gov.pl/api/calendarSlots/find"))
+                .POST(HttpRequest.BodyPublishers.ofString(searchStr)).build(),
+
+            HttpResponse.BodyHandlers.ofString()
+        );
+        Files.writeString(
+            Paths.get(options.output, "logs", "%s_%s.%s.json".formatted(searchCity.name(), vaccine, Instant.now())),
+            out.body(),
+            StandardOpenOption.CREATE_NEW
+        );
+        final List<Result.BasicSlot> list =
+            Optional.ofNullable(mapper.readValue(out.body(), Result.class).list()).orElse(List.of());
+        return list;
     }
 
     public static ObjectMapper getMapper() {
@@ -243,4 +271,6 @@ public class Main {
             throw new IllegalStateException(e);
         }
     }
+
+    record SearchCity(String name, Voivodeship voivodeship, int days) {}
 }
