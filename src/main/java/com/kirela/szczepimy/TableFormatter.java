@@ -77,7 +77,7 @@ public class TableFormatter {
                 Files.writeString(voiFile, """
                                     <tr>
                                         <td>%s</td>
-                                        <td data-order="%d">%s</td>
+                                        <td data-order="%d" data-slot-id="%s">%s</td>
                                         <td data-order="%d">%s</td>
                                         <td>%s</td>
                                         <td>
@@ -89,7 +89,9 @@ public class TableFormatter {
                                                 
                             """.formatted(
                     slot.servicePoint().place(),
-                    slot.startAt().getEpochSecond(), DateTimeFormatter.ofPattern("d MMMM, ;EEEE|HH:mm", Locale.forLanguageTag("pl")).format(
+                    slot.startAt().getEpochSecond(),
+                    slot.id(),
+                    DateTimeFormatter.ofPattern("d MMMM, ;EEEE|HH:mm", Locale.forLanguageTag("pl")).format(
                         LocalDateTime.ofInstant(slot.startAt(), ZoneId.of("Europe/Warsaw"))
                     ).replace(";", "<small>")
                         .replace("|", "</small><br/>"),

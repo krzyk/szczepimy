@@ -97,6 +97,8 @@ public class Main {
         record SearchCity(String name, Voivodeship voivodeship, int days) {}
 
         List<SearchCity> find = List.of(
+            new SearchCity("Grudziądz", Voivodeship.KUJAWSKO_POMORSKIE, 7*5),
+            new SearchCity("Świecie", Voivodeship.KUJAWSKO_POMORSKIE, 7*5),
             new SearchCity("Rzeszów", Voivodeship.PODKARPACKIE, 7),
             new SearchCity("Mielec", Voivodeship.PODKARPACKIE, 7*2),
             new SearchCity("Tarnobrzeg", Voivodeship.PODKARPACKIE, 7*2),
@@ -125,8 +127,10 @@ public class Main {
             new SearchCity("Pszczyna", Voivodeship.ŚLĄSKIE, 7*4),
             new SearchCity("Chorzów", Voivodeship.ŚLĄSKIE, 7*4),
             new SearchCity("Kielce", Voivodeship.ŚWIĘTOKRZYSKIE, 7*2),
-            new SearchCity("Bydgoszcz", Voivodeship.KUJAWSKO_POMORSKIE, 7*3),
-            new SearchCity("Toruń", Voivodeship.KUJAWSKO_POMORSKIE, 7*3),
+            new SearchCity("Bydgoszcz", Voivodeship.KUJAWSKO_POMORSKIE, 7*4),
+            new SearchCity("Toruń", Voivodeship.KUJAWSKO_POMORSKIE, 7*4),
+            new SearchCity("Inowrocław", Voivodeship.KUJAWSKO_POMORSKIE, 7*4),
+            new SearchCity("Włocławek", Voivodeship.KUJAWSKO_POMORSKIE, 7*4),
             new SearchCity("Zielona Góra", Voivodeship.LUBUSKIE, 7),
             new SearchCity("Gorzów Wielkopolski", Voivodeship.LUBUSKIE, 7),
             new SearchCity("Łódź", Voivodeship.ŁÓDZKIE, 7),
