@@ -34,11 +34,16 @@ public class PlaceFinder {
     }
 
     public String findInAddress(String name, Voivodeship voivodeship) {
-        final String maybeCity = name.substring(name.lastIndexOf(',') + 1).trim();
+        final String maybeCity;
+        if (name.contains(",")) {
+            maybeCity = name.substring(name.lastIndexOf(',') + 1).trim();
+        } else {
+            maybeCity = name;
+        }
 
         NormalizedPlaceVoivodeship normalizedPlace = key(maybeCity, voivodeship);
         if (!places.containsKey(normalizedPlace)) {
-            LOG.error("Can't find place %s in %s".formatted(name, voivodeship.readable()));
+            LOG.error("Can't find place %s (key = %s) in %s".formatted(name, normalizedPlace, voivodeship.readable()));
             return maybeCity;
 //            throw new IllegalArgumentException("Can't find place %s in %s".formatted(name, voivodeship.readable()));
         }
@@ -50,7 +55,8 @@ public class PlaceFinder {
             Gmina.normalize(name)
                 .replace("m. st. ", "")
                 .replace("pawlowice/pniowek", "pniowek")
-                .replaceAll("([^ ]+) [0-9]+$", "$1")
+                .replace("kedzierzyn - kozle", "kedzierzyn-kozle")
+                .replaceAll("([^ ]+) [0-9]+[a-z]?$", "$1")
                 .replaceAll("czerwiensk odrzanski", "czerwiensk")
                 .replaceAll("gdansk .+", "gdansk")
                 .replaceAll("krakow-.+", "krakow")

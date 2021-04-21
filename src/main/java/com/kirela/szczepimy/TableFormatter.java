@@ -20,8 +20,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class TableFormatter {
+    private static final Logger LOG = LogManager.getLogger(TableFormatter.class);
     private static final ZoneId ZONE = ZoneId.of("Europe/Warsaw");
     private final String outputDirectory;
     private final ServicePointFinder servicePointFinder;
@@ -92,11 +95,36 @@ public class TableFormatter {
                     ExtendedResult.ServicePoint servicePoint = listEntry.getKey();
                     List<ExtendedResult.Slot> slots = listEntry.getValue();
                     ExtendedResult.Slot slot = slots.get(0);
-                    final String times = slots.stream()
+                    String times = slots.stream()
                         .map(s -> LocalTime.ofInstant(s.startAt(), ZONE))
                         .sorted()
                         .map(t -> DateTimeFormatter.ofPattern("HH:mm", Locale.forLanguageTag("pl")).format(t))
                         .collect(Collectors.joining("<br/>"));
+                    List<TimeRange> ranges = getRanges(slots, slot);
+                    List<TimeRange> incorrect = ranges.stream()
+                        .filter(r -> r.start() == r.end())
+                        .toList();
+                    if (!incorrect.isEmpty()) {
+                        LOG.error("Ranges are incorrect (%s) input: %s".formatted(incorrect, slots));
+                    }
+                    if (incorrect.isEmpty() && slots.size() > 4) {
+                        times = """
+                            <small class="smaller">(co&nbsp;%s&nbsp;min)</small>
+                            %s
+                            <br/>
+                            """.formatted(
+                            slot.duration(),
+                            ranges.stream().map(r -> "<br/><hr/>%s<br/><small>↓</small><br/>%s".formatted(r.start(), r.end())).collect(Collectors.joining())
+                        );
+
+//                        15:00<br/>
+//                        ↓<br/>
+//                            16:20<br/>
+//                        <hr/>
+//                            16:25<br/>
+//                        ↓<br/>
+//                            19:30</td>
+                    }
                     /**
                      <td class="dt-body-center">(co&nbsp;5&nbsp;min)<br/>
                          <hr/>
@@ -116,9 +144,9 @@ public class TableFormatter {
                                     <tr>
                                         <td>%s</td>
                                         <td data-order="%d">%s</td>
-                                        <td class="dt-body-center">%s</td>
-                                        <td data-order="%d">%s</td>
-                                        <td>%s</td>
+                                        <td class="dt-body-center times">%s</td>
+                                        <td class="dt-body-center" data-order="%d">%s</td>
+                                        <td class="address">%s</td>
                                         <td>
                                             %s
                                             <a href="tel:989" title="Zadwoń na infolinię i umów się na ten termin"><img src="assets/phone.png" width="11px"></img>&nbsp;989</a><br/>
@@ -129,10 +157,12 @@ public class TableFormatter {
                             """.formatted(
                             slot.servicePoint().place(),
                             slot.startAt().getEpochSecond(),
-                            DateTimeFormatter.ofPattern("d MMMM, ;EEEE|", Locale.forLanguageTag("pl")).format(
+                            DateTimeFormatter.ofPattern("d MMMM;EEEE|", Locale.forLanguageTag("pl")).format(
                                 LocalDateTime.ofInstant(slot.startAt(), ZONE)
-                            ).replace(";", "<small>")
-                                .replace("|", "</small>"),
+                            )
+                                .replace(";", "<br/><small>")
+                                .replace("|", "</small>")
+                                .replace(" ", "&nbsp;"),
                         times,
 
                             //                    slot.startAt().getEpochSecond(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(
@@ -168,8 +198,8 @@ public class TableFormatter {
                 lastRange = 0;
             } else {
                 TimeRange last = ranges.get(lastRange);
-                if (last.end().plusMinutes(slot.duration()).equals(time)) {
-                    ranges.add(lastRange, new TimeRange(last.start(), time));
+                if (last.end().plusMinutes(slot.duration()).equals(time) || last.end.equals(time)) {
+                    ranges.set(lastRange, new TimeRange(last.start(), time));
                 } else {
                     ranges.add(new TimeRange(time, time));
                     lastRange++;
@@ -193,7 +223,7 @@ public class TableFormatter {
                 phone = dirtyPhone;
             }
             return """
-                <a href="tel:%s" title="Zadzwoń do punktu szczepień"><img src="assets/phone.png" width="11px"></img>&nbsp;%s</a><br/>
+                <a href="tel:%s" title="Zadzwoń do punktu szczepień"><img src="assets/phone.png" width="11px"/>&nbsp;%s</a><br/>
                 """.formatted(found.telephone(), phone.replaceAll("/.*", "").replace(" ", "&nbsp;"));
 
             // TODO: need to add second phone number if "/" is used
@@ -202,13 +232,14 @@ public class TableFormatter {
 
     private String getAddress(ExtendedResult.Slot slot) {
         Optional<ExtendedServicePoint> maybe = servicePointFinder.findByAddress(slot.servicePoint());
+        final String address = "<small class=\"smaller\">%s</small><br/>%s".formatted(slot.servicePoint().name(), slot.servicePoint().addressText());
         if (maybe.isEmpty()) {
-            return slot.servicePoint().addressText();
+            return address;
         } else {
             ExtendedServicePoint found = maybe.get();
             return """
                 <a target="_blank" href="https://www.google.com/maps/search/?api=1&query=%s,%s">%s</a>
-                """.formatted(found.lat(), found.lon(), slot.servicePoint().addressText());
+                """.formatted(found.lat(), found.lon(), address);
         }
     }
     public static record TimeRange(LocalTime start, LocalTime end) {}

@@ -109,64 +109,65 @@ public class Main {
 
 //        for (City city : Set.of(City.KRAKÓW, City.RZESZÓW)) {
 
-        List<SearchCity> findVoi = Arrays.stream(Voivodeship.values())
-            .map(v -> new SearchCity(null, v, 10))
-            .toList();
+//        List<SearchCity> findVoi = Arrays.stream(Voivodeship.values())
+//            .map(v -> new SearchCity(null, v, 10))
+//            .toList();
 
-//        List<SearchCity> findVoi = List.of();
+        List<SearchCity> findVoi = List.of();
         List<SearchCity> find = List.of(
-            new SearchCity("Grudziądz", Voivodeship.KUJAWSKO_POMORSKIE, 7*5),
-            new SearchCity("Świecie", Voivodeship.KUJAWSKO_POMORSKIE, 7*5),
-            new SearchCity("Rzeszów", Voivodeship.PODKARPACKIE, 7),
-            new SearchCity("Mielec", Voivodeship.PODKARPACKIE, 7*2),
-            new SearchCity("Tarnobrzeg", Voivodeship.PODKARPACKIE, 7*2),
-            new SearchCity("Przemyśl", Voivodeship.PODKARPACKIE, 7*2),
-            new SearchCity("Krosno", Voivodeship.PODKARPACKIE, 7*2),
-            new SearchCity("Kraków", Voivodeship.MAŁOPOLSKIE, 7*2),
-            new SearchCity("Tarnów", Voivodeship.MAŁOPOLSKIE, 28),
-            new SearchCity("Nowy Sącz", Voivodeship.MAŁOPOLSKIE, 55),
-            new SearchCity("Warszawa", Voivodeship.MAZOWIECKIE, 7),
-            new SearchCity("Radom", Voivodeship.MAZOWIECKIE, 7),
-            new SearchCity("Ciechanów", Voivodeship.MAZOWIECKIE, 7),
-            new SearchCity("Lublin", Voivodeship.LUBELSKIE, 7*2),
-            new SearchCity("Zamość", Voivodeship.LUBELSKIE, 7*2),
-            new SearchCity("Świdnik", Voivodeship.LUBELSKIE, 7*2),
-            new SearchCity("Szczecin", Voivodeship.ZACHODNIOPOMORSKIE, 7),
-            new SearchCity("Koszalin", Voivodeship.ZACHODNIOPOMORSKIE, 7*3),
-            new SearchCity("Opole", Voivodeship.OPOLSKIE, 7),
-            new SearchCity("Wrocław", Voivodeship.DOLNOŚLĄSKIE, 7),
-            new SearchCity("Kłodzko", Voivodeship.DOLNOŚLĄSKIE, 7*2),
-            new SearchCity("Katowice", Voivodeship.ŚLĄSKIE, 7*2),
-            new SearchCity("Częstochowa", Voivodeship.ŚLĄSKIE, 7*3),
-            new SearchCity("Gliwice", Voivodeship.ŚLĄSKIE, 7*3),
-            new SearchCity("Czechowice-Dziedzice", Voivodeship.ŚLĄSKIE, 7*4),
-            new SearchCity("Dąbrowa Górnicza", Voivodeship.ŚLĄSKIE, 7*3),
-            new SearchCity("Sosnowiec", Voivodeship.ŚLĄSKIE, 7*3),
-            new SearchCity("Bielsko-Biała", Voivodeship.ŚLĄSKIE, 7*4),
-            new SearchCity("Pszczyna", Voivodeship.ŚLĄSKIE, 7*4),
-            new SearchCity("Chorzów", Voivodeship.ŚLĄSKIE, 7*4),
-            new SearchCity("Kielce", Voivodeship.ŚWIĘTOKRZYSKIE, 7*2),
+//            new SearchCity("Rzeszów", Voivodeship.PODKARPACKIE, 7),
+//            new SearchCity("Mielec", Voivodeship.PODKARPACKIE, 7*2),
+//            new SearchCity("Tarnobrzeg", Voivodeship.PODKARPACKIE, 7*2),
+//            new SearchCity("Przemyśl", Voivodeship.PODKARPACKIE, 7*2),
+//            new SearchCity("Krosno", Voivodeship.PODKARPACKIE, 7*2),
+//            new SearchCity("Kraków", Voivodeship.MAŁOPOLSKIE, 7*2),
+//            new SearchCity("Tarnów", Voivodeship.MAŁOPOLSKIE, 28),
+//            new SearchCity("Nowy Sącz", Voivodeship.MAŁOPOLSKIE, 55),
+//            new SearchCity("Warszawa", Voivodeship.MAZOWIECKIE, 7),
+//            new SearchCity("Radom", Voivodeship.MAZOWIECKIE, 7),
+//            new SearchCity("Ciechanów", Voivodeship.MAZOWIECKIE, 7),
+//            new SearchCity("Lublin", Voivodeship.LUBELSKIE, 7*2),
+//            new SearchCity("Zamość", Voivodeship.LUBELSKIE, 7*2),
+//            new SearchCity("Świdnik", Voivodeship.LUBELSKIE, 7*2),
+//            new SearchCity("Szczecin", Voivodeship.ZACHODNIOPOMORSKIE, 7),
+//            new SearchCity("Koszalin", Voivodeship.ZACHODNIOPOMORSKIE, 7*3),
+//            new SearchCity("Opole", Voivodeship.OPOLSKIE, 7),
+//            new SearchCity("Wrocław", Voivodeship.DOLNOŚLĄSKIE, 7),
+//            new SearchCity("Kłodzko", Voivodeship.DOLNOŚLĄSKIE, 7*2),
+//            new SearchCity("Katowice", Voivodeship.ŚLĄSKIE, 7*2),
+//            new SearchCity("Częstochowa", Voivodeship.ŚLĄSKIE, 7*3),
+//            new SearchCity("Gliwice", Voivodeship.ŚLĄSKIE, 7*3),
+//            new SearchCity("Czechowice-Dziedzice", Voivodeship.ŚLĄSKIE, 7*4),
+//            new SearchCity("Dąbrowa Górnicza", Voivodeship.ŚLĄSKIE, 7*3),
+//            new SearchCity("Sosnowiec", Voivodeship.ŚLĄSKIE, 7*3),
+//            new SearchCity("Bielsko-Biała", Voivodeship.ŚLĄSKIE, 7*4),
+//            new SearchCity("Pszczyna", Voivodeship.ŚLĄSKIE, 7*4),
+//            new SearchCity("Chorzów", Voivodeship.ŚLĄSKIE, 7*4),
+//            new SearchCity("Kielce", Voivodeship.ŚWIĘTOKRZYSKIE, 7*2),
+            new SearchCity(null, Voivodeship.KUJAWSKO_POMORSKIE, 7*4),
             new SearchCity("Bydgoszcz", Voivodeship.KUJAWSKO_POMORSKIE, 7*4),
             new SearchCity("Toruń", Voivodeship.KUJAWSKO_POMORSKIE, 7*4),
             new SearchCity("Inowrocław", Voivodeship.KUJAWSKO_POMORSKIE, 7*4),
             new SearchCity("Włocławek", Voivodeship.KUJAWSKO_POMORSKIE, 7*4),
-            new SearchCity("Zielona Góra", Voivodeship.LUBUSKIE, 7),
-            new SearchCity("Gorzów Wielkopolski", Voivodeship.LUBUSKIE, 7),
-            new SearchCity("Łódź", Voivodeship.ŁÓDZKIE, 7),
-            new SearchCity("Białystok", Voivodeship.PODLASKIE, 7),
-            new SearchCity("Łomża", Voivodeship.PODLASKIE, 7),
-            new SearchCity("Jedwabne", Voivodeship.PODLASKIE, 7),
-            new SearchCity("Piątnica", Voivodeship.PODLASKIE, 7),
-            new SearchCity("Gdańsk", Voivodeship.POMORSKIE, 7),
-            new SearchCity("Sopot", Voivodeship.POMORSKIE, 7*2),
-            new SearchCity("Gdynia", Voivodeship.POMORSKIE, 7*2),
-            new SearchCity("Tczew", Voivodeship.POMORSKIE, 7*2),
-            new SearchCity("Olsztyn", Voivodeship.WARMIŃSKO_MAZURSKIE, 7),
-            new SearchCity("Elbląg", Voivodeship.WARMIŃSKO_MAZURSKIE, 7*3),
-            new SearchCity("Poznań", Voivodeship.WIELKOPOLSKIE, 7),
-            new SearchCity("Jarocin", Voivodeship.WIELKOPOLSKIE, 55),
-            new SearchCity("Ostrów Wielkopolski", Voivodeship.WIELKOPOLSKIE, 55),
-            new SearchCity("Kalisz", Voivodeship.WIELKOPOLSKIE, 28)
+            new SearchCity("Grudziądz", Voivodeship.KUJAWSKO_POMORSKIE, 7*5),
+            new SearchCity("Świecie", Voivodeship.KUJAWSKO_POMORSKIE, 7*5)
+//            new SearchCity("Zielona Góra", Voivodeship.LUBUSKIE, 7),
+//            new SearchCity("Gorzów Wielkopolski", Voivodeship.LUBUSKIE, 7),
+//            new SearchCity("Łódź", Voivodeship.ŁÓDZKIE, 7),
+//            new SearchCity("Białystok", Voivodeship.PODLASKIE, 7),
+//            new SearchCity("Łomża", Voivodeship.PODLASKIE, 7),
+//            new SearchCity("Jedwabne", Voivodeship.PODLASKIE, 7),
+//            new SearchCity("Piątnica", Voivodeship.PODLASKIE, 7),
+//            new SearchCity("Gdańsk", Voivodeship.POMORSKIE, 7),
+//            new SearchCity("Sopot", Voivodeship.POMORSKIE, 7*2),
+//            new SearchCity("Gdynia", Voivodeship.POMORSKIE, 7*2),
+//            new SearchCity("Tczew", Voivodeship.POMORSKIE, 7*2),
+//            new SearchCity("Olsztyn", Voivodeship.WARMIŃSKO_MAZURSKIE, 7),
+//            new SearchCity("Elbląg", Voivodeship.WARMIŃSKO_MAZURSKIE, 7*3),
+//            new SearchCity("Poznań", Voivodeship.WIELKOPOLSKIE, 7),
+//            new SearchCity("Jarocin", Voivodeship.WIELKOPOLSKIE, 55),
+//            new SearchCity("Ostrów Wielkopolski", Voivodeship.WIELKOPOLSKIE, 55),
+//            new SearchCity("Kalisz", Voivodeship.WIELKOPOLSKIE, 28)
         );
         Set<SlotWithVoivodeship> results = new HashSet<>();
         try {
@@ -180,8 +181,8 @@ public class Main {
                     VaccineType.AZ
                     //                    VaccineType.JJ
                 )) {
-                    for (int weeks = 2; weeks <= 5; weeks += 2) {
-                        Thread.sleep(2000 + (int)(Math.random() * 3000));
+                    for (int weeks = 2; weeks <= 5; weeks += 1) {
+                        Thread.sleep(2000 + (int)(Math.random() * 2000));
                         var search = new Search(
                             new DateRange(LocalDate.now(), LocalDate.now().plusWeeks(weeks)),
                             new TimeRange(
@@ -194,15 +195,15 @@ public class Main {
                             gmina.map(Gmina::terc).orElse(null),
                             null
                         );
-                        final List<Result.BasicSlot> list =
+                        final Set<Result.BasicSlot> list =
                             webSearch(options, creds, client, mapper, searchCity, vaccine, search);
-                        if (list.size() < 2 || vaccine != VaccineType.PFIZER) {
-                            LOG.info("Found ({} weeks) for {}, {}: {} slots", weeks, searchCity.name, vaccine, list.size());
-                            results.addAll(
-                                list.stream()
-                                    .map(s -> new SlotWithVoivodeship(s, searchCity.voivodeship()))
-                                    .collect(Collectors.toSet())
-                            );
+                        LOG.info("Found ({} weeks) for {}, {}: {} slots", weeks, searchCity.name, vaccine, list.size());
+                        results.addAll(
+                            list.stream()
+                                .map(s -> new SlotWithVoivodeship(s, searchCity.voivodeship()))
+                                .collect(Collectors.toSet())
+                        );
+                        if (list.size() > 2 || vaccine != VaccineType.PFIZER) {
                             break;
                         }
                         LOG.debug("+n weeks");
@@ -216,7 +217,7 @@ public class Main {
         new TableFormatter(options.output, mapper).store(placeFinder, results);
     }
 
-    private static List<Result.BasicSlot> webSearch(Options options, Creds creds, HttpClient client, ObjectMapper mapper,
+    private static Set<Result.BasicSlot> webSearch(Options options, Creds creds, HttpClient client, ObjectMapper mapper,
         SearchCity searchCity, VaccineType vaccine, Search search) throws IOException, InterruptedException {
         String searchStr = mapper.writeValueAsString(search);
 
@@ -232,9 +233,9 @@ public class Main {
             out.body(),
             StandardOpenOption.CREATE_NEW
         );
-        final List<Result.BasicSlot> list =
-            Optional.ofNullable(mapper.readValue(out.body(), Result.class).list()).orElse(List.of());
-        return list;
+        return new HashSet<>(
+            Optional.ofNullable(mapper.readValue(out.body(), Result.class).list()).orElse(List.of())
+        );
     }
 
     public static ObjectMapper getMapper() {
