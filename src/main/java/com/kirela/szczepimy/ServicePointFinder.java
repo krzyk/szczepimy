@@ -10,8 +10,10 @@ import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,7 +21,7 @@ import org.apache.logging.log4j.Logger;
 public class ServicePointFinder {
     private static final Logger LOG = LogManager.getLogger(ServicePointFinder.class);
 
-    private final Map<String, List<ServicePoint>> grouped;
+    private final NavigableMap<String, List<ServicePoint>> grouped;
     private final HttpClient client;
     private final ObjectMapper mapper;
     private final Map<Integer, ExtendedServicePoint> extendedServicePoints = new HashMap<>();
@@ -38,7 +40,7 @@ public class ServicePointFinder {
                 ), new TypeReference<>() {});
             grouped = points.stream()
                 .map(ServicePointFinder::correctNaAddresses)
-                .collect(Collectors.groupingBy(point -> point.address().toLowerCase()));
+                .collect(Collectors.groupingBy(point -> point.address().toLowerCase(), TreeMap::new, Collectors.toList()));
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
@@ -62,7 +64,7 @@ public class ServicePointFinder {
             point.terc(),
             normalize(point.address())
                 .trim()
-                .replaceAll("^NA ([0-9])", point.community() + " $1")
+                .replaceAll("^NA ([0-9])", point.place() + " $1")
             ,
             point.zipCode(),
             point.voivodeship(),

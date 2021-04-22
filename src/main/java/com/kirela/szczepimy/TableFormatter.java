@@ -2,6 +2,8 @@ package com.kirela.szczepimy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -98,48 +100,32 @@ public class TableFormatter {
                     String times = slots.stream()
                         .map(s -> LocalTime.ofInstant(s.startAt(), ZONE))
                         .sorted()
+                        .distinct()
                         .map(t -> DateTimeFormatter.ofPattern("HH:mm", Locale.forLanguageTag("pl")).format(t))
                         .collect(Collectors.joining("<br/>"));
-                    List<TimeRange> ranges = getRanges(slots, slot);
-                    List<TimeRange> incorrect = ranges.stream()
-                        .filter(r -> r.start() == r.end())
-                        .toList();
-                    if (!incorrect.isEmpty()) {
-                        LOG.error("Ranges are incorrect (%s) input: %s".formatted(incorrect, slots));
-                    }
-                    if (incorrect.isEmpty() && slots.size() > 4) {
-                        times = """
+
+                    if (slots.size() >= 4) {
+                        List<TimeRange> ranges = getRanges(slots, slot);
+                        List<TimeRange> incorrect = ranges.stream()
+                            .filter(r -> r.start() == r.end())
+                            .toList();
+                        if (!incorrect.isEmpty()) {
+                            LOG.error("Ranges are incorrect (%s) input: %s".formatted(incorrect, slots));
+                        }
+                        if (incorrect.isEmpty() && slots.size() > 4) {
+                            times = """
                             <small class="smaller">(co&nbsp;%s&nbsp;min)</small>
                             %s
                             <br/>
                             """.formatted(
-                            slot.duration(),
-                            ranges.stream().map(r -> "<br/><hr/>%s<br/><small>↓</small><br/>%s".formatted(r.start(), r.end())).collect(Collectors.joining())
-                        );
-
-//                        15:00<br/>
-//                        ↓<br/>
-//                            16:20<br/>
-//                        <hr/>
-//                            16:25<br/>
-//                        ↓<br/>
-//                            19:30</td>
+                                slot.duration(),
+                                ranges.stream()
+                                    .map(r -> "<br/><hr/>%s<br/><small>↓</small><br/>%s".formatted(r.start(), r.end()))
+                                    .collect(Collectors.joining())
+                            );
+                        }
                     }
-                    /**
-                     <td class="dt-body-center">(co&nbsp;5&nbsp;min)<br/>
-                         <hr/>
-                         15:00<br/>
-                         ↓<br/>
-                         16:20<br/>
-                         <hr/>
-                         16:25<br/>
-                         ↓<br/>
-                         19:30</td>
 
-                     */
-
-//                    List<TimeRange> ranges = getRanges(slots, slot);
-//                    System.out.println(ranges);
                     Files.writeString(voiFile, """
                                     <tr>
                                         <td>%s</td>
@@ -234,7 +220,13 @@ public class TableFormatter {
         Optional<ExtendedServicePoint> maybe = servicePointFinder.findByAddress(slot.servicePoint());
         final String address = "<small class=\"smaller\">%s</small><br/>%s".formatted(slot.servicePoint().name(), slot.servicePoint().addressText());
         if (maybe.isEmpty()) {
-            return address;
+            return """
+                <a target="_blank" href="https://www.google.com/maps/search/?api=1&query=%s,%s">%s</a>
+                """.formatted(
+                URLEncoder.encode(slot.servicePoint().addressText(), StandardCharsets.UTF_8),
+                URLEncoder.encode(slot.servicePoint().place(), StandardCharsets.UTF_8),
+                address
+            );
         } else {
             ExtendedServicePoint found = maybe.get();
             return """

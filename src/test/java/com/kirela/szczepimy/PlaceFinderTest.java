@@ -18,5 +18,7 @@ class PlaceFinderTest {
             .isEqualTo("Warszawa");
         Assertions.assertThat(new PlaceFinder().findInAddress("Zielona 23, Duszniki Zdrój", Voivodeship.DOLNOŚLĄSKIE))
             .isEqualTo("Duszniki-Zdrój");
+        Assertions.assertThat(new PlaceFinder().findInAddress("3 Maja 36D, Czerwionka- Leszczyny", Voivodeship.ŚLĄSKIE))
+            .isEqualTo("Czerwionka-Leszczyny");
     }
 }

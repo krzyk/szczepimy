@@ -55,7 +55,7 @@ public class PlaceFinder {
             Gmina.normalize(name)
                 .replace("m. st. ", "")
                 .replace("pawlowice/pniowek", "pniowek")
-                .replace("kedzierzyn - kozle", "kedzierzyn-kozle")
+                .replaceAll("([^ ]+) ?- ?([^ ]+)", "$1-$2")
                 .replaceAll("([^ ]+) [0-9]+[a-z]?$", "$1")
                 .replaceAll("czerwiensk odrzanski", "czerwiensk")
                 .replaceAll("gdansk .+", "gdansk")
