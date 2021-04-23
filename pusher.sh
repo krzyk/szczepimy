@@ -15,7 +15,7 @@ mvn -B clean package -DskipTests -Dorg.slf4j.simpleLogger.log.org.apache.maven.c
 
 echo "Generating new data"
 mkdir -p $OUTPUT
-java -jar target/szczepimy-1.0-SNAPSHOT.jar -p $EREJ_PID_PLUTA -s $EREJ_SID -c $EREJ_CSRF -t $OUTPUT -v OPOLSKIE
+java -jar target/szczepimy-1.0-SNAPSHOT.jar -p $EREJ_PID_PLUTA -s $EREJ_SID -c $EREJ_CSRF -t $OUTPUT
 
 
 echo "Cloning destination git repository"
