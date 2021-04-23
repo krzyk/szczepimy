@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -254,11 +255,14 @@ public class Main {
 
             HttpResponse.BodyHandlers.ofString()
         );
-        Files.writeString(
-            Paths.get(options.output, "logs", "%s_%s.%s.json".formatted(searchCity.name(), vaccine, Instant.now())),
-            out.body(),
-            StandardOpenOption.CREATE_NEW
-        );
+        if (options.storeLogs) {
+            Paths.get(options.output, "logs").toFile().mkdirs();
+            Files.writeString(
+                Paths.get(options.output, "logs", "%s_%s.%s.json".formatted(searchCity.name(), vaccine, Instant.now())),
+                out.body(),
+                StandardOpenOption.CREATE_NEW
+            );
+        }
         return new HashSet<>(
             Optional.ofNullable(mapper.readValue(out.body(), Result.class).list()).orElse(List.of())
         );

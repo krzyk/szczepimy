@@ -24,4 +24,7 @@ public class Options {
 
     @CommandLine.Option(required = true, names = "-t", description = "Target directory for files (default: ${DEFAULT-VALUE})")
     String output;
+
+    @CommandLine.Option(names = "-l", description = "Store json response logs? (default: ${DEFAULT-VALUE})")
+    boolean storeLogs = false;
 }
