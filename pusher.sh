@@ -4,6 +4,8 @@ set -x
 
 CLONE_DIR=$(mktemp -d)
 
+rm -rf $CLONE_DIR/*
+
 echo "Building"
 mvn -B clean package -DskipTests -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
 
