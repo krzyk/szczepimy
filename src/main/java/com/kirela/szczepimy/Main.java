@@ -141,6 +141,7 @@ public class Main {
             new SearchCity("Zamość", Voivodeship.LUBELSKIE, 7*2),
             new SearchCity("Świdnik", Voivodeship.LUBELSKIE, 7*2),
             new SearchCity("Łuków", Voivodeship.LUBELSKIE, 7*2),
+            new SearchCity("Biłgoraj", Voivodeship.LUBELSKIE, 7*2),
             new SearchCity("Szczecin", Voivodeship.ZACHODNIOPOMORSKIE, 7),
             new SearchCity("Koszalin", Voivodeship.ZACHODNIOPOMORSKIE, 7*3),
             new SearchCity("Opole", Voivodeship.OPOLSKIE, 7),
@@ -180,6 +181,7 @@ public class Main {
             new SearchCity("Tczew", Voivodeship.POMORSKIE, 7*2),
             new SearchCity("Olsztyn", Voivodeship.WARMIŃSKO_MAZURSKIE, 7),
             new SearchCity("Elbląg", Voivodeship.WARMIŃSKO_MAZURSKIE, 7*3),
+            new SearchCity("Dobre Miasto", Voivodeship.WARMIŃSKO_MAZURSKIE, 7*3),
             new SearchCity("Poznań", Voivodeship.WIELKOPOLSKIE, 7),
             new SearchCity("Jarocin", Voivodeship.WIELKOPOLSKIE, 55),
             new SearchCity("Ostrów Wielkopolski", Voivodeship.WIELKOPOLSKIE, 55),
@@ -233,7 +235,7 @@ public class Main {
             LOG.error("Exception", ex);
         }
 
-        new TableFormatter(options.output, mapper, find).store(placeFinder, results);
+        new TableFormatter(options.output, mapper, find, Instant.now()).store(placeFinder, results);
     }
 
     private static Set<Result.BasicSlot> webSearch(Options options, Creds creds, HttpClient client, ObjectMapper mapper,

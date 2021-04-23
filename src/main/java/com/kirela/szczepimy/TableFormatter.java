@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -29,12 +30,14 @@ public class TableFormatter {
     private final String outputDirectory;
     private final ServicePointFinder servicePointFinder;
     private final List<Main.SearchCity> searchCities;
+    private final Instant now;
 
     public TableFormatter(String outputDirectory, ObjectMapper mapper,
-        List<Main.SearchCity> searchCities) {
+        List<Main.SearchCity> searchCities, Instant now) {
         this.searchCities = searchCities;
         this.outputDirectory = outputDirectory;
         this.servicePointFinder = new ServicePointFinder(mapper);
+        this.now = now;
     }
 
     public void store(PlaceFinder placeFinder, Set<Main.SlotWithVoivodeship> results)
@@ -78,6 +81,7 @@ public class TableFormatter {
                 title: %s
                 permalink: /%s
                 ---
+                <p>Ostatnia aktualizacja: <strong><time class="timeago" datetime="%s">%s</time></strong></p>
                 <p>
                 <small>Wyszukujemy w miastach: %s</small>.
                 </p>
@@ -95,7 +99,9 @@ public class TableFormatter {
                     <tbody>
                                     
                 """.formatted(
-                voivodeship.readable(), voivodeship.urlName(),
+                    voivodeship.readable(), voivodeship.urlName(),
+                    now.atZone(ZONE).format(DateTimeFormatter.ISO_INSTANT),
+                    now.atZone(ZONE).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
                     searchCities.stream()
                         .filter(c -> c.voivodeship() == voivodeship)
                         .map(Main.SearchCity::name)
