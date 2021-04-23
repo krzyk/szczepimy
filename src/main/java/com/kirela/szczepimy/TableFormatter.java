@@ -74,7 +74,9 @@ public class TableFormatter {
             .entrySet()) {
             Voivodeship voivodeship = entry.getKey();
             var voiFile = Paths.get(outputDirectory, "%s.html".formatted(voivodeship.urlName()));
-            voiFile.toFile().delete();
+            if (voiFile.toFile().exists()) {
+                voiFile.toFile().delete();
+            }
             Files.writeString(voiFile, """
                 ---
                 layout: page
