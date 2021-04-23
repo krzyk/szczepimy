@@ -3,6 +3,8 @@ set -e
 set -x
 
 CLONE_DIR=$(mktemp -d)
+OUTPUT=$(pwd)/output
+
 
 /sbin/ifconfig
 echo HOST=$HOST
@@ -12,7 +14,8 @@ echo "Building"
 mvn -B clean package -DskipTests -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
 
 echo "Generating new data"
-java -jar target/szczepimy-1.0-SNAPSHOT.jar -p $EREJ_PID_PLUTA -s $EREJ_SID -c $EREJ_CSRF -t $CLONE_DIR -v OPOLSKIE
+mkdir -p $OUTPUT
+java -jar target/szczepimy-1.0-SNAPSHOT.jar -p $EREJ_PID_PLUTA -s $EREJ_SID -c $EREJ_CSRF -t $OUTPUT -v OPOLSKIE
 
 
 echo "Cloning destination git repository"
@@ -20,9 +23,9 @@ git clone --single-branch --branch main "https://szczepienia:$PAT@github.com/szc
 cd "$CLONE_DIR"
 
 echo "Adding git commit"
-touch test.html
 git config user.email "82411728+szczepienia@users.noreply.github.com"
 git config user.name "szczepienia"
+cp $OUTPUT/*.html .
 git add *.html
 if git status | grep -q "Changes to be committed"
 then
