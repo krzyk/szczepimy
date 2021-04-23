@@ -6,7 +6,7 @@ set -x
 CLONE_DIR=$(mktemp -d)
 GENERATED_DIR=output
 
-mvn -b clean package -DskipTests
+mvn -B clean package -DskipTests
 
 java -jar target/szczepimy-1.0-SNAPSHOT.jar -p $EREJ_PID_PLUTA -s $EREJ_SID -c $EREJ_CSRF -t $GENERATED_DIR -v OPOLSKIE
 
