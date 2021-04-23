@@ -109,7 +109,7 @@ public class TableFormatter {
                         .map(Main.SearchCity::name)
                         .collect(Collectors.joining(", "))
                 ),
-                StandardOpenOption.APPEND, StandardOpenOption.CREATE
+                StandardOpenOption.CREATE_NEW
             );
 
             for (Map.Entry<LocalDate, Map<ExtendedResult.ServicePoint, List<ExtendedResult.Slot>>> mapEntry : entry.getValue()
