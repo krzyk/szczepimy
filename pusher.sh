@@ -16,17 +16,13 @@ mvn -B clean package -DskipTests
 echo "Generating new data"
 java -jar target/szczepimy-1.0-SNAPSHOT.jar -p $EREJ_PID_PLUTA -s $EREJ_SID -c $EREJ_CSRF -t $CLONE_DIR -v OPOLSKIE
 
-echo "Copying contents to git repo"
-cp -R "$GENERATED_DIR/*" "$CLONE_DIR/"
 cd "$CLONE_DIR"
 
-INPUT_COMMIT_MESSAGE="remote update"
-
 echo "Adding git commit"
-git add .
+git add *.html
 if git status | grep -q "Changes to be committed"
 then
-    git commit --message "$INPUT_COMMIT_MESSAGE"
+    git commit --message "remote update"
     echo "Pushing git commit"
     git push -u origin HEAD:main
 else
