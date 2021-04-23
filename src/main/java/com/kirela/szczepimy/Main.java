@@ -186,6 +186,7 @@ public class Main {
             new SearchCity("Jarocin", Voivodeship.WIELKOPOLSKIE, 55),
             new SearchCity("Ostrów Wielkopolski", Voivodeship.WIELKOPOLSKIE, 55),
             new SearchCity("Oborniki", Voivodeship.WIELKOPOLSKIE, 7),
+            new SearchCity("Gniezno", Voivodeship.WIELKOPOLSKIE, 7),
             new SearchCity("Kalisz", Voivodeship.WIELKOPOLSKIE, 28)
         );
         Set<SlotWithVoivodeship> results = new HashSet<>();
