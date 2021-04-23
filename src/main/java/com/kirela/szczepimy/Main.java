@@ -93,6 +93,7 @@ public class Main {
             CommandLine.usage(options, System.out);
             return;
         }
+        LOG.info("Options used: {}", options);
 
         GminaFinder gminaFinder = new GminaFinder();
         PlaceFinder placeFinder = new PlaceFinder();
