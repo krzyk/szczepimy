@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 public enum VaccineType {
     PFIZER("cov19.pfizer", "Pfizer"),
     MODERNA("cov19.moderna", "Moderna"),
-    JJ("cov19.johnson_and_johnson", "Johnson and Johnson"),
+    JJ("cov19.johnson_and_johnson", "J &amp; J"),
     AZ("cov19.astra_zeneca", "AstraZeneca");
 
     private final String name;

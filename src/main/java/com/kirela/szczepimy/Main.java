@@ -123,12 +123,18 @@ public class Main {
             new SearchCity("Kraków", Voivodeship.MAŁOPOLSKIE, 7*2),
             new SearchCity("Tarnów", Voivodeship.MAŁOPOLSKIE, 28),
             new SearchCity("Nowy Sącz", Voivodeship.MAŁOPOLSKIE, 55),
+            new SearchCity("Wadowice", Voivodeship.MAŁOPOLSKIE, 55),
+            new SearchCity("Rabka-Zdrój", Voivodeship.MAŁOPOLSKIE, 55),
             new SearchCity("Warszawa", Voivodeship.MAZOWIECKIE, 7),
             new SearchCity("Radom", Voivodeship.MAZOWIECKIE, 7),
             new SearchCity("Ciechanów", Voivodeship.MAZOWIECKIE, 7),
+            new SearchCity("Piaseczno", Voivodeship.MAZOWIECKIE, 7),
+            new SearchCity("Konstancin-Jeziorna", Voivodeship.MAZOWIECKIE, 7),
+            new SearchCity("Solec nad Wisłą", Voivodeship.MAZOWIECKIE, 7),
             new SearchCity("Lublin", Voivodeship.LUBELSKIE, 7*2),
             new SearchCity("Zamość", Voivodeship.LUBELSKIE, 7*2),
             new SearchCity("Świdnik", Voivodeship.LUBELSKIE, 7*2),
+            new SearchCity("Łuków", Voivodeship.LUBELSKIE, 7*2),
             new SearchCity("Szczecin", Voivodeship.ZACHODNIOPOMORSKIE, 7),
             new SearchCity("Koszalin", Voivodeship.ZACHODNIOPOMORSKIE, 7*3),
             new SearchCity("Opole", Voivodeship.OPOLSKIE, 7),
@@ -150,6 +156,11 @@ public class Main {
             new SearchCity("Włocławek", Voivodeship.KUJAWSKO_POMORSKIE, 7*4),
             new SearchCity("Grudziądz", Voivodeship.KUJAWSKO_POMORSKIE, 7*5),
             new SearchCity("Świecie", Voivodeship.KUJAWSKO_POMORSKIE, 7*5),
+            new SearchCity("Wąbrzeźno", Voivodeship.KUJAWSKO_POMORSKIE, 7*5),
+            new SearchCity("Ciechocinek", Voivodeship.KUJAWSKO_POMORSKIE, 7*5),
+            new SearchCity("Kowalewo Pomorskie", Voivodeship.KUJAWSKO_POMORSKIE, 7*5),
+            new SearchCity("Chełmża", Voivodeship.KUJAWSKO_POMORSKIE, 7*5),
+            new SearchCity("Chełmno", Voivodeship.KUJAWSKO_POMORSKIE, 7*5),
             new SearchCity("Zielona Góra", Voivodeship.LUBUSKIE, 7),
             new SearchCity("Gorzów Wielkopolski", Voivodeship.LUBUSKIE, 7),
             new SearchCity("Łódź", Voivodeship.ŁÓDZKIE, 7),
@@ -166,27 +177,30 @@ public class Main {
             new SearchCity("Poznań", Voivodeship.WIELKOPOLSKIE, 7),
             new SearchCity("Jarocin", Voivodeship.WIELKOPOLSKIE, 55),
             new SearchCity("Ostrów Wielkopolski", Voivodeship.WIELKOPOLSKIE, 55),
+            new SearchCity("Oborniki", Voivodeship.WIELKOPOLSKIE, 7),
             new SearchCity("Kalisz", Voivodeship.WIELKOPOLSKIE, 28)
         );
         Set<SlotWithVoivodeship> results = new HashSet<>();
         try {
-            for (SearchCity searchCity : Stream.concat(findVoi.stream(), find.stream()).toList()) {
+            for (SearchCity searchCity : Stream.concat(findVoi.stream(), find.stream())
+                .filter(s -> options.voivodeships.contains(s.voivodeship()))
+                .toList()) {
                 LOG.info("Processing {}", searchCity);
                 Optional<Gmina> gmina = Optional.ofNullable(searchCity.name())
                     .map(n -> gminaFinder.find(n, searchCity.voivodeship));
                 for (VaccineType vaccine : Set.of(
                     VaccineType.PFIZER,
                     VaccineType.MODERNA,
-                    VaccineType.AZ
-                    //                    VaccineType.JJ
+                    VaccineType.AZ,
+                    VaccineType.JJ
                 )) {
                     for (int weeks = 2; weeks <= 5; weeks += 1) {
-                        Thread.sleep(1000 + (int)(Math.random() * 1000));
+                        Thread.sleep(1500 + (int)(Math.random() * 1000));
                         var search = new Search(
                             new DateRange(LocalDate.now(), LocalDate.now().plusWeeks(weeks)),
                             new TimeRange(
-                                LocalTime.of(6, 20),
-                                LocalTime.of(23, 30)
+                                LocalTime.of(5, 50),
+                                LocalTime.of(23, 59)
                             ),
                             creds.prescriptionId(),
                             List.of(vaccine),
@@ -213,7 +227,7 @@ public class Main {
             LOG.error("Exception", ex);
         }
 
-        new TableFormatter(options.output, mapper).store(placeFinder, results);
+        new TableFormatter(options.output, mapper, find).store(placeFinder, results);
     }
 
     private static Set<Result.BasicSlot> webSearch(Options options, Creds creds, HttpClient client, ObjectMapper mapper,

@@ -7,8 +7,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.sql.Time;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -30,70 +28,87 @@ public class TableFormatter {
     private static final ZoneId ZONE = ZoneId.of("Europe/Warsaw");
     private final String outputDirectory;
     private final ServicePointFinder servicePointFinder;
+    private final List<Main.SearchCity> searchCities;
 
-    public TableFormatter(String outputDirectory, ObjectMapper mapper) {
+    public TableFormatter(String outputDirectory, ObjectMapper mapper,
+        List<Main.SearchCity> searchCities) {
+        this.searchCities = searchCities;
         this.outputDirectory = outputDirectory;
         this.servicePointFinder = new ServicePointFinder(mapper);
     }
 
     public void store(PlaceFinder placeFinder, Set<Main.SlotWithVoivodeship> results)
         throws IOException {
-//        Map<Voivodeship, List<ExtendedResult.Slot>> groupByVoi = results.stream()
+        //        Map<Voivodeship, List<ExtendedResult.Slot>> groupByVoi = results.stream()
 
-        Map<Voivodeship, Map<LocalDate, Map<ExtendedResult.ServicePoint, List<ExtendedResult.Slot>>>> groupByVoi = results.stream()
-            .map(
-                s -> new ExtendedResult.Slot(
-                    s.slot(),
-                    new ExtendedResult.ServicePoint(
-                        s.slot().servicePoint(),
-                        placeFinder.findInAddress(s.slot().servicePoint().addressText(), s.voivodeship()),
-                        s.voivodeship()
+        Map<Voivodeship, Map<LocalDate, Map<ExtendedResult.ServicePoint, List<ExtendedResult.Slot>>>> groupByVoi =
+            results.stream()
+                .map(
+                    s -> new ExtendedResult.Slot(
+                        s.slot(),
+                        new ExtendedResult.ServicePoint(
+                            s.slot().servicePoint(),
+                            placeFinder.findInAddress(s.slot().servicePoint().addressText(), s.voivodeship()),
+                            s.voivodeship()
+                        )
                     )
-                )
-            ).sorted(
+                ).sorted(
                 Comparator.comparing((ExtendedResult.Slot s) -> s.servicePoint().place())
                     .thenComparing(ExtendedResult.Slot::vaccineType)
                     .thenComparing(ExtendedResult.Slot::startAt)
             )
-            .collect(
-                Collectors.groupingBy(
-                    k -> k.servicePoint().voivodeship(),
-                    Collectors.groupingBy(k -> LocalDate.ofInstant(k.startAt(), ZONE),
-                        Collectors.groupingBy(ExtendedResult.Slot::servicePoint)
+                .collect(
+                    Collectors.groupingBy(
+                        k -> k.servicePoint().voivodeship(),
+                        Collectors.groupingBy(
+                            k -> LocalDate.ofInstant(k.startAt(), ZONE),
+                            Collectors.groupingBy(ExtendedResult.Slot::servicePoint)
+                        )
                     )
-                )
-            );
+                );
 
-        for (Map.Entry<Voivodeship, Map<LocalDate, Map<ExtendedResult.ServicePoint, List<ExtendedResult.Slot>>>> entry : groupByVoi.entrySet()) {
+        for (Map.Entry<Voivodeship, Map<LocalDate, Map<ExtendedResult.ServicePoint, List<ExtendedResult.Slot>>>> entry : groupByVoi
+            .entrySet()) {
             Voivodeship voivodeship = entry.getKey();
             var voiFile = Paths.get(outputDirectory, "%s.html".formatted(voivodeship.urlName()));
             voiFile.toFile().delete();
             Files.writeString(voiFile, """
-                        ---
-                        layout: page
-                        title: %s
-                        permalink: /%s
-                        ---
-                        <table id="szczepienia" class="stripe">
-                            <thead>
-                                <tr>
-                                    <th>Miasto</th>
-                                    <th>Data</th>
-                                    <th>Godz.</th>
-                                    <th>Rodzaj</th>
-                                    <th>Adres</th>
-                                    <th>Umów</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                            
-                        """.formatted(voivodeship.readable(), voivodeship.urlName()),
+                ---
+                layout: page
+                title: %s
+                permalink: /%s
+                ---
+                <p>
+                <small>Wyszukujemy w miastach: %s</small>.
+                </p>
+                <table id="szczepienia" class="stripe">
+                    <thead>
+                        <tr>
+                            <th>Miasto</th>
+                            <th>Data</th>
+                            <th>Godz.</th>
+                            <th>Rodzaj</th>
+                            <th>Adres</th>
+                            <th>Umów</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                                    
+                """.formatted(
+                voivodeship.readable(), voivodeship.urlName(),
+                    searchCities.stream()
+                        .filter(c -> c.voivodeship() == voivodeship)
+                        .map(Main.SearchCity::name)
+                        .collect(Collectors.joining(", "))
+                ),
                 StandardOpenOption.APPEND, StandardOpenOption.CREATE
             );
 
-            for (Map.Entry<LocalDate, Map<ExtendedResult.ServicePoint, List<ExtendedResult.Slot>>> mapEntry : entry.getValue().entrySet()) {
+            for (Map.Entry<LocalDate, Map<ExtendedResult.ServicePoint, List<ExtendedResult.Slot>>> mapEntry : entry.getValue()
+                .entrySet()) {
                 LocalDate date = mapEntry.getKey();
-                for (Map.Entry<ExtendedResult.ServicePoint, List<ExtendedResult.Slot>> listEntry : mapEntry.getValue().entrySet()) {
+                for (Map.Entry<ExtendedResult.ServicePoint, List<ExtendedResult.Slot>> listEntry : mapEntry.getValue()
+                    .entrySet()) {
                     ExtendedResult.ServicePoint servicePoint = listEntry.getKey();
                     List<ExtendedResult.Slot> slots = listEntry.getValue();
                     ExtendedResult.Slot slot = slots.get(0);
@@ -112,15 +127,15 @@ public class TableFormatter {
                         if (!incorrect.isEmpty()) {
                             LOG.error("Ranges are incorrect (%s) input: %s".formatted(incorrect, slots));
                         }
-                        if (incorrect.isEmpty() && slots.size() > 4) {
+                        if (slots.size() > 4) {
                             times = """
-                            <small class="smaller">(co&nbsp;%s&nbsp;min)</small>
-                            %s
-                            <br/>
-                            """.formatted(
+                                <small class="smaller">(co&nbsp;%s&nbsp;min)</small>
+                                %s
+                                <br/>
+                                """.formatted(
                                 slot.duration(),
                                 ranges.stream()
-                                    .map(r -> "<br/><hr/>%s<br/><small>↓</small><br/>%s".formatted(r.start(), r.end()))
+                                    .map(this::rangeToDisplay)
                                     .collect(Collectors.joining())
                             );
                         }
@@ -141,50 +156,63 @@ public class TableFormatter {
                                     </tr>
                                                 
                             """.formatted(
-                            slot.servicePoint().place(),
-                            slot.startAt().getEpochSecond(),
-                            DateTimeFormatter.ofPattern("d MMMM;EEEE|", Locale.forLanguageTag("pl")).format(
-                                LocalDateTime.ofInstant(slot.startAt(), ZONE)
-                            )
-                                .replace(";", "<br/><small>")
-                                .replace("|", "</small>")
-                                .replace(" ", "&nbsp;"),
+                        slot.servicePoint().place(),
+                        slot.startAt().getEpochSecond(),
+                        DateTimeFormatter.ofPattern("d MMMM;EEEE|", Locale.forLanguageTag("pl")).format(
+                            LocalDateTime.ofInstant(slot.startAt(), ZONE)
+                        )
+                            .replace(";", "<br/><small>")
+                            .replace("|", "</small>")
+                            .replace(" ", "&nbsp;"),
                         times,
 
-                            //                    slot.startAt().getEpochSecond(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(
-                            //                        LocalDateTime.ofInstant(slot.startAt(), ZoneId.of("Europe/Warsaw"))
-                            //                    ),
-                            slot.vaccineType().ordinal(), slot.vaccineType().readable(),
-                            getAddress(slot),
-                            getPhone(slot)
-                            ),
-                            StandardOpenOption.APPEND, StandardOpenOption.CREATE
-                        );
+                        //                    slot.startAt().getEpochSecond(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(
+                        //                        LocalDateTime.ofInstant(slot.startAt(), ZoneId.of("Europe/Warsaw"))
+                        //                    ),
+                        slot.vaccineType().ordinal(),
+                        slot.vaccineType().readable(),
+                        getAddress(slot),
+                        getPhone(slot)
+                        ),
+                        StandardOpenOption.APPEND, StandardOpenOption.CREATE
+                    );
                 }
             }
 
             Files.writeString(voiFile, """
-                            <tbody>
-                        </table>
-                        """,
+                        <tbody>
+                    </table>
+                    """,
                 StandardOpenOption.APPEND, StandardOpenOption.CREATE
             );
+        }
+    }
+
+    private String rangeToDisplay(TimeRange r) {
+        if (r.start.equals(r.end)) {
+            return "<br/>%s".formatted(r.start);
+        } else {
+            return "<br/><hr/>%s<br/><small>↓</small><br/>%s".formatted(r.start(), r.end());
         }
     }
 
     public static List<TimeRange> getRanges(List<ExtendedResult.Slot> slots, ExtendedResult.Slot slot) {
         List<TimeRange> ranges = new ArrayList<>();
         int lastRange = -1;
-        for (LocalTime time : slots.stream()
+        final List<LocalTime> times = slots.stream()
             .map(s -> LocalTime.ofInstant(s.startAt(), ZONE))
             .sorted()
-            .toList()) {
+            .distinct()
+            .toList();
+        int duration = slot.duration();
+//        int duration = guessDuration(slot, times);
+        for (LocalTime time : times) {
             if (lastRange == -1) {
                 ranges.add(new TimeRange(time, time));
                 lastRange = 0;
             } else {
                 TimeRange last = ranges.get(lastRange);
-                if (last.end().plusMinutes(slot.duration()).equals(time) || last.end.equals(time)) {
+                if (last.end().plusMinutes(duration).equals(time)) {
                     ranges.set(lastRange, new TimeRange(last.start(), time));
                 } else {
                     ranges.add(new TimeRange(time, time));
@@ -193,6 +221,15 @@ public class TableFormatter {
             }
         }
         return ranges;
+    }
+
+    private static int guessDuration(ExtendedResult.Slot slot, List<LocalTime> times) {
+        int duration = slot.duration();
+        final int diff = times.get(1).getMinute() - times.get(0).getMinute();
+        if (diff != duration) {
+            duration = diff;
+        }
+        return duration;
     }
 
     private String getPhone(ExtendedResult.Slot slot) {
@@ -204,13 +241,17 @@ public class TableFormatter {
             final String dirtyPhone = found.telephone();
             String phone;
             if (dirtyPhone.length() == 9 && !dirtyPhone.contains(" ")) {
-                phone = "%s %s %s".formatted(dirtyPhone.substring(0, 3), dirtyPhone.substring(3, 6), dirtyPhone.substring(6));
+                phone = "%s %s %s".formatted(
+                    dirtyPhone.substring(0, 3),
+                    dirtyPhone.substring(3, 6),
+                    dirtyPhone.substring(6)
+                );
             } else {
                 phone = dirtyPhone;
             }
             return """
-                <a href="tel:%s" title="Zadzwoń do punktu szczepień"><img src="assets/phone.png" width="11px"/>&nbsp;%s</a><br/>
-                """.formatted(found.telephone(), phone.replaceAll("/.*", "").replace(" ", "&nbsp;"));
+                <a href="tel:%s" title="Zadzwoń do punktu szczepień"><img src="assets/phone.png" width="11px"/><strong>&nbsp;%s</strong></a><br/>
+                """.formatted(found.telephone(), phone.replaceAll("[/;].*", "").replace(" ", "&nbsp;"));
 
             // TODO: need to add second phone number if "/" is used
         }
@@ -218,7 +259,10 @@ public class TableFormatter {
 
     private String getAddress(ExtendedResult.Slot slot) {
         Optional<ExtendedServicePoint> maybe = servicePointFinder.findByAddress(slot.servicePoint());
-        final String address = "<small class=\"smaller\">%s</small><br/>%s".formatted(slot.servicePoint().name(), slot.servicePoint().addressText());
+        final String address = "<small class=\"smaller\">%s</small><br/>%s".formatted(
+            slot.servicePoint().name(),
+            slot.servicePoint().addressText()
+        );
         if (maybe.isEmpty()) {
             return """
                 <a target="_blank" href="https://www.google.com/maps/search/?api=1&query=%s,%s">%s</a>
@@ -234,5 +278,7 @@ public class TableFormatter {
                 """.formatted(found.lat(), found.lon(), address);
         }
     }
-    public static record TimeRange(LocalTime start, LocalTime end) {}
+
+    public static record TimeRange(LocalTime start, LocalTime end) {
+    }
 }
