@@ -125,12 +125,18 @@ public class Main {
             new SearchCity("Nowy Sącz", Voivodeship.MAŁOPOLSKIE, 55),
             new SearchCity("Wadowice", Voivodeship.MAŁOPOLSKIE, 55),
             new SearchCity("Rabka-Zdrój", Voivodeship.MAŁOPOLSKIE, 55),
+            new SearchCity("Krzeszowice", Voivodeship.MAŁOPOLSKIE, 55),
             new SearchCity("Warszawa", Voivodeship.MAZOWIECKIE, 7),
             new SearchCity("Radom", Voivodeship.MAZOWIECKIE, 7),
             new SearchCity("Ciechanów", Voivodeship.MAZOWIECKIE, 7),
             new SearchCity("Piaseczno", Voivodeship.MAZOWIECKIE, 7),
             new SearchCity("Konstancin-Jeziorna", Voivodeship.MAZOWIECKIE, 7),
             new SearchCity("Solec nad Wisłą", Voivodeship.MAZOWIECKIE, 7),
+            new SearchCity("Mińsk Mazowiecki", Voivodeship.MAZOWIECKIE, 7),
+            new SearchCity("Otwock", Voivodeship.MAZOWIECKIE, 7),
+            new SearchCity("Serock", Voivodeship.MAZOWIECKIE, 7),
+            new SearchCity("Legionowo", Voivodeship.MAZOWIECKIE, 7),
+            new SearchCity("Pułtusk", Voivodeship.MAZOWIECKIE, 7),
             new SearchCity("Lublin", Voivodeship.LUBELSKIE, 7*2),
             new SearchCity("Zamość", Voivodeship.LUBELSKIE, 7*2),
             new SearchCity("Świdnik", Voivodeship.LUBELSKIE, 7*2),
@@ -195,7 +201,7 @@ public class Main {
                     VaccineType.JJ
                 )) {
                     for (int weeks = 2; weeks <= 5; weeks += 1) {
-                        Thread.sleep(1500 + (int)(Math.random() * 1000));
+                        Thread.sleep(2000 + (int)(Math.random() * 1000));
                         var search = new Search(
                             new DateRange(LocalDate.now(), LocalDate.now().plusWeeks(weeks)),
                             new TimeRange(
