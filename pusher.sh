@@ -4,6 +4,8 @@ set -x
 
 CLONE_DIR=$(mktemp -d)
 
+/sbin/ifconfig
+echo HOST=$HOST
 rm -rf $CLONE_DIR/*
 
 echo "Building"
