@@ -5,8 +5,6 @@ set -x
 CLONE_DIR=$(mktemp -d)
 
 echo "Cloning destination git repository"
-git config --global user.email "82411728+szczepienia@users.noreply.github.com"
-git config --global user.name "szczepienia"
 git clone --single-branch --branch main "https://szczepienia:$PAT@github.com/szczepienia/szczepienia.github.io.git" "$CLONE_DIR"
 
 echo "Building"
@@ -19,6 +17,8 @@ cd "$CLONE_DIR"
 
 echo "Adding git commit"
 touch test.html
+git config user.email "82411728+szczepienia@users.noreply.github.com"
+git config user.name "szczepienia"
 git add *.html
 if git status | grep -q "Changes to be committed"
 then
