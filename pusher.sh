@@ -7,17 +7,18 @@ CLONE_DIR=$(mktemp -d)
 echo "Cloning destination git repository"
 git config --global user.email "82411728+szczepienia@users.noreply.github.com"
 git config --global user.name "szczepienia"
-git clone --single-branch --branch main "https://x-access-token:$PAT@github.com/szczepienia/szczepienia.github.io.git" "$CLONE_DIR"
+git clone --single-branch --branch main "https://szczepienia:$PAT@github.com/szczepienia/szczepienia.github.io.git" "$CLONE_DIR"
 
 echo "Building"
-mvn -B clean package -DskipTests
+mvn -B clean package -DskipTests -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
 
 echo "Generating new data"
-java -jar target/szczepimy-1.0-SNAPSHOT.jar -p $EREJ_PID_PLUTA -s $EREJ_SID -c $EREJ_CSRF -t $CLONE_DIR -v OPOLSKIE
+#java -jar target/szczepimy-1.0-SNAPSHOT.jar -p $EREJ_PID_PLUTA -s $EREJ_SID -c $EREJ_CSRF -t $CLONE_DIR -v OPOLSKIE
 
 cd "$CLONE_DIR"
 
 echo "Adding git commit"
+touch test.html
 git add *.html
 if git status | grep -q "Changes to be committed"
 then
