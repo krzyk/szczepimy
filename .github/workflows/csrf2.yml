@@ -5,7 +5,7 @@ name: CSRF_2
 
 on:
   schedule:
-  - cron:  '14 5-22 * * *'
+      #  - cron:  '14 5-22 * * *'
 
 jobs:
   build:

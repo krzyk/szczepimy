@@ -5,7 +5,7 @@ name: CSRF_8
 
 on:
   schedule:
-  - cron:  '56 5-22 * * *'
+      #  - cron:  '56 5-22 * * *'
 
 jobs:
   build:
