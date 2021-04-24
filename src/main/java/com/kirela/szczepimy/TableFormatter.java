@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -78,6 +79,7 @@ public class TableFormatter {
             if (voiFile.toFile().exists()) {
                 voiFile.toFile().delete();
             }
+            ZonedDateTime nextRun = calculateNextRun();
             Files.writeString(voiFile, """
                 ---
                 layout: page
@@ -106,8 +108,8 @@ public class TableFormatter {
                     voivodeship.readable(), voivodeship.urlName(),
                     now.atZone(ZONE).format(DateTimeFormatter.ISO_INSTANT),
                     now.atZone(ZONE).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
-                    now.plusSeconds(Duration.ofHours(1).toSeconds() + Duration.ofMinutes(5).toSeconds()).atZone(ZONE).format(DateTimeFormatter.ISO_INSTANT),
-                    now.plusSeconds(Duration.ofHours(1).toSeconds() + Duration.ofMinutes(5).toSeconds()).atZone(ZONE).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                    nextRun.format(DateTimeFormatter.ISO_INSTANT),
+                    nextRun.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
                     searchCities.stream()
                         .filter(c -> c.voivodeship() == voivodeship)
                         .map(Main.SearchCity::name)
@@ -198,6 +200,16 @@ public class TableFormatter {
                 StandardOpenOption.APPEND, StandardOpenOption.CREATE
             );
         }
+    }
+
+    private ZonedDateTime calculateNextRun() {
+        ZonedDateTime nextRun;
+        ZonedDateTime proposedNextRun = now.plusSeconds(Duration.ofHours(1).toSeconds() + Duration.ofMinutes(5).toSeconds()).atZone(ZONE);
+        if (proposedNextRun.getDayOfYear() > now.atZone(ZONE).getDayOfYear()) {
+            nextRun = proposedNextRun.plusHours(7).plusMinutes(30);
+        } else {
+            nextRun = proposedNextRun
+        } return nextRun;
     }
 
     private String rangeToDisplay(TimeRange r) {
