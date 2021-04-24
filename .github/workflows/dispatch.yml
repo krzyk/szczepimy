@@ -5,10 +5,10 @@ name: dispatch
 
 on:
   workflow_dispatch:
-  inputs:
-    voi:
-      description: 'List of voivodeships'
-      required: true
+    inputs:
+      voi:
+        description: 'List of voivodeships'
+        required: true
 
 jobs:
   build:
