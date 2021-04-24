@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -83,7 +84,8 @@ public class TableFormatter {
                 title: %s
                 permalink: /%s
                 ---
-                <p>Ostatnia aktualizacja: <strong><time class="timeago" datetime="%s">%s</time></strong></p>
+                <p>Ostatnia aktualizacja: <time class="timeago" datetime="%s">%s</time></strong>,
+                kolejna: <strong>~ <time class="timeago" datetime="%s">%s</time></strong></p>
                 <p>
                 <small>Wyszukujemy w miastach: %s</small>.
                 </p>
@@ -104,6 +106,8 @@ public class TableFormatter {
                     voivodeship.readable(), voivodeship.urlName(),
                     now.atZone(ZONE).format(DateTimeFormatter.ISO_INSTANT),
                     now.atZone(ZONE).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                    now.plusSeconds(Duration.ofHours(1).toSeconds() + Duration.ofMinutes(5).toSeconds()).atZone(ZONE).format(DateTimeFormatter.ISO_INSTANT),
+                    now.plusSeconds(Duration.ofHours(1).toSeconds() + Duration.ofMinutes(5).toSeconds()).atZone(ZONE).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
                     searchCities.stream()
                         .filter(c -> c.voivodeship() == voivodeship)
                         .map(Main.SearchCity::name)
