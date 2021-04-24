@@ -84,7 +84,7 @@ public class TableFormatter {
                 title: %s
                 permalink: /%s
                 ---
-                <p>Ostatnia aktualizacja: <time class="timeago" datetime="%s">%s</time></strong>,
+                <p>Ostatnia aktualizacja: <strong><time class="timeago" datetime="%s">%s</time></strong>,
                 kolejna: <strong>~ <time class="timeago" datetime="%s">%s</time></strong></p>
                 <p>
                 <small>Wyszukujemy w miastach: %s</small>.
