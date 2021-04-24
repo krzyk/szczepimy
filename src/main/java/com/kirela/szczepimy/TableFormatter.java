@@ -136,9 +136,9 @@ public class TableFormatter {
                         List<TimeRange> incorrect = ranges.stream()
                             .filter(r -> r.start() == r.end())
                             .toList();
-                        if (!incorrect.isEmpty()) {
-                            LOG.error("Ranges are incorrect (%s) input: %s".formatted(incorrect, slots));
-                        }
+//                        if (!incorrect.isEmpty()) {
+//                            LOG.error("Ranges are incorrect (%s) input: %s".formatted(incorrect, slots));
+//                        }
                         if (slots.size() > 4) {
                             times = """
                                 <small class="smaller">(co&nbsp;%s&nbsp;min)</small>

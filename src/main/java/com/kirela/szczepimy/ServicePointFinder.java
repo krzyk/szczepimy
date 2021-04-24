@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -31,17 +30,23 @@ public class ServicePointFinder {
 
         this.mapper = mapper;
         client = HttpClient.newBuilder()
-            .version(HttpClient.Version.HTTP_1_1)
+//            .version(HttpClient.Version.HTTP_1_1)
             .build();
         try {
-            List<ServicePoint> points = mapper.readValue(
-                Objects.requireNonNull(
-                    GminaFinder.class.getResourceAsStream("service-points.json")
-                ), new TypeReference<>() {});
+            HttpResponse<String> out = client.send(
+                requestBuilder().uri(
+                    URI.create("https://www.gov.pl/api/data/covid-vaccination-point")
+                ).GET().build(),
+                HttpResponse.BodyHandlers.ofString()
+            );
+            if (out.statusCode() != 200) {
+                throw new IllegalStateException("Can't read data for service points, got status %d".formatted(out.statusCode()));
+            }
+            List<ServicePoint> points = mapper.readValue(out.body(), new TypeReference<>() {});
             grouped = points.stream()
                 .map(ServicePointFinder::correctNaAddresses)
                 .collect(Collectors.groupingBy(point -> point.address().toLowerCase(), TreeMap::new, Collectors.toList()));
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -86,7 +91,7 @@ public class ServicePointFinder {
             return extendedServicePoints.get(servicePoint.id());
         } else {
             try {
-                LOG.info("Doing request for {}", servicePoint.id());
+                LOG.debug("Doing request for {}", servicePoint.id());
                 HttpResponse<String> out = client.send(
                     requestBuilder().uri(URI.create(
                         "https://www.gov.pl/api/data/covid-vaccination-point/%d".formatted(servicePoint.id())))
@@ -101,7 +106,7 @@ public class ServicePointFinder {
                     );
                     return extendedServicePoints.get(servicePoint.id());
                 } else {
-                    LOG.error("Issue with finding {}", servicePoint);
+                    LOG.error("Issue with finding {}, got status {}", servicePoint.id(), out.statusCode());
                     return new ExtendedServicePoint(
                         servicePoint.id(),
                         servicePoint.ordinalNumber(),

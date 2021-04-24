@@ -208,7 +208,8 @@ public class Main {
             new SearchCity("Warszawa", Voivodeship.MAZOWIECKIE, 7),
             new SearchCity("Radom", Voivodeship.MAZOWIECKIE, 7),
             new SearchCity("Ciechanów", Voivodeship.MAZOWIECKIE, 7),
-            new SearchCity("Piaseczno", Voivodeship.MAZOWIECKIE, 7),
+
+//            new SearchCity("Piaseczno", Voivodeship.MAZOWIECKIE, 7),
 //            new SearchCity("Konstancin-Jeziorna", Voivodeship.MAZOWIECKIE, 7),
 //            new SearchCity("Solec nad Wisłą", Voivodeship.MAZOWIECKIE, 7),
             new SearchCity("Mińsk Mazowiecki", Voivodeship.MAZOWIECKIE, 7),
