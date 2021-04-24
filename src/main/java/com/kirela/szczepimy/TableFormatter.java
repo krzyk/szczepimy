@@ -250,8 +250,14 @@ public class TableFormatter {
             return "";
         } else {
             ExtendedServicePoint found = maybe.get();
-            final String dirtyPhone = found.telephone();
+            String dirtyPhone = found.telephone().replace(" ","").replace("-", "");
             String phone;
+            if (dirtyPhone.length() == 12 && dirtyPhone.startsWith("48")) {
+                dirtyPhone = dirtyPhone.substring(2);
+            }
+            if (dirtyPhone.startsWith("+48")) {
+                dirtyPhone = dirtyPhone.substring(3);
+            }
             if (dirtyPhone.length() == 9 && !dirtyPhone.contains(" ")) {
                 phone = "%s %s %s".formatted(
                     dirtyPhone.substring(0, 3),
