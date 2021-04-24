@@ -2,12 +2,22 @@
 set -e
 set -x
 
+#      WIELKOPOLSKIE,DOLNOŚLĄSKIE,
+#      WARMIŃSKO_MAZURSKIE,KUJAWSKO_POMORSKIE,
+#      LUBELSKIE,LUBUSKIE,
+#      MAŁOPOLSKIE,PODKARPACKIE,
+#      OPOLSKIE,ŚLĄSKIE,
+#      PODLASKIE,MAZOWIECKIE,
+#      ŁÓDZKIE,ŚWIĘTOKRZYSKIE,
+#      POMORSKIE,ZACHODNIOPOMORSKIE,
+# 7 14 21 28 35 42 49 56 
+VOI=$1
 CLONE_DIR=$(mktemp -d)
 OUTPUT=$(pwd)/output
 
 
-/sbin/ifconfig
 echo HOST=$HOST
+
 rm -rf $CLONE_DIR/*
 
 echo "Building"
@@ -15,7 +25,7 @@ mvn -B clean package -DskipTests -Dorg.slf4j.simpleLogger.log.org.apache.maven.c
 
 echo "Generating new data"
 mkdir -p $OUTPUT
-java -jar target/szczepimy-1.0-SNAPSHOT.jar -p $EREJ_PID_PLUTA -s $EREJ_SID -c $EREJ_CSRF -t $OUTPUT 
+java -jar target/szczepimy-1.0-SNAPSHOT.jar -p $EREJ_PID_PLUTA -s $EREJ_SID -c $EREJ_CSRF -t $OUTPUT -v $VOI
 
 
 echo "Cloning destination git repository"

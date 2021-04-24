@@ -5,7 +5,7 @@ name: CSRF_1
 
 on:
   schedule:
-  - cron:  '7 5-22 * * *'
+  - cron:  '56 5-22 * * *'
 
 jobs:
   build:
@@ -25,4 +25,4 @@ jobs:
         EREJ_PID_PLUTA: ${{ secrets.EREJ_PID_PLUTA }}
         EREJ_SID: ${{ secrets.EREJ_SID_1 }}
         EREJ_CSRF: ${{ secrets.EREJ_CSRF_1 }}
-      run: ./pusher.sh WIELKOPOLSKIE,DOLNOŚLĄSKIE
+      run: ./pusher.sh POMORSKIE,ZACHODNIOPOMORSKIE
