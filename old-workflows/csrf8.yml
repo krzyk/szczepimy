@@ -1,0 +1,28 @@
+# This workflow will build a Java project with Maven
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: CSRF_8
+
+on:
+  schedule:
+      #  - cron:  '56 5-22 * * *'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK
+      uses: actions/setup-java@v2
+      with:
+        java-version: '16'
+        distribution: 'adopt'
+    - name: Build with Maven
+      env:
+        PAT: ${{ secrets.PAT }}
+        EREJ_PID_PLUTA: ${{ secrets.EREJ_PID_PLUTA }}
+        EREJ_SID: ${{ secrets.EREJ_SID_1 }}
+        EREJ_CSRF: ${{ secrets.EREJ_CSRF_1 }}
+      run: ./pusher.sh POMORSKIE,ZACHODNIOPOMORSKIE
