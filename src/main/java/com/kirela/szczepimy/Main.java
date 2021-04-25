@@ -336,6 +336,10 @@ public class Main {
             new SearchCity("Grajewo", Voivodeship.PODLASKIE, 7),
             new SearchCity("Piątnica", Voivodeship.PODLASKIE, 7),
             new SearchCity("Jedwabne", Voivodeship.PODLASKIE, 7),
+            new SearchCity("Przytuły", Voivodeship.PODLASKIE, 7),
+            new SearchCity("Wizna", Voivodeship.PODLASKIE, 7),
+            new SearchCity("Stawiski", Voivodeship.PODLASKIE, 7),
+            new SearchCity("Radziłów", Voivodeship.PODLASKIE, 7),
 
             new SearchCity("Rzeszów", Voivodeship.PODKARPACKIE, 7),
             new SearchCity("Mielec", Voivodeship.PODKARPACKIE, 7),
