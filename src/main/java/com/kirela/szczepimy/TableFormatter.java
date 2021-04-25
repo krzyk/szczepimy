@@ -277,7 +277,7 @@ public class TableFormatter {
                 .map(p -> p.replace(" ", "&nbsp;"))
                 .map(p -> """
                 <a href="tel:%s" title="Zadzwoń do punktu szczepień"><img src="assets/phone.png" width="11px"/><strong>&nbsp;%s</strong></a><br/>
-                """.formatted(p, p.replace(" ", "&nbsp;")))
+                """.formatted(p.replace(" ", ""), p.replace(" ", "&nbsp;")))
                 .collect(Collectors.joining());
         }
     }
