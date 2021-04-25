@@ -264,6 +264,7 @@ public class TableFormatter {
             ExtendedServicePoint found = maybe.get();
             String dirtyPhone = found.telephone().replace(" ","").replace("-", "");
             String phone;
+            dirtyPhone = dirtyPhone.replaceAll("[/;].*", "");
             if (dirtyPhone.length() == 12 && dirtyPhone.startsWith("48")) {
                 dirtyPhone = dirtyPhone.substring(2);
             }
@@ -281,7 +282,7 @@ public class TableFormatter {
             }
             return """
                 <a href="tel:%s" title="Zadzwoń do punktu szczepień"><img src="assets/phone.png" width="11px"/><strong>&nbsp;%s</strong></a><br/>
-                """.formatted(found.telephone(), phone.replaceAll("[/;].*", "").replace(" ", "&nbsp;"));
+                """.formatted(found.telephone(), phone.replace(" ", "&nbsp;"));
 
             // TODO: need to add second phone number if "/" is used
         }
