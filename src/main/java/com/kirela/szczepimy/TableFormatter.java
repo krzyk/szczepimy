@@ -16,6 +16,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -262,30 +263,43 @@ public class TableFormatter {
             return "";
         } else {
             ExtendedServicePoint found = maybe.get();
-            String dirtyPhone = found.telephone().replace(" ","").replace("-", "");
-            String phone;
-            dirtyPhone = dirtyPhone.replaceAll("[/;].*", "");
-            if (dirtyPhone.length() == 11 && dirtyPhone.startsWith("48")) {
-                dirtyPhone = dirtyPhone.substring(2);
-            }
-            if (dirtyPhone.startsWith("+48")) {
-                dirtyPhone = dirtyPhone.substring(3);
-            }
-            if (dirtyPhone.length() == 9 && !dirtyPhone.contains(" ")) {
-                phone = "%s %s %s".formatted(
-                    dirtyPhone.substring(0, 3),
-                    dirtyPhone.substring(3, 6),
-                    dirtyPhone.substring(6)
-                );
-            } else {
-                phone = dirtyPhone;
-            }
-            return """
-                <a href="tel:%s" title="Zadzwoń do punktu szczepień"><img src="assets/phone.png" width="11px"/><strong>&nbsp;%s</strong></a><br/>
-                """.formatted(found.telephone(), phone.replace(" ", "&nbsp;"));
 
-            // TODO: need to add second phone number if "/" is used
+            final String dirtyPhone = found.telephone();
+            List<String> phoneList;
+            if (dirtyPhone.contains("/")) {
+                phoneList = Arrays.asList(dirtyPhone.split("/"));
+            } else {
+                phoneList = List.of(dirtyPhone);
+            }
+
+            return phoneList.stream()
+                .map(this::cleanupPhone)
+                .map(p -> p.replace(" ", "&nbsp;"))
+                .map(p -> """
+                <a href="tel:%s" title="Zadzwoń do punktu szczepień"><img src="assets/phone.png" width="11px"/><strong>&nbsp;%s</strong></a><br/>
+                """.formatted(p, p.replace(" ", "&nbsp;")))
+                .collect(Collectors.joining());
         }
+    }
+
+    private String cleanupPhone(String phone) {
+        String dirtyPhone = phone.replace(" ","").replace("-", "");
+        if (dirtyPhone.length() == 11 && dirtyPhone.startsWith("48")) {
+            dirtyPhone = dirtyPhone.substring(2);
+        }
+        if (dirtyPhone.startsWith("+48")) {
+            dirtyPhone = dirtyPhone.substring(3);
+        }
+        if (dirtyPhone.length() == 9 && !dirtyPhone.contains(" ")) {
+            phone = "%s %s %s".formatted(
+                dirtyPhone.substring(0, 3),
+                dirtyPhone.substring(3, 6),
+                dirtyPhone.substring(6)
+            );
+        } else {
+            phone = dirtyPhone;
+        }
+        return phone;
     }
 
     private String getAddress(ExtendedResult.Slot slot) {
