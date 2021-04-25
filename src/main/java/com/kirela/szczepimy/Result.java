@@ -10,7 +10,7 @@ public record Result(String geoDepth, List<BasicSlot> list) {
         VaccineType vaccineType, int dose, String status, String mobility
     ) {}
 
-    public static record BasicServicePoint(UUID id, String name, String addressText) {
+    public static record BasicServicePoint(UUID id, String name, String addressText, String mobility) {
         public String normalizedCity() {
             return Gmina.normalize(addressText.substring(addressText.lastIndexOf(",") + 1)).trim().toLowerCase();
         }
