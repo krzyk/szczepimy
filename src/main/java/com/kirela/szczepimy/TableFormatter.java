@@ -274,7 +274,6 @@ public class TableFormatter {
 
             return phoneList.stream()
                 .map(this::cleanupPhone)
-                .map(p -> p.replace(" ", "&nbsp;"))
                 .map(p -> """
                 <a href="tel:%s" title="Zadzwoń do punktu szczepień"><img src="assets/phone.png" width="11px"/><strong>&nbsp;%s</strong></a><br/>
                 """.formatted(p.replace(" ", ""), p.replace(" ", "&nbsp;")))
