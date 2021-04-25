@@ -265,7 +265,7 @@ public class TableFormatter {
             String dirtyPhone = found.telephone().replace(" ","").replace("-", "");
             String phone;
             dirtyPhone = dirtyPhone.replaceAll("[/;].*", "");
-            if (dirtyPhone.length() == 12 && dirtyPhone.startsWith("48")) {
+            if (dirtyPhone.length() == 11 && dirtyPhone.startsWith("48")) {
                 dirtyPhone = dirtyPhone.substring(2);
             }
             if (dirtyPhone.startsWith("+48")) {
