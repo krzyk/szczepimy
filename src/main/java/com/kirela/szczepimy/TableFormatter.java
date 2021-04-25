@@ -208,7 +208,7 @@ public class TableFormatter {
         if (proposedNextRun.getDayOfYear() > now.atZone(ZONE).getDayOfYear()) {
             nextRun = proposedNextRun.plusHours(7).plusMinutes(30);
         } else {
-            nextRun = proposedNextRun
+            nextRun = proposedNextRun;
         } return nextRun;
     }
 
