@@ -7,7 +7,7 @@ import java.util.UUID;
 public record Result(String geoDepth, List<BasicSlot> list) {
     public static record BasicSlot(
         UUID id, Instant startAt, int duration, BasicServicePoint servicePoint,
-        VaccineType vaccineType, int dose, String status
+        VaccineType vaccineType, int dose, String status, String mobility
     ) {}
 
     public static record BasicServicePoint(UUID id, String name, String addressText) {
