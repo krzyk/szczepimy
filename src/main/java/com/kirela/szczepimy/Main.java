@@ -354,6 +354,7 @@ public class Main {
             new SearchCity("Wejherowo", Voivodeship.POMORSKIE, 7),
             new SearchCity("Jastarnia", Voivodeship.POMORSKIE, 7),
             new SearchCity("Hel", Voivodeship.POMORSKIE, 7),
+            new SearchCity("Władysławowo", Voivodeship.POMORSKIE, 7),
 //            new SearchCity("Chojnice", Voivodeship.POMORSKIE, 7),
 
 
