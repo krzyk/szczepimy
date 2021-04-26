@@ -206,8 +206,8 @@ public class TableFormatter {
     private ZonedDateTime calculateNextRun() {
         ZonedDateTime nextRun;
         ZonedDateTime proposedNextRun = now.plusSeconds(Duration.ofHours(1).toSeconds() + Duration.ofMinutes(5).toSeconds()).atZone(ZONE);
-        if (proposedNextRun.getDayOfYear() > now.atZone(ZONE).getDayOfYear()) {
-            nextRun = proposedNextRun.plusHours(7).plusMinutes(30);
+        if (now.atZone(ZONE).getHour() >= 1) {
+            nextRun = proposedNextRun.withHour(7).withMinute(30);
         } else {
             nextRun = proposedNextRun;
         } return nextRun;
