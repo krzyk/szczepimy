@@ -22,7 +22,7 @@ jobs:
       with:
         java-version: '16'
         distribution: 'adopt'
-    - name: Build with Maven
+    - name: Run ${{ github.event.inputs.voi}}
       env:
         PAT: ${{ secrets.PAT }}
         EREJ_PID_PLUTA: ${{ secrets.EREJ_PID_PLUTA }}
