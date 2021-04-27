@@ -284,116 +284,116 @@ public class Main {
 //            new SearchCity("Kalisz", Voivodeship.WIELKOPOLSKIE, 28)
 
             //
-            new SearchCity("Wrocław", Voivodeship.DOLNOŚLĄSKIE, 7),
-            new SearchCity("Jelenia Góra", Voivodeship.DOLNOŚLĄSKIE, 7),
-            new SearchCity("Wałbrzych", Voivodeship.DOLNOŚLĄSKIE, 7),
-            new SearchCity("Głogów", Voivodeship.DOLNOŚLĄSKIE, 7),
+            new SearchCity("Wrocław", Voivodeship.DOLNOŚLĄSKIE, 1),
+            new SearchCity("Jelenia Góra", Voivodeship.DOLNOŚLĄSKIE, 1),
+            new SearchCity("Wałbrzych", Voivodeship.DOLNOŚLĄSKIE, 1),
+            new SearchCity("Głogów", Voivodeship.DOLNOŚLĄSKIE, 1),
 
-            new SearchCity("Bydgoszcz", Voivodeship.KUJAWSKO_POMORSKIE, 7),
-            new SearchCity("Toruń", Voivodeship.KUJAWSKO_POMORSKIE, 7),
-            new SearchCity("Grudziądz", Voivodeship.KUJAWSKO_POMORSKIE, 7),
-            new SearchCity("Włocławek", Voivodeship.KUJAWSKO_POMORSKIE, 7),
-
-
-            new SearchCity("Lublin", Voivodeship.LUBELSKIE, 7),
-            new SearchCity("Zamość", Voivodeship.LUBELSKIE, 7),
-            new SearchCity("Biała Podlaska", Voivodeship.LUBELSKIE, 7),
-            new SearchCity("Łuków", Voivodeship.LUBELSKIE, 7),
-//            new SearchCity("Chełm", Voivodeship.LUBELSKIE, 7),
+            new SearchCity("Bydgoszcz", Voivodeship.KUJAWSKO_POMORSKIE, 1),
+            new SearchCity("Toruń", Voivodeship.KUJAWSKO_POMORSKIE, 1),
+            new SearchCity("Grudziądz", Voivodeship.KUJAWSKO_POMORSKIE, 1),
+            new SearchCity("Włocławek", Voivodeship.KUJAWSKO_POMORSKIE, 1),
 
 
-            new SearchCity("Zielona Góra", Voivodeship.LUBUSKIE, 7),
-            new SearchCity("Gorzów Wielkopolski", Voivodeship.LUBUSKIE, 7),
-            new SearchCity("Nowa Sól", Voivodeship.LUBUSKIE, 7),
-            new SearchCity("Żary", Voivodeship.LUBUSKIE, 7),
-//            new SearchCity("Świebodzin", Voivodeship.LUBUSKIE, 7),
+            new SearchCity("Lublin", Voivodeship.LUBELSKIE, 1),
+            new SearchCity("Zamość", Voivodeship.LUBELSKIE, 1),
+            new SearchCity("Biała Podlaska", Voivodeship.LUBELSKIE, 1),
+            new SearchCity("Łuków", Voivodeship.LUBELSKIE, 1),
+//            new SearchCity("Chełm", Voivodeship.LUBELSKIE, 1),
 
 
-            new SearchCity("Łódź", Voivodeship.ŁÓDZKIE, 7),
-            new SearchCity("Piotrków Trybunalski", Voivodeship.ŁÓDZKIE, 7),
-            new SearchCity("Łowicz", Voivodeship.ŁÓDZKIE, 7),
-            new SearchCity("Wieluń", Voivodeship.ŁÓDZKIE, 7),
+            new SearchCity("Zielona Góra", Voivodeship.LUBUSKIE, 1),
+            new SearchCity("Gorzów Wielkopolski", Voivodeship.LUBUSKIE, 1),
+            new SearchCity("Nowa Sól", Voivodeship.LUBUSKIE, 1),
+            new SearchCity("Żary", Voivodeship.LUBUSKIE, 1),
+//            new SearchCity("Świebodzin", Voivodeship.LUBUSKIE, 1),
 
 
-            new SearchCity("Kraków", Voivodeship.MAŁOPOLSKIE, 7),
+            new SearchCity("Łódź", Voivodeship.ŁÓDZKIE, 1),
+            new SearchCity("Piotrków Trybunalski", Voivodeship.ŁÓDZKIE, 1),
+            new SearchCity("Łowicz", Voivodeship.ŁÓDZKIE, 1),
+            new SearchCity("Wieluń", Voivodeship.ŁÓDZKIE, 1),
+
+
+            new SearchCity("Kraków", Voivodeship.MAŁOPOLSKIE, 1),
             new SearchCity("Tarnów", Voivodeship.MAŁOPOLSKIE, 28),
             new SearchCity("Chrzanów", Voivodeship.MAŁOPOLSKIE, 55),
             new SearchCity("Nowy Targ", Voivodeship.MAŁOPOLSKIE, 55),
 
-            new SearchCity("Warszawa", Voivodeship.MAZOWIECKIE, 7),
-            new SearchCity("Radom", Voivodeship.MAZOWIECKIE, 7),
-            new SearchCity("Płock", Voivodeship.MAZOWIECKIE, 7),
-            new SearchCity("Ostrołęka", Voivodeship.MAZOWIECKIE, 7),
-//            new SearchCity("Siedlce", Voivodeship.MAZOWIECKIE, 7),
+            new SearchCity("Warszawa", Voivodeship.MAZOWIECKIE, 1),
+            new SearchCity("Radom", Voivodeship.MAZOWIECKIE, 1),
+            new SearchCity("Płock", Voivodeship.MAZOWIECKIE, 1),
+            new SearchCity("Ostrołęka", Voivodeship.MAZOWIECKIE, 1),
+//            new SearchCity("Siedlce", Voivodeship.MAZOWIECKIE, 1),
 
 
-            new SearchCity("Opole", Voivodeship.OPOLSKIE, 7),
-            new SearchCity("Kędzierzyn-Koźle", Voivodeship.OPOLSKIE, 7),
-            new SearchCity("Olesno", Voivodeship.OPOLSKIE, 7),
-            new SearchCity("Nysa", Voivodeship.OPOLSKIE, 7),
-            new SearchCity("Kluczbork", Voivodeship.OPOLSKIE, 7),
+            new SearchCity("Opole", Voivodeship.OPOLSKIE, 1),
+            new SearchCity("Kędzierzyn-Koźle", Voivodeship.OPOLSKIE, 1),
+            new SearchCity("Olesno", Voivodeship.OPOLSKIE, 1),
+            new SearchCity("Nysa", Voivodeship.OPOLSKIE, 1),
+            new SearchCity("Kluczbork", Voivodeship.OPOLSKIE, 1),
 
 
-            new SearchCity("Białystok", Voivodeship.PODLASKIE, 7),
-            new SearchCity("Łomża", Voivodeship.PODLASKIE, 7),
-            new SearchCity("Suwałki", Voivodeship.PODLASKIE, 7),
-            new SearchCity("Grajewo", Voivodeship.PODLASKIE, 7),
-            new SearchCity("Piątnica", Voivodeship.PODLASKIE, 7),
-            new SearchCity("Jedwabne", Voivodeship.PODLASKIE, 7),
-            new SearchCity("Przytuły", Voivodeship.PODLASKIE, 7),
-            new SearchCity("Wizna", Voivodeship.PODLASKIE, 7),
-            new SearchCity("Stawiski", Voivodeship.PODLASKIE, 7),
-            new SearchCity("Radziłów", Voivodeship.PODLASKIE, 7),
+            new SearchCity("Białystok", Voivodeship.PODLASKIE, 1),
+            new SearchCity("Łomża", Voivodeship.PODLASKIE, 1),
+            new SearchCity("Suwałki", Voivodeship.PODLASKIE, 1),
+            new SearchCity("Grajewo", Voivodeship.PODLASKIE, 1),
+            new SearchCity("Piątnica", Voivodeship.PODLASKIE, 1),
+            new SearchCity("Jedwabne", Voivodeship.PODLASKIE, 1),
+            new SearchCity("Przytuły", Voivodeship.PODLASKIE, 1),
+            new SearchCity("Wizna", Voivodeship.PODLASKIE, 1),
+            new SearchCity("Stawiski", Voivodeship.PODLASKIE, 1),
+            new SearchCity("Radziłów", Voivodeship.PODLASKIE, 1),
 
-            new SearchCity("Rzeszów", Voivodeship.PODKARPACKIE, 7),
-            new SearchCity("Mielec", Voivodeship.PODKARPACKIE, 7),
-            new SearchCity("Tarnobrzeg", Voivodeship.PODKARPACKIE, 7),
-            new SearchCity("Przemyśl", Voivodeship.PODKARPACKIE, 7),
-//            new SearchCity("Krosno", Voivodeship.PODKARPACKIE, 7),
-
-
-            new SearchCity("Gdańsk", Voivodeship.POMORSKIE, 7),
-            new SearchCity("Gdynia", Voivodeship.POMORSKIE, 7),
-            new SearchCity("Słupsk", Voivodeship.POMORSKIE, 7),
-            new SearchCity("Wejherowo", Voivodeship.POMORSKIE, 7),
-            new SearchCity("Jastarnia", Voivodeship.POMORSKIE, 7),
-            new SearchCity("Hel", Voivodeship.POMORSKIE, 7),
-            new SearchCity("Władysławowo", Voivodeship.POMORSKIE, 7),
-//            new SearchCity("Chojnice", Voivodeship.POMORSKIE, 7),
+            new SearchCity("Rzeszów", Voivodeship.PODKARPACKIE, 1),
+            new SearchCity("Mielec", Voivodeship.PODKARPACKIE, 1),
+            new SearchCity("Tarnobrzeg", Voivodeship.PODKARPACKIE, 1),
+            new SearchCity("Przemyśl", Voivodeship.PODKARPACKIE, 1),
+//            new SearchCity("Krosno", Voivodeship.PODKARPACKIE, 1),
 
 
-            new SearchCity("Katowice", Voivodeship.ŚLĄSKIE, 7),
-            new SearchCity("Bielsko-Biała", Voivodeship.ŚLĄSKIE, 7),
-            new SearchCity("Częstochowa", Voivodeship.ŚLĄSKIE, 7),
-            new SearchCity("Zabrze", Voivodeship.ŚLĄSKIE, 7),
-            new SearchCity("Ruda Śląska", Voivodeship.ŚLĄSKIE, 7),
-            new SearchCity("Gliwice", Voivodeship.ŚLĄSKIE, 7),
-            new SearchCity("Sosnowiec", Voivodeship.ŚLĄSKIE, 7),
-            new SearchCity("Bytom", Voivodeship.ŚLĄSKIE, 7),
-            new SearchCity("Chorzów", Voivodeship.ŚLĄSKIE, 7),
-            new SearchCity("Pszczyna", Voivodeship.ŚLĄSKIE, 7),
-
-            new SearchCity("Kielce", Voivodeship.ŚWIĘTOKRZYSKIE, 7),
-            new SearchCity("Ostrowiec Świętokrzyski", Voivodeship.ŚWIĘTOKRZYSKIE, 7),
-            new SearchCity("Sandomierz", Voivodeship.ŚWIĘTOKRZYSKIE, 7),
-//            new SearchCity("Skarżysko-Kamienna", Voivodeship.ŚWIĘTOKRZYSKIE, 7),
-//            new SearchCity("Jędrzejów", Voivodeship.ŚWIĘTOKRZYSKIE, 7),
+            new SearchCity("Gdańsk", Voivodeship.POMORSKIE, 1),
+            new SearchCity("Gdynia", Voivodeship.POMORSKIE, 1),
+            new SearchCity("Słupsk", Voivodeship.POMORSKIE, 1),
+            new SearchCity("Wejherowo", Voivodeship.POMORSKIE, 1),
+            new SearchCity("Jastarnia", Voivodeship.POMORSKIE, 1),
+            new SearchCity("Hel", Voivodeship.POMORSKIE, 1),
+            new SearchCity("Władysławowo", Voivodeship.POMORSKIE, 1),
+//            new SearchCity("Chojnice", Voivodeship.POMORSKIE, 1),
 
 
-            new SearchCity("Olsztyn", Voivodeship.WARMIŃSKO_MAZURSKIE, 7),
-            new SearchCity("Elbląg", Voivodeship.WARMIŃSKO_MAZURSKIE, 7),
-            new SearchCity("Ełk", Voivodeship.WARMIŃSKO_MAZURSKIE, 7),
-//            new SearchCity("Szczytno", Voivodeship.WARMIŃSKO_MAZURSKIE, 7),
+            new SearchCity("Katowice", Voivodeship.ŚLĄSKIE, 1),
+            new SearchCity("Bielsko-Biała", Voivodeship.ŚLĄSKIE, 1),
+            new SearchCity("Częstochowa", Voivodeship.ŚLĄSKIE, 1),
+            new SearchCity("Zabrze", Voivodeship.ŚLĄSKIE, 1),
+            new SearchCity("Ruda Śląska", Voivodeship.ŚLĄSKIE, 1),
+            new SearchCity("Gliwice", Voivodeship.ŚLĄSKIE, 1),
+            new SearchCity("Sosnowiec", Voivodeship.ŚLĄSKIE, 1),
+            new SearchCity("Bytom", Voivodeship.ŚLĄSKIE, 1),
+            new SearchCity("Chorzów", Voivodeship.ŚLĄSKIE, 1),
+            new SearchCity("Pszczyna", Voivodeship.ŚLĄSKIE, 1),
 
-            new SearchCity("Poznań", Voivodeship.WIELKOPOLSKIE, 7),
-            new SearchCity("Konin", Voivodeship.WIELKOPOLSKIE, 7),
-            new SearchCity("Kalisz", Voivodeship.WIELKOPOLSKIE, 7),
-            new SearchCity("Gniezno", Voivodeship.WIELKOPOLSKIE, 7),
+            new SearchCity("Kielce", Voivodeship.ŚWIĘTOKRZYSKIE, 1),
+            new SearchCity("Ostrowiec Świętokrzyski", Voivodeship.ŚWIĘTOKRZYSKIE, 1),
+            new SearchCity("Sandomierz", Voivodeship.ŚWIĘTOKRZYSKIE, 1),
+//            new SearchCity("Skarżysko-Kamienna", Voivodeship.ŚWIĘTOKRZYSKIE, 1),
+//            new SearchCity("Jędrzejów", Voivodeship.ŚWIĘTOKRZYSKIE, 1),
 
-            new SearchCity("Szczecin", Voivodeship.ZACHODNIOPOMORSKIE, 7),
-            new SearchCity("Koszalin", Voivodeship.ZACHODNIOPOMORSKIE, 7),
-            new SearchCity("Szczecinek", Voivodeship.ZACHODNIOPOMORSKIE, 7),
-            new SearchCity("Stargard", Voivodeship.ZACHODNIOPOMORSKIE, 7)
+
+            new SearchCity("Olsztyn", Voivodeship.WARMIŃSKO_MAZURSKIE, 1),
+            new SearchCity("Elbląg", Voivodeship.WARMIŃSKO_MAZURSKIE, 1),
+            new SearchCity("Ełk", Voivodeship.WARMIŃSKO_MAZURSKIE, 1),
+//            new SearchCity("Szczytno", Voivodeship.WARMIŃSKO_MAZURSKIE, 1),
+
+            new SearchCity("Poznań", Voivodeship.WIELKOPOLSKIE, 1),
+            new SearchCity("Konin", Voivodeship.WIELKOPOLSKIE, 1),
+            new SearchCity("Kalisz", Voivodeship.WIELKOPOLSKIE, 1),
+            new SearchCity("Gniezno", Voivodeship.WIELKOPOLSKIE, 1),
+
+            new SearchCity("Szczecin", Voivodeship.ZACHODNIOPOMORSKIE, 1),
+            new SearchCity("Koszalin", Voivodeship.ZACHODNIOPOMORSKIE, 1),
+            new SearchCity("Szczecinek", Voivodeship.ZACHODNIOPOMORSKIE, 1),
+            new SearchCity("Stargard", Voivodeship.ZACHODNIOPOMORSKIE, 1)
         );
         Set<SlotWithVoivodeship> results = new HashSet<>();
 
@@ -414,8 +414,14 @@ public class Main {
                 )) {
                     for (int weeks = 2; weeks <= 2; weeks += 1) {
                         Thread.sleep(1500 + (int)(Math.random() * 1000));
+                        final LocalDate endDateRange;
+                        if (searchCity.name() == null) {
+                            endDateRange = LocalDate.of(2021, 5, 30);
+                        } else {
+                            endDateRange = LocalDate.now().plusWeeks(weeks);
+                        }
                         var search = new Search(
-                            new DateRange(LocalDate.now(), LocalDate.now().plusWeeks(weeks)),
+                            new DateRange(LocalDate.now(), endDateRange),
                             new TimeRange(
                                 initialStartTime,
                                 LocalTime.of(23, 59)
