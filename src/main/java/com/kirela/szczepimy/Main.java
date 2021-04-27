@@ -7,6 +7,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -437,7 +440,9 @@ public class Main {
             }
         } catch (Exception ex) {
             LOG.error("Exception", ex);
-            telegram("Prawdopodobnie wygasła sesja");
+            StringWriter writer = new StringWriter();
+            ex.printStackTrace(new PrintWriter(writer));
+            telegram("Prawdopodobnie wygasła sesja (%s): \n ```\n%s\n```".formatted(ex.getMessage(), writer.toString()));
         }
 
         new TableFormatter(options.output, mapper, find, Instant.now()).store(placeFinder, results);
