@@ -419,7 +419,8 @@ public class Main {
                         if (searchCity.name() == null) {
                             endDateRange = LocalDate.of(2021, 5, 30);
                         } else {
-                            endDateRange = LocalDate.now().plusWeeks(weeks);
+//                            endDateRange = LocalDate.now().plusWeeks(weeks);
+                            endDateRange = LocalDate.of(2021, 5, 30);
                         }
                         var search = new Search(
                             new DateRange(LocalDate.now(), endDateRange),
