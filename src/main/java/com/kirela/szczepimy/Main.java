@@ -319,6 +319,7 @@ public class Main {
             new SearchCity("Tarnów", Voivodeship.MAŁOPOLSKIE, 28),
             new SearchCity("Chrzanów", Voivodeship.MAŁOPOLSKIE, 55),
             new SearchCity("Nowy Targ", Voivodeship.MAŁOPOLSKIE, 55),
+            new SearchCity("Olkusz", Voivodeship.MAŁOPOLSKIE, 1),
 
             new SearchCity("Warszawa", Voivodeship.MAZOWIECKIE, 1),
             new SearchCity("Radom", Voivodeship.MAZOWIECKIE, 1),
@@ -349,7 +350,6 @@ public class Main {
             new SearchCity("Mielec", Voivodeship.PODKARPACKIE, 1),
             new SearchCity("Tarnobrzeg", Voivodeship.PODKARPACKIE, 1),
             new SearchCity("Przemyśl", Voivodeship.PODKARPACKIE, 1),
-            new SearchCity("Olkusz", Voivodeship.PODKARPACKIE, 1),
 //            new SearchCity("Krosno", Voivodeship.PODKARPACKIE, 1),
 
 
