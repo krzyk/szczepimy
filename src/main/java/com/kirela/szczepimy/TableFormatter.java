@@ -318,8 +318,8 @@ public class TableFormatter {
         } else {
             ExtendedServicePoint found = maybe.get();
             return """
-                <a target="_blank" href="https://www.google.com/maps/search/?api=1&query=%s,%s">%s</a>
-                """.formatted(found.lat(), found.lon(), address);
+                <a target="_blank" data-point-id="%d" href="https://www.google.com/maps/search/?api=1&query=%s,%s">%s</a>
+                """.formatted(found.id(), found.lat(), found.lon(), address);
         }
     }
 

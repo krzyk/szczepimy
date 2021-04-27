@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -396,6 +397,8 @@ public class Main {
         );
         Set<SlotWithVoivodeship> results = new HashSet<>();
 
+        final LocalTime initialStartTime = LocalTime.of(6, 5 * new Random().nextInt(5));
+
         try {
             for (SearchCity searchCity : Stream.concat(findVoi.stream(), find.stream())
                 .filter(s -> options.voivodeships.contains(s.voivodeship()))
@@ -414,7 +417,7 @@ public class Main {
                         var search = new Search(
                             new DateRange(LocalDate.now(), LocalDate.now().plusWeeks(weeks)),
                             new TimeRange(
-                                LocalTime.of(6, 0),
+                                initialStartTime,
                                 LocalTime.of(23, 59)
                             ),
                             creds.prescriptionId(),

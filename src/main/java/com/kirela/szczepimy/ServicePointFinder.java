@@ -26,6 +26,10 @@ public class ServicePointFinder {
     private final Map<Integer, ExtendedServicePoint> extendedServicePoints = new HashMap<>();
     // https://www.gov.pl/api/data/covid-vaccination-point/246801
 
+    private final Map<Integer, String> phoneCorrections = Map.of(
+        273956, "486797157"
+    );
+
     public ServicePointFinder(ObjectMapper mapper) {
 
         this.mapper = mapper;
@@ -44,7 +48,7 @@ public class ServicePointFinder {
             }
             List<ServicePoint> points = mapper.readValue(out.body(), new TypeReference<>() {});
             grouped = points.stream()
-                .map(ServicePointFinder::correctNaAddresses)
+                .map(ServicePointFinder::correctData)
                 .collect(Collectors.groupingBy(point -> point.address().toLowerCase(), TreeMap::new, Collectors.toList()));
         } catch (IOException | InterruptedException e) {
             throw new IllegalStateException(e);
@@ -61,7 +65,7 @@ public class ServicePointFinder {
             .trim();
     }
 
-    private static ServicePoint correctNaAddresses(ServicePoint point) {
+    private static ServicePoint correctData(ServicePoint point) {
         return new ServicePoint(
             point.id(),
             point.ordinalNumber(),
@@ -102,7 +106,7 @@ public class ServicePointFinder {
                 if (out.statusCode() == 200) {
                     extendedServicePoints.put(
                         servicePoint.id(),
-                        mapper.readValue(out.body(), ExtendedServicePoint.class)
+                        correctPhones(mapper.readValue(out.body(), ExtendedServicePoint.class))
                     );
                     return extendedServicePoints.get(servicePoint.id());
                 } else {
@@ -126,6 +130,30 @@ public class ServicePointFinder {
                 throw new IllegalStateException(e);
             }
         }
+    }
+
+    private ExtendedServicePoint correctPhones(ExtendedServicePoint value) {
+        return new ExtendedServicePoint(
+            value.id(),
+            value.ordinalNumber(),
+            value.facilityName(),
+            value.terc(),
+            value.address(),
+            value.zipCode(),
+            value.voivodeship(),
+            value.county(),
+            value.community(),
+            value.place(),
+            value.lon(),
+            value.lat(),
+            phoneCorrections.getOrDefault(value.id(), value.telephone()),
+            value.fax(),
+            value.site(),
+            value.facilityDescription(),
+            value.limitations(),
+            value.additionalInformation(),
+            value.updateDate()
+        );
     }
 
     private Optional<ServicePoint> findByAddressInternal(ExtendedResult.ServicePoint servicePoint) {
