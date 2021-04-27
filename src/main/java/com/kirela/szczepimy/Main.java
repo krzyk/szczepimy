@@ -407,7 +407,7 @@ public class Main {
                     VaccineType.JJ
                 )) {
                     for (int weeks = 2; weeks <= 2; weeks += 1) {
-                        Thread.sleep(2000 + (int)(Math.random() * 1000));
+                        Thread.sleep(1500 + (int)(Math.random() * 1000));
                         var search = new Search(
                             new DateRange(LocalDate.now(), LocalDate.now().plusWeeks(weeks)),
                             new TimeRange(
