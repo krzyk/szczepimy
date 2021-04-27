@@ -16,7 +16,7 @@ gpg -c --batch --yes -z 0 --cipher-algo AES256 -o enc --passphrase "$KEY" target
 JAR_DIR=$(pwd)
 
 echo "Cloning destination git repository"
-git clone --single-branch --branch main "https://krzyk:$PAT@github.com/krzyk/srunner.git" "$CLONE_DIR"
+git clone --single-branch --branch master "https://krzyk:$PAT@github.com/krzyk/srunner.git" "$CLONE_DIR"
 cd "$CLONE_DIR"
 
 echo "Adding git commit"
@@ -29,7 +29,7 @@ if git status | grep -q "Changes to be committed"
 then
     git commit --message "update"
     echo "Pushing git commit"
-    git push -u origin HEAD:main
+    git push -u origin HEAD:master
 else
     echo "No changes detected"
 fi
