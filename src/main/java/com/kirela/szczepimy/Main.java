@@ -448,8 +448,8 @@ public class Main {
                     }
                     int tries = 0;
                     while (startDate.isBefore(endDateRange)) {
-                        LOG.error("city={}, vaccine={}: try={}, startDate={}", searchCity.name(), vaccine, tries, startDate);
                         Thread.sleep(1500 + (int)(Math.random() * 1000));
+                        LOG.info("city={}, vaccine={}: try={}, startDate={}", searchCity.name(), vaccine, tries, startDate);
                         var search = new Search(
                             new DateRange(startDate, endDateRange),
                             new TimeRange(

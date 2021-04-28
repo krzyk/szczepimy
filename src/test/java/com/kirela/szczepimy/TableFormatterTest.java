@@ -13,24 +13,24 @@ import org.junit.jupiter.api.Test;
 
 class TableFormatterTest {
 
-    @Test
-    public void guessDuration() {
-        int duration = 5;
-        List<TableFormatter.TimeRange> ranges = TableFormatter.getRanges(
-            List.of(
-                create(duration*3, LocalDateTime.parse("2020-01-01T10:00:00")),
-                create(duration, LocalDateTime.parse("2020-01-01T10:05:00")),
-                create(duration, LocalDateTime.parse("2020-01-01T10:10:00")),
-                create(duration, LocalDateTime.parse("2020-01-01T10:15:00"))
-            ),
-            create(duration*3, LocalDateTime.parse("2020-01-01T10:00:00"))
-        );
-
-        Assertions.assertThat(ranges.get(0)).isEqualTo(
-            new TableFormatter.TimeRange(LocalTime.parse("10:00"), LocalTime.parse("10:15"))
-        );
-        Assertions.assertThat(ranges).hasSize(1);
-    }
+//    @Test
+//    public void guessDuration() {
+//        int duration = 5;
+//        List<TableFormatter.TimeRange> ranges = TableFormatter.getRanges(
+//            List.of(
+//                create(duration*3, LocalDateTime.parse("2020-01-01T10:00:00")),
+//                create(duration, LocalDateTime.parse("2020-01-01T10:05:00")),
+//                create(duration, LocalDateTime.parse("2020-01-01T10:10:00")),
+//                create(duration, LocalDateTime.parse("2020-01-01T10:15:00"))
+//            ),
+//            create(duration*3, LocalDateTime.parse("2020-01-01T10:00:00"))
+//        );
+//
+//        Assertions.assertThat(ranges.get(0)).isEqualTo(
+//            new TableFormatter.TimeRange(LocalTime.parse("10:00"), LocalTime.parse("10:15"))
+//        );
+//        Assertions.assertThat(ranges).hasSize(1);
+//    }
 
     @Test
     public void longerRangeWithBreak() {

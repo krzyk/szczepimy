@@ -134,6 +134,7 @@ public class TableFormatter {
                         .map(t -> DateTimeFormatter.ofPattern("HH:mm", Locale.forLanguageTag("pl")).format(t))
                         .collect(Collectors.joining("<br/>"));
 
+                    // https://github.com/szczepienia/szczepienia.github.io/issues/new?labels=incorrect_phone&title=Z%C5%82y+number+telefonu+do+plac%C3%B3wki+(id=1234)
                     if (slots.size() >= 4) {
                         List<TimeRange> ranges = getRanges(slots, slot);
                         List<TimeRange> incorrect = ranges.stream()
@@ -264,10 +265,12 @@ public class TableFormatter {
         } else {
             ExtendedServicePoint found = maybe.get();
 
-            final String dirtyPhone = found.telephone();
+            final String dirtyPhone = found.telephone().trim();
             List<String> phoneList;
             if (dirtyPhone.contains("/")) {
                 phoneList = Arrays.asList(dirtyPhone.split("/"));
+            } else if (dirtyPhone.length() > 9 && dirtyPhone.indexOf(' ') == 9) {
+                phoneList = Arrays.asList(dirtyPhone.split(" "));
             } else {
                 phoneList = List.of(dirtyPhone);
             }
