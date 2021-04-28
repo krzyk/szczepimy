@@ -27,7 +27,8 @@ public class ServicePointFinder {
     // https://www.gov.pl/api/data/covid-vaccination-point/246801
 
     private final Map<Integer, String> phoneCorrections = Map.of(
-        273956, "486797157"
+        273956, "486797157",
+        273238, "566100488"
     );
 
     public ServicePointFinder(ObjectMapper mapper) {
