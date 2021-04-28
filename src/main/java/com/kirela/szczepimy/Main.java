@@ -22,7 +22,10 @@ import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -117,6 +120,27 @@ public class Main {
 
 //        for (City city : Set.of(City.KRAKÓW, City.RZESZÓW)) {
 
+        Set<String> voiCities = Set.of(
+            "Wrocław",
+            "Bydgoszcz",
+            "Toruń",
+            "Lublin",
+            "Zielona Góra",
+            "Gorzów Wielkopolski",
+            "Łódź",
+            "Kraków",
+            "Warszawa",
+            "Opole",
+            "Białystok",
+            "Rzeszów",
+            "Gdańsk",
+            "Gdynia",
+            "Katowice",
+            "Kielce",
+            "Olsztyn",
+            "Poznań",
+            "Szczecin"
+        );
         List<SearchCity> findVoi = Arrays.stream(Voivodeship.values())
             .map(v -> new SearchCity(null, v, 10))
             .toList();
@@ -398,8 +422,9 @@ public class Main {
         );
         Set<SlotWithVoivodeship> results = new HashSet<>();
 
-        final LocalTime initialStartTime = LocalTime.of(6, 5 * new Random().nextInt(5));
+        final LocalTime initialStartTime = LocalTime.of(0, 0);
 
+        int searchCount = 0;
         try {
             for (SearchCity searchCity : Stream.concat(findVoi.stream(), find.stream())
                 .filter(s -> options.voivodeships.contains(s.voivodeship()))
@@ -413,17 +438,20 @@ public class Main {
                     VaccineType.AZ
 //                    VaccineType.JJ
                 )) {
-                    for (int weeks = 2; weeks <= 2; weeks += 1) {
+                    final LocalDate endDateRange;
+                    LocalDate startDate = LocalDate.now();
+                    if (searchCity.name() == null) {
+                        endDateRange = LocalDate.of(2021, 5, 30);
+                    } else {
+                        //                            endDateRange = LocalDate.now().plusWeeks(weeks);
+                        endDateRange = LocalDate.of(2021, 5, 30);
+                    }
+                    int tries = 0;
+                    while (startDate.isBefore(endDateRange)) {
+                        LOG.error("city={}, vaccine={}: try={}, startDate={}", searchCity.name(), vaccine, tries, startDate);
                         Thread.sleep(1500 + (int)(Math.random() * 1000));
-                        final LocalDate endDateRange;
-                        if (searchCity.name() == null) {
-                            endDateRange = LocalDate.of(2021, 5, 30);
-                        } else {
-//                            endDateRange = LocalDate.now().plusWeeks(weeks);
-                            endDateRange = LocalDate.of(2021, 5, 30);
-                        }
                         var search = new Search(
-                            new DateRange(LocalDate.now(), endDateRange),
+                            new DateRange(startDate, endDateRange),
                             new TimeRange(
                                 initialStartTime,
                                 LocalTime.of(23, 59)
@@ -434,18 +462,28 @@ public class Main {
                             gmina.map(Gmina::terc).orElse(null),
                             null
                         );
+                        searchCount++;
                         final Set<Result.BasicSlot> list =
                             webSearch(options, creds, client, mapper, searchCity, vaccine, search);
-                        LOG.info("Found ({} weeks) for {}, {}: {} slots", weeks, searchCity.name, vaccine, list.size());
+                        LOG.info("Found for {}, {}: {} slots", searchCity.name, vaccine, list.size());
+                        startDate = list.stream()
+                            .map(Result.BasicSlot::startAt)
+                            .map(s -> s.atZone(ZoneId.of("Europe/Warsaw")))
+                            .map(ZonedDateTime::toLocalDate)
+                            .map(s -> s.plusDays(1))
+                            .distinct()
+                            .max(Comparator.naturalOrder())
+                            .orElse(endDateRange);
+
                         results.addAll(
                             list.stream()
                                 .map(s -> new SlotWithVoivodeship(s, searchCity.voivodeship()))
                                 .collect(Collectors.toSet())
                         );
-                        if (list.size() > 2 || vaccine != VaccineType.PFIZER) {
+                        tries++;
+                        if (tries >= 4 || vaccine == VaccineType.AZ || (searchCity.name() != null && !voiCities.contains(searchCity.name()))) {
                             break;
                         }
-                        LOG.debug("+n weeks");
                     }
                 }
             }
@@ -454,6 +492,8 @@ public class Main {
             StringWriter writer = new StringWriter();
             ex.printStackTrace(new PrintWriter(writer));
             telegram("Prawdopodobnie wygasła sesja (%s): \n ```\n%s\n```".formatted(ex.getMessage(), writer.toString()));
+        } finally {
+            LOG.info("Search count = {}", searchCount);
         }
 
         new TableFormatter(options.output, mapper, find, Instant.now()).store(placeFinder, results);
