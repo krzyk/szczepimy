@@ -88,7 +88,7 @@ public class TableFormatter {
                 permalink: /%s
                 ---
                 <p>Ostatnia aktualizacja: <strong><time class="timeago" datetime="%s">%s</time></strong>,
-                kolejna: <strong>~ <time class="timeago" datetime="%s">%s</time></strong></p>
+                kolejna: <strong>~ <time id="nexttime" class="timeago" datetime="%s">%s</time></strong></p>
                 <p>
                 <small>Wyszukujemy w miastach: %s</small>.
                 </p>
@@ -205,7 +205,7 @@ public class TableFormatter {
 
     private ZonedDateTime calculateNextRun() {
         ZonedDateTime nextRun;
-        ZonedDateTime proposedNextRun = now.plusSeconds(Duration.ofHours(1).toSeconds() + Duration.ofMinutes(5).toSeconds()).atZone(ZONE);
+        ZonedDateTime proposedNextRun = now.plusSeconds(Duration.ofMinutes(30).toSeconds() + Duration.ofMinutes(6).toSeconds()).atZone(ZONE);
         if (proposedNextRun.getHour() > 1 && proposedNextRun.getHour() < 6) {
             nextRun = proposedNextRun.withHour(7).plusMinutes(30);
         } else {

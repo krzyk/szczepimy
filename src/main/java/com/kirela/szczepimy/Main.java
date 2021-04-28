@@ -343,8 +343,8 @@ public class Main {
             new SearchCity("Jedwabne", Voivodeship.PODLASKIE, 1),
             new SearchCity("Przytuły", Voivodeship.PODLASKIE, 1),
             new SearchCity("Wizna", Voivodeship.PODLASKIE, 1),
-            new SearchCity("Stawiski", Voivodeship.PODLASKIE, 1),
-            new SearchCity("Radziłów", Voivodeship.PODLASKIE, 1),
+//            new SearchCity("Stawiski", Voivodeship.PODLASKIE, 1),
+//            new SearchCity("Radziłów", Voivodeship.PODLASKIE, 1),
 
             new SearchCity("Rzeszów", Voivodeship.PODKARPACKIE, 1),
             new SearchCity("Mielec", Voivodeship.PODKARPACKIE, 1),
@@ -410,8 +410,8 @@ public class Main {
                 for (VaccineType vaccine : Set.of(
                     VaccineType.PFIZER,
                     VaccineType.MODERNA,
-                    VaccineType.AZ,
-                    VaccineType.JJ
+                    VaccineType.AZ
+//                    VaccineType.JJ
                 )) {
                     for (int weeks = 2; weeks <= 2; weeks += 1) {
                         Thread.sleep(1500 + (int)(Math.random() * 1000));
