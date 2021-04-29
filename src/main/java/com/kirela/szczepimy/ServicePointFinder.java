@@ -80,6 +80,7 @@ public class ServicePointFinder {
             point.voivodeship(),
             point.county(),
             point.community(),
+            point.facilityType(),
             point.place(),
             point.lon(),
             point.lat()
