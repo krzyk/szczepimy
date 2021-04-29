@@ -10,6 +10,7 @@ public record ServicePoint(
     Voivodeship voivodeship,
     String county,
     String community,
+    String facilityType,
     String place,
     String lon,
     String lat

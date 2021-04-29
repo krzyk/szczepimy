@@ -487,6 +487,7 @@ public class Main {
                     }
                 }
             }
+            new TableFormatter(options.output, mapper, find, Instant.now()).store(placeFinder, results);
         } catch (Exception ex) {
             LOG.error("Exception", ex);
             StringWriter writer = new StringWriter();
@@ -495,8 +496,6 @@ public class Main {
         } finally {
             LOG.info("Search count = {}", searchCount);
         }
-
-        new TableFormatter(options.output, mapper, find, Instant.now()).store(placeFinder, results);
     }
 
     private static Set<Result.BasicSlot> webSearch(Options options, Creds creds, HttpClient client, ObjectMapper mapper,
