@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -286,6 +287,7 @@ public class TableFormatter {
 
         return phoneList.stream()
             .map(this::cleanupPhone)
+            .filter(Predicate.not(String::isBlank))
             .map(p -> """
                 <a href="tel:%s" title="Zadzwoń do punktu szczepień"><img src="assets/phone.png" width="11px"/><strong>&nbsp;%s</strong></a><br/>
                 """.formatted(p.replace(" ", ""), p.replace(" ", "&nbsp;")))
