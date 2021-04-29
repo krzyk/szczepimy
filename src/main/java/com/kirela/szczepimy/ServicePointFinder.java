@@ -123,6 +123,7 @@ public class ServicePointFinder {
                         servicePoint.voivodeship(),
                         servicePoint.county(),
                         servicePoint.community(),
+                        servicePoint.facilityType(),
                         servicePoint.place(),
                         servicePoint.lon(),
                         servicePoint.lat(),
