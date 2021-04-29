@@ -146,6 +146,7 @@ public class ServicePointFinder {
             value.voivodeship(),
             value.county(),
             value.community(),
+            value.facilityType(),
             value.place(),
             value.lon(),
             value.lat(),
