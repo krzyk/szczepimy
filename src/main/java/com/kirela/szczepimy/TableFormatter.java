@@ -23,6 +23,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,6 +35,10 @@ public class TableFormatter {
     private final ServicePointFinder servicePointFinder;
     private final List<Main.SearchCity> searchCities;
     private final Instant now;
+
+    private final Map<UUID, String> phoneCorrections = Map.of(
+        UUID.fromString("48324f72-a003-438a-90a1-b5f4c887f2de"), "507816804 503893600"
+    );
 
     public TableFormatter(String outputDirectory, ObjectMapper mapper,
         List<Main.SearchCity> searchCities, Instant now) {
@@ -157,8 +162,9 @@ public class TableFormatter {
                         }
                     }
 
+                    Optional<ExtendedServicePoint> maybe = servicePointFinder.findByAddress(slot.servicePoint());
                     Files.writeString(voiFile, """
-                                    <tr>
+                                    <tr data-service-point-id="%s" data-service-point-uuid="%s">
                                         <td>%s</td>
                                         <td data-order="%d">%s</td>
                                         <td class="dt-body-center times">%s</td>
@@ -172,6 +178,8 @@ public class TableFormatter {
                                     </tr>
                                                 
                             """.formatted(
+                        maybe.map(ExtendedServicePoint::id).map(String::valueOf).orElse(""),
+                        slot.servicePoint().id(),
                         slot.servicePoint().place(),
                         slot.startAt().getEpochSecond(),
                         DateTimeFormatter.ofPattern("d MMMM;EEEE|", Locale.forLanguageTag("pl")).format(
@@ -187,8 +195,8 @@ public class TableFormatter {
                         //                    ),
                         slot.vaccineType().ordinal(),
                         slot.vaccineType().readable(),
-                        getAddress(slot),
-                        getPhone(slot)
+                        getAddress(slot, maybe),
+                        getPhone(slot, maybe)
                         ),
                         StandardOpenOption.APPEND, StandardOpenOption.CREATE
                     );
@@ -258,30 +266,30 @@ public class TableFormatter {
         return duration;
     }
 
-    private String getPhone(ExtendedResult.Slot slot) {
-        Optional<ExtendedServicePoint> maybe = servicePointFinder.findByAddress(slot.servicePoint());
+    private String getPhone(ExtendedResult.Slot slot, Optional<ExtendedServicePoint> maybe) {
+        String dirtyPhone;
         if (maybe.isEmpty() || maybe.get().telephone() == null || maybe.get().telephone().isBlank()) {
-            return "";
+            dirtyPhone = phoneCorrections.getOrDefault(slot.servicePoint().id(), "");
         } else {
             ExtendedServicePoint found = maybe.get();
+            dirtyPhone = found.telephone();
+        }
+        dirtyPhone = dirtyPhone.trim();
+        List<String> phoneList;
+        if (dirtyPhone.contains("/")) {
+            phoneList = Arrays.asList(dirtyPhone.split("/"));
+        } else if (dirtyPhone.length() > 9 && dirtyPhone.indexOf(' ') == 9) {
+            phoneList = Arrays.asList(dirtyPhone.split(" "));
+        } else {
+            phoneList = List.of(dirtyPhone);
+        }
 
-            final String dirtyPhone = found.telephone().trim();
-            List<String> phoneList;
-            if (dirtyPhone.contains("/")) {
-                phoneList = Arrays.asList(dirtyPhone.split("/"));
-            } else if (dirtyPhone.length() > 9 && dirtyPhone.indexOf(' ') == 9) {
-                phoneList = Arrays.asList(dirtyPhone.split(" "));
-            } else {
-                phoneList = List.of(dirtyPhone);
-            }
-
-            return phoneList.stream()
-                .map(this::cleanupPhone)
-                .map(p -> """
+        return phoneList.stream()
+            .map(this::cleanupPhone)
+            .map(p -> """
                 <a href="tel:%s" title="Zadzwoń do punktu szczepień"><img src="assets/phone.png" width="11px"/><strong>&nbsp;%s</strong></a><br/>
                 """.formatted(p.replace(" ", ""), p.replace(" ", "&nbsp;")))
-                .collect(Collectors.joining());
-        }
+            .collect(Collectors.joining());
     }
 
     private String cleanupPhone(String phone) {
@@ -304,8 +312,7 @@ public class TableFormatter {
         return phone;
     }
 
-    private String getAddress(ExtendedResult.Slot slot) {
-        Optional<ExtendedServicePoint> maybe = servicePointFinder.findByAddress(slot.servicePoint());
+    private String getAddress(ExtendedResult.Slot slot, Optional<ExtendedServicePoint> maybe) {
         final String address = "<small class=\"smaller\">%s</small><br/>%s".formatted(
             slot.servicePoint().name(),
             slot.servicePoint().addressText()
@@ -321,8 +328,8 @@ public class TableFormatter {
         } else {
             ExtendedServicePoint found = maybe.get();
             return """
-                <a target="_blank" data-point-id="%d" href="https://www.google.com/maps/search/?api=1&query=%s,%s">%s</a>
-                """.formatted(found.id(), found.lat(), found.lon(), address);
+                <a target="_blank" href="https://www.google.com/maps/search/?api=1&query=%s,%s">%s</a>
+                """.formatted(found.lat(), found.lon(), address);
         }
     }
 
