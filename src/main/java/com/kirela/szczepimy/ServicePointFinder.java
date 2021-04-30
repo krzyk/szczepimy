@@ -176,9 +176,10 @@ public class ServicePointFinder {
             return Optional.empty();
         }
         if (found.size() > 1) {
-            String facilityName = Optional.ofNullable(servicePoint.name()).map(String::toLowerCase).orElse("");
+            String facilityName = Optional.ofNullable(servicePoint.name()).map(String::toLowerCase).orElse("").trim();
+            String place = Optional.ofNullable(servicePoint.place()).map(String::toLowerCase).orElse("").trim();
             Map<String, List<ServicePoint>> namedFind = found.stream()
-                .filter(f -> f.facilityName().equalsIgnoreCase(facilityName.trim()))
+                .filter(f -> f.place().equalsIgnoreCase(place))
                 .collect(Collectors.groupingBy(ServicePoint::lat));
             if (namedFind.isEmpty()) {
                 LOG.warn("Did not find address in placed list for '{}' '{}' in {}", address, servicePoint.place(), servicePoint.voivodeship());

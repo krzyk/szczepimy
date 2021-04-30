@@ -43,10 +43,6 @@ public class TableFormatter {
 
     record Coordinates(String lat, String lon) {}
 
-    private final Map<UUID, String> phoneCorrections = Map.of(
-        UUID.fromString("48324f72-a003-438a-90a1-b5f4c887f2de"), "507816804 503893600"
-    );
-
     private final Map<UUID, Coordinates> coordsCorrections = Map.of(
     );
 
@@ -196,6 +192,7 @@ public class TableFormatter {
                                                 
                             """.formatted(
                         cords.lat(), cords.lon(),
+                        maybe.map(ExtendedServicePoint::id).map(String::valueOf).orElse(""),
                         slot.servicePoint().id(),
                         slot.servicePoint().place(),
                         slot.startAt().getEpochSecond(),
