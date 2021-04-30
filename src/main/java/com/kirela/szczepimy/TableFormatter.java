@@ -41,6 +41,15 @@ public class TableFormatter {
         UUID.fromString("48324f72-a003-438a-90a1-b5f4c887f2de"), "507816804 503893600"
     );
 
+    record Coordinates(String lat, String lon) {}
+
+    private final Map<UUID, String> phoneCorrections = Map.of(
+        UUID.fromString("48324f72-a003-438a-90a1-b5f4c887f2de"), "507816804 503893600"
+    );
+
+    private final Map<UUID, Coordinates> coordsCorrections = Map.of(
+    );
+
     public TableFormatter(String outputDirectory, ObjectMapper mapper,
         List<Main.SearchCity> searchCities, Instant now) {
         this.searchCities = searchCities;
@@ -164,8 +173,11 @@ public class TableFormatter {
                     }
 
                     Optional<ExtendedServicePoint> maybe = servicePointFinder.findByAddress(slot.servicePoint());
+                    Coordinates cords = maybe.map(e -> new Coordinates(e.lat(), e.lon()))
+                        .orElse(coordsCorrections.getOrDefault(slot.servicePoint().id(), new Coordinates("", "")));
+
                     Files.writeString(voiFile, """
-                                    <tr data-service-point-id="%s" data-service-point-uuid="%s">
+                                    <tr data-lat="%s" data-lon="%s" data-service-point-id="%s" data-service-point-uuid="%s">
                                         <td>%s</td>
                                         <td data-order="%d">%s</td>
                                         <td class="dt-body-center times">%s</td>
@@ -183,7 +195,7 @@ public class TableFormatter {
                                     </tr>
                                                 
                             """.formatted(
-                        maybe.map(ExtendedServicePoint::id).map(String::valueOf).orElse(""),
+                        cords.lat(), cords.lon(),
                         slot.servicePoint().id(),
                         slot.servicePoint().place(),
                         slot.startAt().getEpochSecond(),

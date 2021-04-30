@@ -165,14 +165,14 @@ public class ServicePointFinder {
     private Optional<ServicePoint> findByAddressInternal(ExtendedResult.ServicePoint servicePoint) {
         String address = normalize(servicePoint.addressText()).toLowerCase();
         if (!grouped.containsKey(address)) {
-            LOG.warn("Did not find address '{}' in {}", address, servicePoint.voivodeship());
+            LOG.warn("Did not find address '{}' '{}' ({}) in {}", address, servicePoint.place(), servicePoint.name(), servicePoint.voivodeship());
             return Optional.empty();
         }
         List<ServicePoint> found = grouped.get(address).stream()
             .filter(p -> p.voivodeship() == servicePoint.voivodeship())
             .toList();
         if (found.isEmpty()) {
-            LOG.warn("Did not find address in list for '{}' in {}", address, servicePoint.voivodeship());
+            LOG.warn("Did not find address in list for '{}' '{}' in {}", address, servicePoint.place(), servicePoint.voivodeship());
             return Optional.empty();
         }
         if (found.size() > 1) {
@@ -181,11 +181,11 @@ public class ServicePointFinder {
                 .filter(f -> f.facilityName().equalsIgnoreCase(facilityName.trim()))
                 .collect(Collectors.groupingBy(ServicePoint::lat));
             if (namedFind.isEmpty()) {
-                LOG.warn("Did not find address in placed list for '{}' in {}", address, servicePoint.voivodeship());
+                LOG.warn("Did not find address in placed list for '{}' '{}' in {}", address, servicePoint.place(), servicePoint.voivodeship());
                 return Optional.empty();
             }
             if (namedFind.size() > 1) {
-                LOG.warn("Found too many addresses for placed find '{}' in {}: {}", address, servicePoint.voivodeship(), found);
+                LOG.warn("Found too many addresses for placed find '{}' '{}' in {}: {}", address, servicePoint.place(), servicePoint.voivodeship(), found);
                 return Optional.empty();
             }
             return Optional.of(
