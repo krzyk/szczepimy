@@ -28,7 +28,8 @@ public class ServicePointFinder {
 
     private final Map<Integer, String> phoneCorrections = Map.of(
         273956, "486797157",
-        273238, "566100488"
+        273238, "566100488",
+        283722, "616771011"
     );
 
     public ServicePointFinder(ObjectMapper mapper) {
