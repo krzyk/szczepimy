@@ -170,11 +170,15 @@ public class TableFormatter {
                                         <td data-order="%d">%s</td>
                                         <td class="dt-body-center times">%s</td>
                                         <td class="dt-body-center" data-order="%d">%s</td>
-                                        <td class="address">%s</td>
+                                        <td class="address">
+                                        %s
+                                        %s
+                                        </td>
                                         <td>
                                             %s
-                                            <a href="tel:989" title="Zadwoń na infolinię i umów się na ten termin"><img src="assets/phone.png" width="11px"></img>&nbsp;989</a><br/>
-                                            <a target="_blank" title="Skorzystaj z profilu zaufanego i umów się przez internet" href="https://pacjent.erejestracja.ezdrowie.gov.pl/wizyty"><img src="assets/url.png" width="11px"></img>&nbsp;e-rejestracja</a><br/>
+                                            %s
+                                            <a href="tel:989" title="Zadwoń na infolinię i umów się na ten termin">📞</img>&nbsp;989</a><br/>
+                                            <a target="_blank" title="Skorzystaj z profilu zaufanego i umów się przez internet" href="https://pacjent.erejestracja.ezdrowie.gov.pl/wizyty">🔗</img>&nbsp;e-rejestracja</a><br/>
                                         </td>
                                     </tr>
                                                 
@@ -196,7 +200,13 @@ public class TableFormatter {
                         //                    ),
                         slot.vaccineType().ordinal(),
                         slot.vaccineType().readable(),
+                        """
+                            <div class="bug"><a href="https://github.com/szczepienia/szczepienia.github.io/issues/new?labels=incorrect_address&title=[%s]+Z%%C5%%82y+adres+plac%%C3%%B3wki+(id=%s)" title="Zgłoś błąd">🐛</a></div>
+                            """.formatted(URLEncoder.encode(voivodeship.name(), StandardCharsets.UTF_8), maybe.map(ExtendedServicePoint::id).map(String::valueOf).orElse(slot.servicePoint().id().toString())),
                         getAddress(slot, maybe),
+                        """
+                            <div class="bug"><a href="https://github.com/szczepienia/szczepienia.github.io/issues/new?labels=incorrect_phone&title=[%s]+Z%%C5%%82y+number+telefonu+do+plac%%C3%%B3wki+(id=%s)" title="Zgłoś błąd">🐛</a></div>
+                            """.formatted(URLEncoder.encode(voivodeship.name(), StandardCharsets.UTF_8), maybe.map(ExtendedServicePoint::id).map(String::valueOf).orElse(slot.servicePoint().id().toString())),
                         getPhone(slot, maybe)
                         ),
                         StandardOpenOption.APPEND, StandardOpenOption.CREATE
@@ -289,7 +299,7 @@ public class TableFormatter {
             .map(this::cleanupPhone)
             .filter(Predicate.not(String::isBlank))
             .map(p -> """
-                <a href="tel:%s" title="Zadzwoń do punktu szczepień"><img src="assets/phone.png" width="11px"/><strong>&nbsp;%s</strong></a><br/>
+                <a href="tel:%s" title="Zadzwoń do punktu szczepień">📞<strong>&nbsp;%s</strong></a><br/>
                 """.formatted(p.replace(" ", ""), p.replace(" ", "&nbsp;")))
             .collect(Collectors.joining());
     }
