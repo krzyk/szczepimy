@@ -30,7 +30,8 @@ public class ServicePointFinder {
         Map.entry(273956, "486797157"),
         Map.entry(273238, "566100488"),
         Map.entry(283722, "616771011"),
-        Map.entry(281259, "222992406")
+        Map.entry(281259, "222992406"),
+        Map.entry(288437, "124467527")
     );
 
     public ServicePointFinder(ObjectMapper mapper) {
