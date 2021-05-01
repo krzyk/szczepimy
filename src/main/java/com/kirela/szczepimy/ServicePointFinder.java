@@ -66,6 +66,12 @@ public class ServicePointFinder {
             .replace("ul. ", "")
             .replace("Ul. ", "")
             .replace("UL. ", "")
+            .replace("AL. ", "")
+            .replace("Al. ", "")
+            .replace("al. ", "")
+            .replace("Aleja ", "")
+            .replace("ALEJA ", "")
+            .replace("-", " ")
             .trim();
     }
 

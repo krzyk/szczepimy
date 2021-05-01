@@ -13,9 +13,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class ServicePointFinderTest {
 
@@ -78,8 +80,8 @@ class ServicePointFinderTest {
     public void aaa() {
         var mapper = Main.getMapper();
         var finder = new ServicePointFinder(mapper);
-//        assertThat(finder.findByAddress("GRUNWALDZKA 82", null, Voivodeship.POMORSKIE))
-//            .isNotEmpty();
+        assertThat(finder.findByAddress(new ExtendedResult.ServicePoint(UUID.randomUUID(), "name", "Al. 1000 Lecia 13", "Olkusz", Voivodeship.MAŁOPOLSKIE)))
+            .isNotEmpty();
 //        assertThat(finder.findByAddress("GRUNWALDZKA 12", null, Voivodeship.MAZOWIECKIE))
 //            .isEmpty();
 //        assertThat(finder.findByAddress("ul. Kościuszki 15", null, Voivodeship.DOLNOŚLĄSKIE))
