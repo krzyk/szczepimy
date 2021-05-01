@@ -176,21 +176,34 @@ public class ServicePointFinder {
             return Optional.empty();
         }
         if (found.size() > 1) {
-            String facilityName = Optional.ofNullable(servicePoint.name()).map(String::toLowerCase).orElse("").trim();
             String place = Optional.ofNullable(servicePoint.place()).map(String::toLowerCase).orElse("").trim();
-            Map<String, List<ServicePoint>> namedFind = found.stream()
+            Map<String, List<ServicePoint>> placeFind = found.stream()
                 .filter(f -> f.place().equalsIgnoreCase(place))
                 .collect(Collectors.groupingBy(ServicePoint::lat));
-            if (namedFind.isEmpty()) {
+            if (placeFind.isEmpty()) {
                 LOG.warn("Did not find address in placed list for '{}' '{}' in {}", address, servicePoint.place(), servicePoint.voivodeship());
                 return Optional.empty();
             }
-            if (namedFind.size() > 1) {
-                LOG.warn("Found too many addresses for placed find '{}' '{}' in {}: {}", address, servicePoint.place(), servicePoint.voivodeship(), found);
+            if (placeFind.size() > 1) {
+                String facilityName = Optional.ofNullable(servicePoint.name()).map(String::toLowerCase).orElse("").trim();
+                Map<String, List<ServicePoint>> facilityFind = found.stream()
+                    .filter(f -> f.facilityName().equalsIgnoreCase(facilityName))
+                    .collect(Collectors.groupingBy(ServicePoint::lat));
+                if (facilityFind.size() == 1) {
+                    return Optional.of(facilityFind.values().stream().findFirst().get().get(0));
+                }
+                if (facilityFind.isEmpty()) {
+                    LOG.warn("Did not find address in facility list for '{}' '{}' in {}", address, servicePoint.place(), servicePoint.voivodeship());
+                    return Optional.empty();
+                }
+                if (found.size() > 1) {
+                    LOG.warn("Too many addresses in facility list for '{}' '{}' in {}", address, servicePoint.place(), servicePoint.voivodeship());
+                    return Optional.empty();
+                }
                 return Optional.empty();
             }
             return Optional.of(
-                namedFind.values().stream().findFirst().get().get(0)
+                placeFind.values().stream().findFirst().get().get(0)
             );
         }
         return Optional.of(found.get(0));

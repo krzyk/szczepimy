@@ -210,7 +210,7 @@ public class TableFormatter {
                         slot.vaccineType().ordinal(),
                         slot.vaccineType().readable(),
                         """
-                            <div class="bug"><a href="https://github.com/szczepienia/szczepienia.github.io/issues/new?labels=incorrect_address&title=[%s]+Z%%C5%%82y+adres+plac%%C3%%B3wki+(id=%s)" title="Zgłoś błąd">🐛</a></div>
+                            <div class="bug" style="visibility: hidden"><a href="https://github.com/szczepienia/szczepienia.github.io/issues/new?labels=incorrect_address&title=[%s]+Z%%C5%%82y+adres+plac%%C3%%B3wki+(id=%s)" title="Zgłoś błąd">🐛</a></div>
                             """.formatted(URLEncoder.encode(voivodeship.name(), StandardCharsets.UTF_8), maybe.map(ExtendedServicePoint::id).map(String::valueOf).orElse(slot.servicePoint().id().toString())),
                         getAddress(slot, maybe),
                         """
