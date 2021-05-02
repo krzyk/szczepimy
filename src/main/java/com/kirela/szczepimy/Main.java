@@ -394,6 +394,7 @@ public class Main {
             new SearchCity("Bytom", Voivodeship.ŚLĄSKIE, 1),
             new SearchCity("Chorzów", Voivodeship.ŚLĄSKIE, 1),
             new SearchCity("Pszczyna", Voivodeship.ŚLĄSKIE, 1),
+            new SearchCity("Tarnowskie Góry", Voivodeship.ŚLĄSKIE, 1),
 
             new SearchCity("Kielce", Voivodeship.ŚWIĘTOKRZYSKIE, 1),
             new SearchCity("Ostrowiec Świętokrzyski", Voivodeship.ŚWIĘTOKRZYSKIE, 1),

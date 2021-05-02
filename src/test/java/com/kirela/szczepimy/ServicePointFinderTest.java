@@ -8,6 +8,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -94,5 +95,11 @@ class ServicePointFinderTest {
 //            .isNotEmpty();
 //        assertThat(finder.findByAddress("KRAKOWSKA 16", "PUNKT SZCZEPIEŃ", Voivodeship.PODKARPACKIE))
 //            .isNotEmpty();
+    }
+
+    @Test
+    void test2() {
+        Arrays.stream(Voivodeship.values())
+            .forEach(v -> System.out.print(v.readable() + " "));
     }
 }
