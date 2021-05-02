@@ -1,13 +1,11 @@
 package com.kirela.szczepimy;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URI;
@@ -21,6 +19,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -28,11 +27,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -323,7 +319,7 @@ public class Main {
             new SearchCity("Zamość", Voivodeship.LUBELSKIE, 1),
             new SearchCity("Biała Podlaska", Voivodeship.LUBELSKIE, 1),
             new SearchCity("Łuków", Voivodeship.LUBELSKIE, 1),
-//            new SearchCity("Chełm", Voivodeship.LUBELSKIE, 1),
+            new SearchCity("Chełm", Voivodeship.LUBELSKIE, 1),
 
 
             new SearchCity("Zielona Góra", Voivodeship.LUBUSKIE, 1),
@@ -349,7 +345,8 @@ public class Main {
             new SearchCity("Radom", Voivodeship.MAZOWIECKIE, 1),
             new SearchCity("Płock", Voivodeship.MAZOWIECKIE, 1),
             new SearchCity("Ostrołęka", Voivodeship.MAZOWIECKIE, 1),
-//            new SearchCity("Siedlce", Voivodeship.MAZOWIECKIE, 1),
+            new SearchCity("Mińsk Mazowiecki", Voivodeship.MAZOWIECKIE, 1),
+            new SearchCity("Siedlce", Voivodeship.MAZOWIECKIE, 1),
 
 
             new SearchCity("Opole", Voivodeship.OPOLSKIE, 1),
@@ -365,8 +362,8 @@ public class Main {
             new SearchCity("Grajewo", Voivodeship.PODLASKIE, 1),
             new SearchCity("Piątnica", Voivodeship.PODLASKIE, 1),
             new SearchCity("Jedwabne", Voivodeship.PODLASKIE, 1),
-            new SearchCity("Przytuły", Voivodeship.PODLASKIE, 1),
-            new SearchCity("Wizna", Voivodeship.PODLASKIE, 1),
+//            new SearchCity("Przytuły", Voivodeship.PODLASKIE, 1),
+//            new SearchCity("Wizna", Voivodeship.PODLASKIE, 1),
 //            new SearchCity("Stawiski", Voivodeship.PODLASKIE, 1),
 //            new SearchCity("Radziłów", Voivodeship.PODLASKIE, 1),
 
@@ -438,23 +435,23 @@ public class Main {
                     VaccineType.AZ
 //                    VaccineType.JJ
                 )) {
-                    final LocalDate endDateRange;
-                    LocalDate startDate = LocalDate.now();
+                    final LocalDateTime endDate;
+                    LocalDateTime startDate = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
                     if (searchCity.name() == null) {
-                        endDateRange = LocalDate.of(2021, 5, 30);
+                        endDate = LocalDateTime.of(2021, 5, 30, 23, 59);
                     } else {
                         //                            endDateRange = LocalDate.now().plusWeeks(weeks);
-                        endDateRange = LocalDate.of(2021, 5, 30);
+                        endDate = LocalDateTime.of(2021, 5, 30, 23, 59);
                     }
                     int tries = 0;
-                    while (startDate.isBefore(endDateRange)) {
+                    while (startDate.isBefore(endDate)) {
                         Thread.sleep(1400 + (int)(Math.random() * 1000));
                         LOG.info("city={}, vaccine={}: try={}, startDate={}", searchCity.name(), vaccine, tries, startDate);
                         var search = new Search(
-                            new DateRange(startDate, endDateRange),
+                            new DateRange(startDate.toLocalDate(), endDate.toLocalDate()),
                             new TimeRange(
-                                initialStartTime,
-                                LocalTime.of(23, 59)
+                                startDate.toLocalTime(),
+                                endDate.toLocalTime()
                             ),
                             creds.prescriptionId(),
                             List.of(vaccine),
@@ -469,11 +466,12 @@ public class Main {
                         startDate = list.stream()
                             .map(Result.BasicSlot::startAt)
                             .map(s -> s.atZone(ZoneId.of("Europe/Warsaw")))
-                            .map(ZonedDateTime::toLocalDate)
-                            .map(s -> s.plusDays(1))
+                            .map(ZonedDateTime::toLocalDateTime)
+                            //.map(s -> s.plusDays(1))
+                            .map(s -> s.plusMinutes(1))
                             .distinct()
                             .max(Comparator.naturalOrder())
-                            .orElse(endDateRange);
+                            .orElse(endDate);
 
                         results.addAll(
                             list.stream()
@@ -493,9 +491,10 @@ public class Main {
             ex.printStackTrace(new PrintWriter(writer));
             telegram("Prawdopodobnie wygasła sesja (%s): \n ```\n%s\n```".formatted(ex.getMessage(), writer.toString()));
         } finally {
-            LOG.info("Search count = {}", searchCount);
+            LOG.info("Search count = {}, results = {}", searchCount, results.size());
         }
         new TableFormatter(options.output, mapper, find, Instant.now()).store(placeFinder, results);
+        new Stats(mapper).store(results);
     }
 
     private static Set<Result.BasicSlot> webSearch(Options options, Creds creds, HttpClient client, ObjectMapper mapper,
@@ -564,5 +563,9 @@ public class Main {
         }
     }
 
-    record SearchCity(String name, Voivodeship voivodeship, int days) {}
+    record SearchCity(String name, Voivodeship voivodeship, int days, Set<VaccineType> vaccines) {
+        public SearchCity(String name, Voivodeship voivodeship, int days) {
+            this(name, voivodeship, days, Arrays.stream(VaccineType.values()).collect(Collectors.toSet()));
+        }
+    }
 }

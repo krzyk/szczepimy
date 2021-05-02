@@ -141,34 +141,51 @@ public class TableFormatter {
                     ExtendedResult.ServicePoint servicePoint = listEntry.getKey();
                     List<ExtendedResult.Slot> slots = listEntry.getValue();
                     ExtendedResult.Slot slot = slots.get(0);
-                    String times = slots.stream()
+                    List<String> slotTimes = slots.stream()
                         .map(s -> LocalTime.ofInstant(s.startAt(), ZONE))
                         .sorted()
                         .distinct()
                         .map(t -> DateTimeFormatter.ofPattern("HH:mm", Locale.forLanguageTag("pl")).format(t))
-                        .collect(Collectors.joining("<br/>"));
+                        .toList();
+//                        .collect(Collectors.joining("<br/>"));
+
+                    String times;
 
                     // https://github.com/szczepienia/szczepienia.github.io/issues/new?labels=incorrect_phone&title=Z%C5%82y+number+telefonu+do+plac%C3%B3wki+(id=1234)
                     if (slots.size() >= 4) {
-                        List<TimeRange> ranges = getRanges(slots, slot);
-                        List<TimeRange> incorrect = ranges.stream()
-                            .filter(r -> r.start() == r.end())
-                            .toList();
+//                        List<TimeRange> ranges = getRanges(slots, slot);
+//                        List<TimeRange> incorrect = ranges.stream()
+//                            .filter(r -> r.start() == r.end())
+//                            .toList();
 //                        if (!incorrect.isEmpty()) {
 //                            LOG.error("Ranges are incorrect (%s) input: %s".formatted(incorrect, slots));
 //                        }
-                        if (slots.size() > 4) {
-                            times = """
-                                <small class="smaller">(co&nbsp;%s&nbsp;min)</small>
-                                %s
-                                <br/>
-                                """.formatted(
-                                slot.duration(),
-                                ranges.stream()
-                                    .map(this::rangeToDisplay)
-                                    .collect(Collectors.joining())
-                            );
-                        }
+//                        times = """
+//                                <small class="smaller">(liczba = %d)</small>
+//                                <small class="smaller">(co&nbsp;%s&nbsp;min)</small>
+//                                %s
+//                                <br/>
+//                                """.formatted(
+//                            slots.size(),
+//                            slot.duration(),
+//                            ranges.stream()
+//                                .map(this::rangeToDisplay)
+//                                .collect(Collectors.joining())
+
+                        times = """
+                            <div class="slot-count">(terminów: <strong>%d</strong>)</div>
+                            <div class="toggle-times">%s</div>
+                            <div class="extended-times">
+                            %s
+                            </div>
+                            <br/>
+                            """.formatted(
+                            slots.size(),
+                            slotTimes.get(0),
+                            String.join("<br/>", slotTimes.subList(1, slotTimes.size()))
+                        );
+                    } else {
+                        times = String.join("<br/>", slotTimes);
                     }
 
                     Optional<ExtendedServicePoint> maybe = servicePointFinder.findByAddress(slot.servicePoint());
@@ -213,11 +230,11 @@ public class TableFormatter {
                         slot.vaccineType().ordinal(),
                         slot.vaccineType().readable(),
                         """
-                            <div class="bug" style="visibility: hidden"><a href="https://github.com/szczepienia/szczepienia.github.io/issues/new?labels=incorrect_address&title=[%s]+Z%%C5%%82y+adres+plac%%C3%%B3wki+(id=%s)" title="Zgłoś błąd">🐛</a></div>
+                            <div class="bug" style="visibility: hidden"><a href="https://github.com/szczepienia/szczepienia.github.io/issues/new?labels=incorrect_address&title=[%s]+Z%%C5%%82y+adres+plac%%C3%%B3wki+(id=%s)" title="Zgłoś błąd">Zgłoś</a></div>
                             """.formatted(URLEncoder.encode(voivodeship.name(), StandardCharsets.UTF_8), maybe.map(ExtendedServicePoint::id).map(String::valueOf).orElse(slot.servicePoint().id().toString())),
                         getAddress(slot, maybe),
                         """
-                            <div class="bug"><a href="https://github.com/szczepienia/szczepienia.github.io/issues/new?labels=incorrect_phone&title=[%s]+Z%%C5%%82y+number+telefonu+do+plac%%C3%%B3wki+(id=%s)" title="Zgłoś błąd">🐛</a></div>
+                            <div class="bug"><a href="https://github.com/szczepienia/szczepienia.github.io/issues/new?labels=incorrect_phone&title=[%s]+Z%%C5%%82y+number+telefonu+do+plac%%C3%%B3wki+(id=%s)" title="Zgłoś błąd">Zgłoś</a></div>
                             """.formatted(URLEncoder.encode(voivodeship.name(), StandardCharsets.UTF_8), maybe.map(ExtendedServicePoint::id).map(String::valueOf).orElse(slot.servicePoint().id().toString())),
                         getPhone(slot, maybe)
                         ),
@@ -301,6 +318,8 @@ public class TableFormatter {
         List<String> phoneList;
         if (dirtyPhone.contains("/")) {
             phoneList = Arrays.asList(dirtyPhone.split("/"));
+        } else if (dirtyPhone.contains(",")) {
+            phoneList = Arrays.asList(dirtyPhone.split(","));
         } else if (dirtyPhone.length() > 9 && dirtyPhone.indexOf(' ') == 9) {
             phoneList = Arrays.asList(dirtyPhone.split(" "));
         } else {
@@ -337,7 +356,7 @@ public class TableFormatter {
     }
 
     private String getAddress(ExtendedResult.Slot slot, Optional<ExtendedServicePoint> maybe) {
-        final String address = "<small class=\"smaller\">%s</small><br/>%s".formatted(
+        final String address = "<div class=\"point-description\">%s</div><div class=\"point-address\">%s</div>".formatted(
             slot.servicePoint().name(),
             slot.servicePoint().addressText()
         );
