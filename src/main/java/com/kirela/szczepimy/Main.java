@@ -430,12 +430,7 @@ public class Main {
                 LOG.info("Processing {}", searchCity);
                 Optional<Gmina> gmina = Optional.ofNullable(searchCity.name())
                     .map(n -> gminaFinder.find(n, searchCity.voivodeship));
-                for (VaccineType vaccine : Set.of(
-                    VaccineType.PFIZER,
-                    VaccineType.MODERNA,
-                    VaccineType.AZ
-//                    VaccineType.JJ
-                )) {
+                for (VaccineType vaccine : options.vaccineTypes) {
                     final LocalDateTime endDate;
                     LocalDateTime startDate = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
                     if (searchCity.name() == null) {

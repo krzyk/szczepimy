@@ -16,6 +16,9 @@ public class Options {
     @CommandLine.Option(names = "-v", split = ",", description = "voivodeships, valid: ${COMPLETION-CANDIDATES} (default: ${DEFAULT-VALUE})")
     Set<Voivodeship> voivodeships = new HashSet<>(Arrays.asList(Voivodeship.values()));
 
+    @CommandLine.Option(names = "-u", split = ",", description = "vaccine types, valid: ${COMPLETION-CANDIDATES} (default: ${DEFAULT-VALUE})")
+    Set<VaccineType> vaccineTypes = new HashSet<>(Arrays.asList(VaccineType.values()));
+
     @CommandLine.Option(required = true, names = "-s", description = "SID (default: ${DEFAULT-VALUE})")
     String sid;
 
