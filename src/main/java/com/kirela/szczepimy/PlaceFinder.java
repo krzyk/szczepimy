@@ -56,6 +56,7 @@ public class PlaceFinder {
                 .replace("m. st. ", "")
                 .replace("pawlowice/pniowek", "pniowek")
                 .replace("dziegowice", "dziergowice")
+                .replace("mlp.", "malopolski")
                 .replaceAll(" +", " ")
                 .replaceAll("([^ ]+) ?- ?([^ ]+)", "$1-$2")
                 .replaceAll("([^ ]+) [0-9]+[a-z]?$", "$1")

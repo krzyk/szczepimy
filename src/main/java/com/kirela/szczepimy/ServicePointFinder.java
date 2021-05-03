@@ -79,22 +79,27 @@ public class ServicePointFinder {
     }
 
     private static ServicePoint correctData(ServicePoint point) {
+        String address = normalize(point.address())
+            .trim()
+            .replaceAll("^NA ([0-9])", point.place() + " $1");
+        String place = point.place()
+            .replaceAll("DZIEGOWICE", "DZIERGOWICE");
+        if (point.place().equals("SĘDZISZÓW MŁP.") && point.address().equals("3-GO MAJA 2")) {
+            address = point.address();
+            place = "Sędziszów Małopolski";
+        }
         return new ServicePoint(
             point.id(),
             point.ordinalNumber(),
             point.facilityName(),
             point.terc(),
-            normalize(point.address())
-                .trim()
-                .replaceAll("^NA ([0-9])", point.place() + " $1")
-            ,
+            address,
             point.zipCode(),
             point.voivodeship(),
             point.county(),
             point.community(),
             point.facilityType(),
-            point.place()
-                .replaceAll("DZIEGOWICE", "DZIERGOWICE"),
+            place,
             point.lon(),
             point.lat()
         );

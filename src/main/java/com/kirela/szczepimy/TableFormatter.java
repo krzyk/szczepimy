@@ -44,8 +44,6 @@ public class TableFormatter {
         UUID.fromString("81a97b5e-6159-4844-b1d9-c81e7f6d644e"), "690694186"
     );
 
-    record Coordinates(String lat, String lon) {}
-
     private final Map<UUID, Coordinates> coordsCorrections = Map.of(
     );
 
@@ -106,7 +104,7 @@ public class TableFormatter {
                 <p>
                 <small>Wyszukujemy w miastach: %s</small>.
                 </p>
-                <table id="szczepienia" class="stripe">
+                <table id="szczepienia" class="stripe" data-lat="%s" data-lon="%s">
                     <thead>
                         <tr>
                             <th>Miasto</th>
@@ -128,7 +126,8 @@ public class TableFormatter {
                     searchCities.stream()
                         .filter(c -> c.voivodeship() == voivodeship)
                         .map(Main.SearchCity::name)
-                        .collect(Collectors.joining(", "))
+                        .collect(Collectors.joining(", ")),
+                    voivodeship.cords().lat(), voivodeship.cords().lon()
                 ),
                 StandardOpenOption.CREATE_NEW
             );
