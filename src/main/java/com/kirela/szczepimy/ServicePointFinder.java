@@ -33,6 +33,7 @@ public class ServicePointFinder {
         Map.entry(281259, "222992406"),
         Map.entry(288437, "126372791"),
         Map.entry(289055, "517194743 178652000"),
+//        Map.entry(287920, "")
         // Tauron Arena 123491500
         Map.entry(288509, "509842442 690694775 690694999")
     );
