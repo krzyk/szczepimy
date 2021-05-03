@@ -308,12 +308,14 @@ public class Main {
             new SearchCity("Jelenia Góra", Voivodeship.DOLNOŚLĄSKIE, 1),
             new SearchCity("Wałbrzych", Voivodeship.DOLNOŚLĄSKIE, 1),
             new SearchCity("Głogów", Voivodeship.DOLNOŚLĄSKIE, 1),
+            new SearchCity("Lubin", Voivodeship.DOLNOŚLĄSKIE, 1),
 
             new SearchCity("Bydgoszcz", Voivodeship.KUJAWSKO_POMORSKIE, 1),
             new SearchCity("Toruń", Voivodeship.KUJAWSKO_POMORSKIE, 1),
             new SearchCity("Grudziądz", Voivodeship.KUJAWSKO_POMORSKIE, 1),
             new SearchCity("Włocławek", Voivodeship.KUJAWSKO_POMORSKIE, 1),
             new SearchCity("Żnin", Voivodeship.KUJAWSKO_POMORSKIE, 1),
+            new SearchCity("Inowrocław", Voivodeship.KUJAWSKO_POMORSKIE, 1),
 
 
             new SearchCity("Lublin", Voivodeship.LUBELSKIE, 1),
@@ -321,6 +323,7 @@ public class Main {
             new SearchCity("Biała Podlaska", Voivodeship.LUBELSKIE, 1),
             new SearchCity("Łuków", Voivodeship.LUBELSKIE, 1),
             new SearchCity("Chełm", Voivodeship.LUBELSKIE, 1),
+            new SearchCity("Puławy", Voivodeship.LUBELSKIE, 1),
 
 
             new SearchCity("Zielona Góra", Voivodeship.LUBUSKIE, 1),
@@ -334,6 +337,8 @@ public class Main {
             new SearchCity("Piotrków Trybunalski", Voivodeship.ŁÓDZKIE, 1),
             new SearchCity("Łowicz", Voivodeship.ŁÓDZKIE, 1),
             new SearchCity("Wieluń", Voivodeship.ŁÓDZKIE, 1),
+            new SearchCity("Łęczyca", Voivodeship.ŁÓDZKIE, 1),
+            new SearchCity("Zgierz", Voivodeship.ŁÓDZKIE, 1),
 
 
             new SearchCity("Kraków", Voivodeship.MAŁOPOLSKIE, 1),
@@ -341,13 +346,15 @@ public class Main {
             new SearchCity("Chrzanów", Voivodeship.MAŁOPOLSKIE, 55),
             new SearchCity("Nowy Targ", Voivodeship.MAŁOPOLSKIE, 55),
             new SearchCity("Olkusz", Voivodeship.MAŁOPOLSKIE, 1),
+            new SearchCity("Wieliczka", Voivodeship.MAŁOPOLSKIE, 1),
 
             new SearchCity("Warszawa", Voivodeship.MAZOWIECKIE, 1),
             new SearchCity("Radom", Voivodeship.MAZOWIECKIE, 1),
             new SearchCity("Płock", Voivodeship.MAZOWIECKIE, 1),
             new SearchCity("Ostrołęka", Voivodeship.MAZOWIECKIE, 1),
             new SearchCity("Mińsk Mazowiecki", Voivodeship.MAZOWIECKIE, 1),
-            new SearchCity("Siedlce", Voivodeship.MAZOWIECKIE, 1),
+            new SearchCity("Płońsk", Voivodeship.MAZOWIECKIE, 1),
+            new SearchCity("Nowy Dwór Mazowiecki", Voivodeship.MAZOWIECKIE, 1),
 
 
             new SearchCity("Opole", Voivodeship.OPOLSKIE, 1),
@@ -363,6 +370,7 @@ public class Main {
             new SearchCity("Grajewo", Voivodeship.PODLASKIE, 1),
             new SearchCity("Piątnica", Voivodeship.PODLASKIE, 1),
             new SearchCity("Jedwabne", Voivodeship.PODLASKIE, 1),
+            new SearchCity("Wysokie Mazowieckie", Voivodeship.PODLASKIE, 1),
 //            new SearchCity("Przytuły", Voivodeship.PODLASKIE, 1),
 //            new SearchCity("Wizna", Voivodeship.PODLASKIE, 1),
 //            new SearchCity("Stawiski", Voivodeship.PODLASKIE, 1),
@@ -373,6 +381,7 @@ public class Main {
             new SearchCity("Tarnobrzeg", Voivodeship.PODKARPACKIE, 1),
             new SearchCity("Przemyśl", Voivodeship.PODKARPACKIE, 1),
             new SearchCity("Krosno", Voivodeship.PODKARPACKIE, 1),
+            new SearchCity("Jasło", Voivodeship.PODKARPACKIE, 1),
 
 
             new SearchCity("Gdańsk", Voivodeship.POMORSKIE, 1),
@@ -400,13 +409,14 @@ public class Main {
             new SearchCity("Kielce", Voivodeship.ŚWIĘTOKRZYSKIE, 1),
             new SearchCity("Ostrowiec Świętokrzyski", Voivodeship.ŚWIĘTOKRZYSKIE, 1),
             new SearchCity("Sandomierz", Voivodeship.ŚWIĘTOKRZYSKIE, 1),
-//            new SearchCity("Skarżysko-Kamienna", Voivodeship.ŚWIĘTOKRZYSKIE, 1),
+            new SearchCity("Skarżysko-Kamienna", Voivodeship.ŚWIĘTOKRZYSKIE, 1),
 //            new SearchCity("Jędrzejów", Voivodeship.ŚWIĘTOKRZYSKIE, 1),
 
 
             new SearchCity("Olsztyn", Voivodeship.WARMIŃSKO_MAZURSKIE, 1),
             new SearchCity("Elbląg", Voivodeship.WARMIŃSKO_MAZURSKIE, 1),
             new SearchCity("Ełk", Voivodeship.WARMIŃSKO_MAZURSKIE, 1),
+            new SearchCity("Giżycko", Voivodeship.WARMIŃSKO_MAZURSKIE, 1),
 //            new SearchCity("Szczytno", Voivodeship.WARMIŃSKO_MAZURSKIE, 1),
 
             new SearchCity("Poznań", Voivodeship.WIELKOPOLSKIE, 1),
@@ -417,7 +427,8 @@ public class Main {
             new SearchCity("Szczecin", Voivodeship.ZACHODNIOPOMORSKIE, 1),
             new SearchCity("Koszalin", Voivodeship.ZACHODNIOPOMORSKIE, 1),
             new SearchCity("Szczecinek", Voivodeship.ZACHODNIOPOMORSKIE, 1),
-            new SearchCity("Stargard", Voivodeship.ZACHODNIOPOMORSKIE, 1)
+            new SearchCity("Stargard", Voivodeship.ZACHODNIOPOMORSKIE, 1),
+            new SearchCity("Police", Voivodeship.ZACHODNIOPOMORSKIE, 1)
         );
         Set<SlotWithVoivodeship> results = new HashSet<>();
 

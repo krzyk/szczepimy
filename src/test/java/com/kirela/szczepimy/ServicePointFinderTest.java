@@ -63,10 +63,11 @@ class ServicePointFinderTest {
             System.out.println(value.readable());
             TreeMap<String, List<ServicePoint>> grouped = points.stream()
                 .filter(s -> s.voivodeship() == value)
+                .filter(s -> !s.facilityType().equals("1"))
                 .collect(Collectors.groupingBy(point -> point.place().toLowerCase(), TreeMap::new, Collectors.toList()));
             List<Map.Entry<String, Integer>> tr = grouped.entrySet().stream()
                 .map(e -> Map.entry(e.getKey(), e.getValue().size()))
-                .filter(e -> e.getValue() > max.get(value))
+//                .filter(e -> e.getValue() > max.get(value))
                 .toList();
                 System.out.println("Count = " + tr.size());
                 sum += tr.size();
