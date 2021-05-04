@@ -454,7 +454,7 @@ public class Main {
                     }
                     int tries = 0;
                     while (startDate.isBefore(endDate)) {
-                        Thread.sleep(2000);
+                        Thread.sleep(1010);
                         LOG.info("city={}, vaccine={}: try={}, startDate={}", searchCity.name(), vaccine, tries, startDate);
                         var search = new Search(
                             new DateRange(startDate.toLocalDate(), endDate.toLocalDate()),
