@@ -347,6 +347,7 @@ public class Main {
             new SearchCity("Nowy Targ", Voivodeship.MAŁOPOLSKIE, 55),
             new SearchCity("Olkusz", Voivodeship.MAŁOPOLSKIE, 1),
             new SearchCity("Wieliczka", Voivodeship.MAŁOPOLSKIE, 1),
+            new SearchCity("Węgrzce", Voivodeship.MAŁOPOLSKIE, 1),
 
             new SearchCity("Warszawa", Voivodeship.MAZOWIECKIE, 1),
             new SearchCity("Radom", Voivodeship.MAZOWIECKIE, 1),
