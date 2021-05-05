@@ -382,17 +382,13 @@ public class Main {
                 Optional<Gmina> gmina = Optional.ofNullable(searchCity.name())
                     .map(n -> gminaFinder.find(n, searchCity.voivodeship));
                 for (VaccineType vaccine : options.vaccineTypes) {
-                    final LocalDateTime endDate;
                     LocalDateTime startDate = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
-                    if (searchCity.name() == null) {
-                        endDate = startDate.plusWeeks(4);
-                    } else {
-                        endDate = startDate.plusWeeks(4);
-                    }
+                    final LocalDateTime endDate = startDate.plusWeeks(4).withHour(23).withMinute(59);
+//                    final LocalDateTime endDate = LocalDateTime.of(2021, 5, 31, 23, 59);
                     int tries = 0;
                     while (startDate.isBefore(endDate)) {
                         Thread.sleep(1050);
-                        LOG.info("city={}, vaccine={}: try={}, startDate={}", searchCity.name(), vaccine, tries, startDate);
+                        LOG.info("city={}, vaccine={}: try={}, start={}, end={}", searchCity.name(), vaccine, tries, startDate, endDate);
                         var search = new Search(
                             new DateRange(startDate.toLocalDate(), endDate.toLocalDate()),
                             new TimeRange(
@@ -425,7 +421,7 @@ public class Main {
                                 .collect(Collectors.toSet())
                         );
                         tries++;
-                        if (tries >= 8 || vaccine == VaccineType.AZ || (searchCity.name() != null && !voiCities.contains(searchCity.name()))) {
+                        if (tries >= 9 || vaccine == VaccineType.AZ || (searchCity.name() != null && !voiCities.contains(searchCity.name()))) {
                             break;
                         }
                     }
