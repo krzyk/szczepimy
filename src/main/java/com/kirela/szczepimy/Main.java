@@ -89,7 +89,7 @@ public class Main {
         }
     }
 
-    private static final String CHROME = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36";
+    private static final String CHROME = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36";
     private static final String USER_AGENT = "User-Agent";
 
     public static void main(String[] args) throws IOException, InterruptedException {
@@ -372,7 +372,6 @@ public class Main {
             new SearchCity("Suwałki", Voivodeship.PODLASKIE, 1),
             new SearchCity("Grajewo", Voivodeship.PODLASKIE, 1),
             new SearchCity("Piątnica", Voivodeship.PODLASKIE, 1),
-            new SearchCity("Jedwabne", Voivodeship.PODLASKIE, 1),
             new SearchCity("Wysokie Mazowieckie", Voivodeship.PODLASKIE, 1),
 //            new SearchCity("Przytuły", Voivodeship.PODLASKIE, 1),
 //            new SearchCity("Wizna", Voivodeship.PODLASKIE, 1),
@@ -451,7 +450,6 @@ public class Main {
                     if (searchCity.name() == null) {
                         endDate = LocalDateTime.of(2021, 6, 10, 23, 59);
                     } else {
-                        //                            endDateRange = LocalDate.now().plusWeeks(weeks);
                         endDate = LocalDateTime.of(2021, 6, 10, 23, 59);
                     }
                     int tries = 0;
@@ -490,7 +488,7 @@ public class Main {
                                 .collect(Collectors.toSet())
                         );
                         tries++;
-                        if (tries >= 5 || vaccine == VaccineType.AZ || (searchCity.name() != null && !voiCities.contains(searchCity.name()))) {
+                        if (tries >= 6 || vaccine == VaccineType.AZ || (searchCity.name() != null && !voiCities.contains(searchCity.name()))) {
                             break;
                         }
                     }
