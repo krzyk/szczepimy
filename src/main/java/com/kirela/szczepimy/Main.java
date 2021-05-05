@@ -502,7 +502,7 @@ public class Main {
             ex.printStackTrace(new PrintWriter(writer));
             telegram("Prawdopodobnie wygasła sesja (%s): \n ```\n%s\n```".formatted(ex.getMessage(), writer.toString()));
         } finally {
-            LOG.info("Search count = {}, results = {}", searchCount, results.size());
+            LOG.info("Search count = {}, results = {}, results/count = {}", searchCount, results.size(), results.size()/searchCount);
         }
         new TableFormatter(options.output, mapper, find, Instant.now()).store(placeFinder, results);
         new Stats(mapper).store(results);
