@@ -28,6 +28,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -347,7 +348,8 @@ public class Main {
             new SearchCity("Nowy Targ", Voivodeship.MAŁOPOLSKIE, 55),
             new SearchCity("Olkusz", Voivodeship.MAŁOPOLSKIE, 1),
             new SearchCity("Wieliczka", Voivodeship.MAŁOPOLSKIE, 1),
-            new SearchCity("Węgrzce", Voivodeship.MAŁOPOLSKIE, 1),
+            new SearchCity("Zielonki", Voivodeship.MAŁOPOLSKIE, 1),
+//            new SearchCity("Węgrzce", Voivodeship.MAŁOPOLSKIE, 1),
 
             new SearchCity("Warszawa", Voivodeship.MAZOWIECKIE, 1),
             new SearchCity("Radom", Voivodeship.MAZOWIECKIE, 1),
@@ -506,28 +508,53 @@ public class Main {
         new Stats(mapper).store(results);
     }
 
+
     private static Set<Result.BasicSlot> webSearch(Options options, Creds creds, HttpClient client, ObjectMapper mapper,
         SearchCity searchCity, VaccineType vaccine, Search search) throws IOException, InterruptedException {
         String searchStr = mapper.writeValueAsString(search);
+        int retryCount = 0;
+        try {
+            for (int i = 0; i < options.retries; i++) {
+                HttpResponse<String> out = client.send(
+                    requestBuilder(creds).uri(URI.create(
+                        "https://pacjent.erejestracja.ezdrowie.gov.pl/api/calendarSlots/find"))
+                        .POST(HttpRequest.BodyPublishers.ofString(searchStr)).build(),
 
-        HttpResponse<String> out = client.send(
-            requestBuilder(creds).uri(URI.create(
-                "https://pacjent.erejestracja.ezdrowie.gov.pl/api/calendarSlots/find"))
-                .POST(HttpRequest.BodyPublishers.ofString(searchStr)).build(),
+                    HttpResponse.BodyHandlers.ofString()
+                );
+                if (options.storeLogs) {
+                    Paths.get(options.output, "logs").toFile().mkdirs();
+                    Files.writeString(
+                        Paths.get(
+                            options.output,
+                            "logs",
+                            "%s_%s.%s.json".formatted(searchCity.name(), vaccine, Instant.now())
+                        ),
+                        out.body(),
+                        StandardOpenOption.CREATE_NEW
+                    );
+                }
+                if (out.body().contains("errorCode")) {
+                    if (out.body().contains("ERR_RATE_LIMITED")) {
+                        retryCount++;
+                        Thread.sleep(1000 + new Random().nextInt(1000));
+                        continue;
+                    } else {
+                        throw new IllegalArgumentException("Received error: %s".formatted(out.body()));
+                    }
+                }
 
-            HttpResponse.BodyHandlers.ofString()
-        );
-        if (options.storeLogs) {
-            Paths.get(options.output, "logs").toFile().mkdirs();
-            Files.writeString(
-                Paths.get(options.output, "logs", "%s_%s.%s.json".formatted(searchCity.name(), vaccine, Instant.now())),
-                out.body(),
-                StandardOpenOption.CREATE_NEW
-            );
+                return new HashSet<>(
+                    Optional.ofNullable(mapper.readValue(out.body(), Result.class).list()).orElse(List.of())
+                );
+            }
+
+            throw new IllegalArgumentException("Exceeded retry count");
+        } finally {
+            if (retryCount > 0) {
+                LOG.error("Retries count = {}", retryCount);
+            }
         }
-        return new HashSet<>(
-            Optional.ofNullable(mapper.readValue(out.body(), Result.class).list()).orElse(List.of())
-        );
     }
 
     public static ObjectMapper getMapper() {

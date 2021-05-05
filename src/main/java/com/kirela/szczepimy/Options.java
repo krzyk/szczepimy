@@ -30,4 +30,7 @@ public class Options {
 
     @CommandLine.Option(names = "-l", description = "Store json response logs? (default: ${DEFAULT-VALUE})")
     boolean storeLogs = false;
+
+    @CommandLine.Option(names = "-m", description = "Max retries if limited (default: ${DEFAULT-VALUE})")
+    int retries = 20;
 }
