@@ -449,10 +449,10 @@ public class Main {
                     final LocalDateTime endDate;
                     LocalDateTime startDate = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
                     if (searchCity.name() == null) {
-                        endDate = LocalDateTime.of(2021, 5, 30, 23, 59);
+                        endDate = LocalDateTime.of(2021, 6, 10, 23, 59);
                     } else {
                         //                            endDateRange = LocalDate.now().plusWeeks(weeks);
-                        endDate = LocalDateTime.of(2021, 5, 30, 23, 59);
+                        endDate = LocalDateTime.of(2021, 6, 10, 23, 59);
                     }
                     int tries = 0;
                     while (startDate.isBefore(endDate)) {
