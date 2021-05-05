@@ -15,7 +15,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,31 +50,37 @@ class ServicePointFinderTest {
         max.put(Voivodeship.LUBELSKIE, 7);
         max.put(Voivodeship.ŁÓDZKIE, 8);
         max.put(Voivodeship.MAŁOPOLSKIE, 5);
-        max.put(Voivodeship.MAZOWIECKIE, 8);
-        max.put(Voivodeship.OPOLSKIE, 5);
-        max.put(Voivodeship.PODKARPACKIE, 9);
-        max.put(Voivodeship.PODLASKIE, 7);
-        max.put(Voivodeship.POMORSKIE, 7);
+        max.put(Voivodeship.MAZOWIECKIE, 6);
+        max.put(Voivodeship.OPOLSKIE, 6);
+        max.put(Voivodeship.PODKARPACKIE, 7);
+        max.put(Voivodeship.PODLASKIE, 8);
+        max.put(Voivodeship.POMORSKIE, 8);
         max.put(Voivodeship.ŚLĄSKIE, 15);
-        max.put(Voivodeship.ŚWIĘTOKRZYSKIE, 4);
-        max.put(Voivodeship.WIELKOPOLSKIE, 8);
+        max.put(Voivodeship.ŚWIĘTOKRZYSKIE, 5);
+        max.put(Voivodeship.WIELKOPOLSKIE, 9);
         max.put(Voivodeship.ZACHODNIOPOMORSKIE, 10);
-        max.put(Voivodeship.LUBUSKIE, 4);
+        max.put(Voivodeship.LUBUSKIE, 5);
         for (Voivodeship value : Voivodeship.values()) {
             System.out.println("---");
             System.out.println(value.readable());
             TreeMap<String, List<ServicePoint>> grouped = points.stream()
                 .filter(s -> s.voivodeship() == value)
-                .filter(s -> !s.facilityType().equals("1"))
+                .flatMap(s -> {
+                    if (s.facilityType().equals("2")) {
+                        return Stream.of(s, s);
+                    } else {
+                        return Stream.of(s);
+                    }
+                })
                 .collect(Collectors.groupingBy(point -> point.place().toLowerCase(), TreeMap::new, Collectors.toList()));
             List<Map.Entry<String, Integer>> tr = grouped.entrySet().stream()
                 .map(e -> Map.entry(e.getKey(), e.getValue().size()))
-//                .filter(e -> e.getValue() > max.get(value))
+                .filter(e -> e.getValue() > max.get(value))
                 .toList();
                 System.out.println("Count = " + tr.size());
                 sum += tr.size();
             tr.stream()
-                .sorted(Comparator.comparingInt(entry -> entry.getValue()))
+                .sorted(Comparator.comparingInt((ToIntFunction<Map.Entry<String, Integer>>) Map.Entry::getValue).reversed())
                 .forEach(e -> System.out.println(e.getKey() + " " + e.getValue()));
         }
         System.out.println("\nSUM = " + sum);
