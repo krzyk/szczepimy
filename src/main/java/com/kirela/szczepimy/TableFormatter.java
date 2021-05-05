@@ -38,7 +38,7 @@ public class TableFormatter {
     private final Instant now;
 
     private final Map<UUID, String> phoneCorrections = Map.of(
-        UUID.fromString("48324f72-a003-438a-90a1-b5f4c887f2de"), "507816804 503893600",
+        UUID.fromString("48324f72-a003-438a-90a1-b5f4c887f2de"), "507816804 503893600", // Broniewskiego 14
         UUID.fromString("b0408af7-d22b-45af-9aab-0dfc61816483"), "124003305, 124003306",
         UUID.fromString("22cd6a69-a441-40fc-b974-053a92a785ff"), "124003305, 124003306",
         UUID.fromString("81a97b5e-6159-4844-b1d9-c81e7f6d644e"), "690694186"

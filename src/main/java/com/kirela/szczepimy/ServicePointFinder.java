@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,6 +28,7 @@ public class ServicePointFinder {
     // https://www.gov.pl/api/data/covid-vaccination-point/246801
 
     private final Map<Integer, String> phoneCorrections = Map.ofEntries(
+        Map.entry(296242, "507816804 503893600"), // Broniewskiego 14
         Map.entry(273956, "486797157"),
         Map.entry(273238, "566100488"),
         Map.entry(283722, "616771011"),

@@ -407,6 +407,7 @@ public class Main {
             new SearchCity("Chorzów", Voivodeship.ŚLĄSKIE, 1),
             new SearchCity("Pszczyna", Voivodeship.ŚLĄSKIE, 1),
             new SearchCity("Tarnowskie Góry", Voivodeship.ŚLĄSKIE, 1),
+            new SearchCity("Tychy", Voivodeship.ŚLĄSKIE, 1),
 
             new SearchCity("Kielce", Voivodeship.ŚWIĘTOKRZYSKIE, 1),
             new SearchCity("Ostrowiec Świętokrzyski", Voivodeship.ŚWIĘTOKRZYSKIE, 1),
@@ -434,8 +435,6 @@ public class Main {
         );
         Set<SlotWithVoivodeship> results = new HashSet<>();
 
-        final LocalTime initialStartTime = LocalTime.of(0, 0);
-
         int searchCount = 0;
         try {
             for (SearchCity searchCity : Stream.concat(findVoi.stream(), find.stream())
@@ -448,13 +447,13 @@ public class Main {
                     final LocalDateTime endDate;
                     LocalDateTime startDate = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
                     if (searchCity.name() == null) {
-                        endDate = LocalDateTime.of(2021, 6, 10, 23, 59);
+                        endDate = startDate.plusWeeks(4);
                     } else {
-                        endDate = LocalDateTime.of(2021, 6, 10, 23, 59);
+                        endDate = startDate.plusWeeks(4);
                     }
                     int tries = 0;
                     while (startDate.isBefore(endDate)) {
-                        Thread.sleep(1010);
+                        Thread.sleep(1050);
                         LOG.info("city={}, vaccine={}: try={}, startDate={}", searchCity.name(), vaccine, tries, startDate);
                         var search = new Search(
                             new DateRange(startDate.toLocalDate(), endDate.toLocalDate()),
@@ -488,7 +487,7 @@ public class Main {
                                 .collect(Collectors.toSet())
                         );
                         tries++;
-                        if (tries >= 6 || vaccine == VaccineType.AZ || (searchCity.name() != null && !voiCities.contains(searchCity.name()))) {
+                        if (tries >= 8 || vaccine == VaccineType.AZ || (searchCity.name() != null && !voiCities.contains(searchCity.name()))) {
                             break;
                         }
                     }
