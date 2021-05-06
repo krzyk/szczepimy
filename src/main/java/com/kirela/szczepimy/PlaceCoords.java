@@ -27,12 +27,12 @@ public class PlaceCoords {
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    public Coordinates find(String simc, String name) {
-        if (name == null) {
-            LOG.warn("Missing SIMC for {}", name);
+    public Coordinates find(String simc, ExtendedResult.ServicePoint point) {
+        if (simc == null) {
+            LOG.warn("Missing SIMC for {}", point);
         }
         if (!coords.containsKey(simc)) {
-            LOG.warn("Can't find simc {} for {} in coords", simc, name);
+            LOG.warn("Can't find simc {} for {} in coords", simc, point);
         }
         return coords.get(simc);
     }

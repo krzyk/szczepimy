@@ -9,6 +9,8 @@ class PlaceFinderTest {
     @Test
     public void ignoresIncorrectSuffixesPrefixes() {
         final PlaceFinder placeFinder = new PlaceFinder();
+        Assertions.assertThat(placeFinder.findInAddress("Grabowiecka 3 D,E, Ostrowiec św.", Voivodeship.ŚWIĘTOKRZYSKIE).name())
+            .isEqualTo("Ostrowiec Świętokrzyski");
         Assertions.assertThat(placeFinder.findInAddress("Górna 7, Bełchatów - Szkoła w Dobrzelowie", Voivodeship.ŁÓDZKIE).name())
             .isEqualTo("Bełchatów");
         Assertions.assertThat(placeFinder.findInAddress("GRUNWALDZKA 82, GDAŃSK WRZESZCZ", Voivodeship.POMORSKIE).name())

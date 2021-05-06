@@ -66,6 +66,7 @@ public class PlaceFinder {
                 .replace("belchatow - szkola w dobrzelowie", "belchatow")
                 .replace("lodz - poradnie", "lodz")
                 .replace("mlp.", "malopolski")
+                .replace("ostrowiec sw.", "ostrowiec swietokrzyski")
                 .replaceAll(" +", " ")
                 .replaceAll("([^ ]+) ?- ?([^ ]+)", "$1-$2")
                 .replaceAll("([^ ]+) [0-9]+[a-z]?$", "$1")

@@ -27,7 +27,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -69,7 +68,7 @@ public class TableFormatter {
         //        Map<Voivodeship, List<ExtendedResult.Slot>> groupByVoi = results.stream()
 
         List<ExtendedResult.Slot> sorted = results.stream()
-            .map(this::method)
+            .map(this::toSlot)
             .sorted(
                 Comparator.comparing((ExtendedResult.Slot s) -> s.servicePoint().place())
                     .thenComparing(ExtendedResult.Slot::vaccineType)
@@ -79,8 +78,8 @@ public class TableFormatter {
         record PlaceLocation(String name, Coordinates coords){};
 
         List<PlaceLocation> coords = sorted.stream()
-            .map(s -> new PlaceLocation(s.servicePoint().place(), placeCoords.find(s.servicePoint().simc(), s.servicePoint().place())))
             .distinct()
+            .map(s -> new PlaceLocation(s.servicePoint().place(), placeCoords.find(s.servicePoint().simc(), s.servicePoint())))
             .filter(s -> s.coords != null)
             .toList();
         Map<Voivodeship, Map<LocalDate, Map<ExtendedResult.ServicePoint, List<ExtendedResult.Slot>>>> groupByVoi =
@@ -401,20 +400,20 @@ public class TableFormatter {
         }
     }
 
-    public static record TimeRange(LocalTime start, LocalTime end) {
-    }
-
-    private ExtendedResult.Slot method(Main.SlotWithVoivodeship s) {
+    private ExtendedResult.Slot toSlot(Main.SlotWithVoivodeship slot1) {
         PlaceFinder.RealNamePlace address =
-            placeFinder.findInAddress(s.slot().servicePoint().addressText(), s.voivodeship());
+            placeFinder.findInAddress(slot1.slot().servicePoint().addressText(), slot1.voivodeship());
         return new ExtendedResult.Slot(
-            s.slot(),
+            slot1.slot(),
             new ExtendedResult.ServicePoint(
-                s.slot().servicePoint(),
+                slot1.slot().servicePoint(),
                 address.name(),
-                s.voivodeship(),
+                slot1.voivodeship(),
                 address.simc()
             )
         );
+    }
+
+    public static record TimeRange(LocalTime start, LocalTime end) {
     }
 }
