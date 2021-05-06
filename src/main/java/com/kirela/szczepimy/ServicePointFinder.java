@@ -30,7 +30,7 @@ public class ServicePointFinder {
     private final Map<Integer, String> phoneCorrections = Map.ofEntries(
         Map.entry(295349, "126372791"), // Kraków, Podchorążych 3
         Map.entry(295348, "123491500"), // Kraków, Lema 7
-        Map.entry(296242, "507816804 503893600"), // Broniewskiego 14
+        Map.entry(303154, "507816804 503893600"), // Broniewskiego 14
         Map.entry(273956, "486797157"),
         Map.entry(273238, "566100488"),
         Map.entry(283722, "616771011"),
