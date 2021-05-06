@@ -27,24 +27,20 @@ public class ServicePointFinder {
     private final Map<Integer, ExtendedServicePoint> extendedServicePoints = new HashMap<>();
     // https://www.gov.pl/api/data/covid-vaccination-point/246801
 
-    private final Map<Integer, String> phoneCorrections = Map.ofEntries(
-        Map.entry(295349, "126372791"), // Kraków, Podchorążych 3
-        Map.entry(295348, "123491500"), // Kraków, Lema 7
-        Map.entry(303154, "507816804 503893600"), // Broniewskiego 14
+    private final Map<Integer, String> oldCorrections = Map.ofEntries(
         Map.entry(273956, "486797157"),
-        Map.entry(303509, "587270505"), // d199b3c1-d47c-45c2-be41-34d1133f404c, Dębowa 21, Gdańsk
         Map.entry(273238, "566100488"),
         Map.entry(283722, "616771011"),
         Map.entry(281259, "222992406"),
         Map.entry(288437, "126372791"),
         Map.entry(289055, "517194743 178652000"),
-//        Map.entry(287920, "")
-        // Tauron Arena 123491500
         Map.entry(288509, "509842442 690694775 690694999")
     );
+    private final Map<UUID, String> phoneCorrections;
 
-    public ServicePointFinder(ObjectMapper mapper) {
+    public ServicePointFinder(ObjectMapper mapper, Map<UUID, String> phoneCorrections) {
 
+        this.phoneCorrections = phoneCorrections;
         this.mapper = mapper;
         client = HttpClient.newBuilder()
 //            .version(HttpClient.Version.HTTP_1_1)
@@ -95,6 +91,9 @@ public class ServicePointFinder {
             address = point.address();
             place = "Sędziszów Małopolski";
         }
+        if (point.voivodeship() == Voivodeship.PODLASKIE && point.place().equals("PIĄTNICA")) {
+            place = "Piątnica Poduchowna";
+        }
         return new ServicePoint(
             point.id(),
             point.ordinalNumber(),
@@ -114,10 +113,10 @@ public class ServicePointFinder {
 
     public Optional<ExtendedServicePoint> findByAddress(ExtendedResult.ServicePoint servicePoint) {
         Optional<ServicePoint> maybe = findByAddressInternal(servicePoint);
-        return maybe.map(this::upgrade);
+        return maybe.map(s -> this.upgrade(s, servicePoint.id()));
     }
 
-    private ExtendedServicePoint upgrade(ServicePoint servicePoint) {
+    private ExtendedServicePoint upgrade(ServicePoint servicePoint, UUID servicePointId) {
         if (extendedServicePoints.containsKey(servicePoint.id())) {
             return extendedServicePoints.get(servicePoint.id());
         } else {
@@ -133,13 +132,14 @@ public class ServicePointFinder {
                 if (out.statusCode() == 200) {
                     extendedServicePoints.put(
                         servicePoint.id(),
-                        correctPhones(mapper.readValue(out.body(), ExtendedServicePoint.class))
+                        correctPhones(mapper.readValue(out.body(), ExtendedServicePoint.class), servicePointId)
                     );
                     return extendedServicePoints.get(servicePoint.id());
                 } else {
                     LOG.error("Issue with finding {}, got status {}", servicePoint.id(), out.statusCode());
                     return new ExtendedServicePoint(
                         servicePoint.id(),
+                        servicePointId,
                         servicePoint.ordinalNumber(),
                         servicePoint.facilityName(),
                         servicePoint.terc(),
@@ -160,9 +160,10 @@ public class ServicePointFinder {
         }
     }
 
-    private ExtendedServicePoint correctPhones(ExtendedServicePoint value) {
+    private ExtendedServicePoint correctPhones(ExtendedServicePoint value, UUID servicePointId) {
         return new ExtendedServicePoint(
             value.id(),
+            servicePointId,
             value.ordinalNumber(),
             value.facilityName(),
             value.terc(),
@@ -175,7 +176,7 @@ public class ServicePointFinder {
             value.place(),
             value.lon(),
             value.lat(),
-            phoneCorrections.getOrDefault(value.id(), value.telephone()),
+            phoneCorrections.getOrDefault(servicePointId, value.telephone()),
             value.fax(),
             value.site(),
             value.facilityDescription(),

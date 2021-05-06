@@ -8,17 +8,20 @@ class PlaceFinderTest {
 
     @Test
     public void ignoresIncorrectSuffixesPrefixes() {
-        Assertions.assertThat(new PlaceFinder().findInAddress("GRUNWALDZKA 82, GDAŃSK WRZESZCZ", Voivodeship.POMORSKIE))
+        final PlaceFinder placeFinder = new PlaceFinder();
+        Assertions.assertThat(placeFinder.findInAddress("Górna 7, Bełchatów - Szkoła w Dobrzelowie", Voivodeship.ŁÓDZKIE).name())
+            .isEqualTo("Bełchatów");
+        Assertions.assertThat(placeFinder.findInAddress("GRUNWALDZKA 82, GDAŃSK WRZESZCZ", Voivodeship.POMORSKIE).name())
             .isEqualTo("Gdańsk");
-        Assertions.assertThat(new PlaceFinder().findInAddress("GRUNWALDZKA 12, M. St. Warszawa", Voivodeship.MAZOWIECKIE))
+        Assertions.assertThat(placeFinder.findInAddress("GRUNWALDZKA 12, M. St. Warszawa", Voivodeship.MAZOWIECKIE).name())
             .isEqualTo("Warszawa");
-        Assertions.assertThat(new PlaceFinder().findInAddress("ul. Kościuszki 15, Lądek Zdrój", Voivodeship.DOLNOŚLĄSKIE))
+        Assertions.assertThat(placeFinder.findInAddress("ul. Kościuszki 15, Lądek Zdrój", Voivodeship.DOLNOŚLĄSKIE).name())
             .isEqualTo("Lądek-Zdrój");
-        Assertions.assertThat(new PlaceFinder().findInAddress("Cieplarniana 25 D, Warszawa Wesoła", Voivodeship.MAZOWIECKIE))
+        Assertions.assertThat(placeFinder.findInAddress("Cieplarniana 25 D, Warszawa Wesoła", Voivodeship.MAZOWIECKIE).name())
             .isEqualTo("Warszawa");
-        Assertions.assertThat(new PlaceFinder().findInAddress("Zielona 23, Duszniki Zdrój", Voivodeship.DOLNOŚLĄSKIE))
+        Assertions.assertThat(placeFinder.findInAddress("Zielona 23, Duszniki Zdrój", Voivodeship.DOLNOŚLĄSKIE).name())
             .isEqualTo("Duszniki-Zdrój");
-        Assertions.assertThat(new PlaceFinder().findInAddress("3 Maja 36D, Czerwionka- Leszczyny", Voivodeship.ŚLĄSKIE))
+        Assertions.assertThat(placeFinder.findInAddress("3 Maja 36D, Czerwionka- Leszczyny", Voivodeship.ŚLĄSKIE).name())
             .isEqualTo("Czerwionka-Leszczyny");
     }
 }

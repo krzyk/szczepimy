@@ -89,8 +89,10 @@ class ServicePointFinderTest {
     @Test
     public void aaa() {
         var mapper = Main.getMapper();
-        var finder = new ServicePointFinder(mapper);
-        assertThat(finder.findByAddress(new ExtendedResult.ServicePoint(UUID.randomUUID(), "name", "Al. 1000 Lecia 13", "Olkusz", Voivodeship.MAŁOPOLSKIE)))
+        var finder = new ServicePointFinder(mapper, Map.of());
+        assertThat(finder.findByAddress(new ExtendedResult.ServicePoint(UUID.randomUUID(), "name", "WIDOK 1", "Winnica", Voivodeship.MAZOWIECKIE, null)))
+            .isNotEmpty();
+        assertThat(finder.findByAddress(new ExtendedResult.ServicePoint(UUID.randomUUID(), "name", "Al. 1000 Lecia 13", "Olkusz", Voivodeship.MAŁOPOLSKIE, null)))
             .isNotEmpty();
 //        assertThat(finder.findByAddress("GRUNWALDZKA 12", null, Voivodeship.MAZOWIECKIE))
 //            .isEmpty();

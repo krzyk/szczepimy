@@ -17,7 +17,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -28,6 +27,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -38,45 +38,53 @@ public class TableFormatter {
     private final ServicePointFinder servicePointFinder;
     private final List<Main.SearchCity> searchCities;
     private final Instant now;
+    private final PlaceFinder placeFinder;
 
     private final Map<UUID, String> phoneCorrections = Map.of(
+        UUID.fromString("d199b3c1-d47c-45c2-be41-34d1133f404c"), "587270505", // d199b3c1-d47c-45c2-be41-34d1133f404c, Dębowa 21, Gdańsk
         UUID.fromString("48324f72-a003-438a-90a1-b5f4c887f2de"), "507816804 503893600", // Broniewskiego 14
         UUID.fromString("b0408af7-d22b-45af-9aab-0dfc61816483"), "124003305, 124003306",
         UUID.fromString("22cd6a69-a441-40fc-b974-053a92a785ff"), "124003305, 124003306",
-        UUID.fromString("81a97b5e-6159-4844-b1d9-c81e7f6d644e"), "690694186"
+        UUID.fromString("81a97b5e-6159-4844-b1d9-c81e7f6d644e"), "690694186",
+        UUID.fromString("966e6b13-d82f-452c-9bec-53b284f9f83f"), "126372791", // Podchorążych 3, Kraków
+        UUID.fromString("c841eda9-ee36-46f6-8332-f451727edd26"), "123491500" // Lema 7, Kraków
     );
 
     private final Map<UUID, Coordinates> coordsCorrections = Map.of(
     );
+    private final PlaceCoords placeCoords;
 
     public TableFormatter(String outputDirectory, ObjectMapper mapper,
-        List<Main.SearchCity> searchCities, Instant now) {
+        List<Main.SearchCity> searchCities, Instant now, PlaceFinder placeFinder) {
         this.searchCities = searchCities;
         this.outputDirectory = outputDirectory;
-        this.servicePointFinder = new ServicePointFinder(mapper);
+        this.servicePointFinder = new ServicePointFinder(mapper, phoneCorrections);
         this.now = now;
+        this.placeFinder = placeFinder;
+        this.placeCoords = new PlaceCoords();
     }
 
-    public void store(PlaceFinder placeFinder, Set<Main.SlotWithVoivodeship> results)
+    public void store(Set<Main.SlotWithVoivodeship> results)
         throws IOException {
         //        Map<Voivodeship, List<ExtendedResult.Slot>> groupByVoi = results.stream()
 
-        Map<Voivodeship, Map<LocalDate, Map<ExtendedResult.ServicePoint, List<ExtendedResult.Slot>>>> groupByVoi =
-            results.stream()
-                .map(
-                    s -> new ExtendedResult.Slot(
-                        s.slot(),
-                        new ExtendedResult.ServicePoint(
-                            s.slot().servicePoint(),
-                            placeFinder.findInAddress(s.slot().servicePoint().addressText(), s.voivodeship()),
-                            s.voivodeship()
-                        )
-                    )
-                ).sorted(
+        List<ExtendedResult.Slot> sorted = results.stream()
+            .map(this::method)
+            .sorted(
                 Comparator.comparing((ExtendedResult.Slot s) -> s.servicePoint().place())
                     .thenComparing(ExtendedResult.Slot::vaccineType)
                     .thenComparing(ExtendedResult.Slot::startAt)
-            )
+            ).toList();
+
+        record PlaceLocation(String name, Coordinates coords){};
+
+        List<PlaceLocation> coords = sorted.stream()
+            .map(s -> new PlaceLocation(s.servicePoint().place(), placeCoords.find(s.servicePoint().simc(), s.servicePoint().place())))
+            .distinct()
+            .filter(s -> s.coords != null)
+            .toList();
+        Map<Voivodeship, Map<LocalDate, Map<ExtendedResult.ServicePoint, List<ExtendedResult.Slot>>>> groupByVoi =
+            sorted.stream()
                 .collect(
                     Collectors.groupingBy(
                         k -> k.servicePoint().voivodeship(),
@@ -235,8 +243,8 @@ public class TableFormatter {
                             """.formatted(URLEncoder.encode(voivodeship.name(), StandardCharsets.UTF_8), maybe.map(ExtendedServicePoint::id).map(String::valueOf).orElse(slot.servicePoint().id().toString())),
                         getAddress(slot, maybe),
                         """
-                            <div class="bug"><a href="https://github.com/szczepienia/szczepienia.github.io/issues/new?labels=incorrect_phone&title=[%s]+Z%%C5%%82y+number+telefonu+do+plac%%C3%%B3wki+(id=%s, uuid=%s)" title="Zgłoś błąd">Zgłoś</a></div>
-                            """.formatted(URLEncoder.encode(voivodeship.name(), StandardCharsets.UTF_8), maybe.map(ExtendedServicePoint::id).map(String::valueOf).orElse(slot.servicePoint().id().toString()), slot.servicePoint().id()),
+                            <div class="bug"><a href="https://github.com/szczepienia/szczepienia.github.io/issues/new?labels=incorrect_phone&title=[%s]+Z%%C5%%82y+number+telefonu+do+plac%%C3%%B3wki+(uuid=%s)" title="Zgłoś błąd">Zgłoś</a></div>
+                            """.formatted(URLEncoder.encode(voivodeship.name(), StandardCharsets.UTF_8), slot.servicePoint().id()),
                         getPhone(slot, maybe)
                         ),
                         StandardOpenOption.APPEND, StandardOpenOption.CREATE
@@ -250,12 +258,26 @@ public class TableFormatter {
                     """,
                 StandardOpenOption.APPEND, StandardOpenOption.CREATE
             );
+            Files.writeString(voiFile, """
+                    <ul id="locations" hidden>
+                    %s
+                    </ul>
+                    """.formatted(
+                        coords.stream()
+                            .map(
+                                l -> """
+                                     <li data-lat="%s" data-lon="%s">%s</li>
+                                     """.formatted(l.coords().lat(), l.coords().lon(), l.name())
+                            ).collect(Collectors.joining())
+                ),
+                StandardOpenOption.APPEND, StandardOpenOption.CREATE
+            );
         }
     }
 
     private ZonedDateTime calculateNextRun() {
         ZonedDateTime nextRun;
-        ZonedDateTime proposedNextRun = now.plusSeconds(Duration.ofMinutes(30).toSeconds() + Duration.ofMinutes(6).toSeconds()).atZone(ZONE);
+        ZonedDateTime proposedNextRun = now.plusSeconds(Duration.ofMinutes(30).toSeconds() + Duration.ofMinutes(2).toSeconds()).atZone(ZONE);
         if (proposedNextRun.getHour() >= 2 && proposedNextRun.getHour() < 6) {
             nextRun = proposedNextRun.withHour(7).plusMinutes(30);
         } else {
@@ -380,5 +402,19 @@ public class TableFormatter {
     }
 
     public static record TimeRange(LocalTime start, LocalTime end) {
+    }
+
+    private ExtendedResult.Slot method(Main.SlotWithVoivodeship s) {
+        PlaceFinder.RealNamePlace address =
+            placeFinder.findInAddress(s.slot().servicePoint().addressText(), s.voivodeship());
+        return new ExtendedResult.Slot(
+            s.slot(),
+            new ExtendedResult.ServicePoint(
+                s.slot().servicePoint(),
+                address.name(),
+                s.voivodeship(),
+                address.simc()
+            )
+        );
     }
 }

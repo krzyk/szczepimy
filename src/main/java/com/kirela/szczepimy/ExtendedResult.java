@@ -15,14 +15,15 @@ public record ExtendedResult(String geoDepth, List<Slot> list) {
 
     }
 
-    public static record ServicePoint(UUID id, String name, String addressText, String place, Voivodeship voivodeship) {
-        public ServicePoint(Result.BasicServicePoint basic, String place, Voivodeship voivodeship) {
+    public static record ServicePoint(UUID id, String name, String addressText, String place, Voivodeship voivodeship, String simc) {
+        public ServicePoint(Result.BasicServicePoint basic, String place, Voivodeship voivodeship, String simc) {
             this(
                 basic.id(),
                 basic.name(),
                 streetAddress(basic),
                 place,
-                voivodeship
+                voivodeship,
+                simc
             );
         }
 

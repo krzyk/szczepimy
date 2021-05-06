@@ -390,7 +390,7 @@ public class Main {
 //                    final LocalDateTime endDate = LocalDateTime.of(2021, 5, 31, 23, 59);
                     int tries = 0;
                     while (startDate.isBefore(endDate)) {
-                        Thread.sleep(1050);
+                        Thread.sleep(900);
                         LOG.info("city={}, vaccine={}: try={}, start={}, end={}, pointId={}", searchCity.name(), vaccine, tries, startDate, endDate, searchCity.servicePointId());
                         var search = new Search(
                             new DateRange(startDate.toLocalDate(), endDate.toLocalDate()),
@@ -439,7 +439,7 @@ public class Main {
         } finally {
             LOG.info("Search count = {}, results = {}, results/count = {}", searchCount, results.size(), results.size()/searchCount);
         }
-        new TableFormatter(options.output, mapper, find, Instant.now()).store(placeFinder, results);
+        new TableFormatter(options.output, mapper, find, Instant.now(), placeFinder).store(results);
         new Stats(mapper).store(results);
     }
 
@@ -471,8 +471,9 @@ public class Main {
                 }
                 if (out.body().contains("errorCode")) {
                     if (out.body().contains("ERR_RATE_LIMITED")) {
+                        LOG.warn("retrying");
                         retryCount++;
-                        Thread.sleep(1000 + new Random().nextInt(1000));
+                        Thread.sleep(500 + new Random().nextInt(500));
                         continue;
                     } else {
                         throw new IllegalArgumentException("Received error: %s".formatted(out.body()));

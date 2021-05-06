@@ -113,7 +113,8 @@ class TableFormatterTest {
                 "name",
                 "address",
                 "place",
-                Voivodeship.DOLNOŚLĄSKIE
+                Voivodeship.DOLNOŚLĄSKIE,
+                null
             ),
             VaccineType.PFIZER,
             1,

@@ -1,9 +1,11 @@
 package com.kirela.szczepimy;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import java.util.UUID;
 
 public record ExtendedServicePoint(
     int id,
+    UUID uuid,
     int ordinalNumber,
     String facilityName,
     String terc,

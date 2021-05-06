@@ -12,7 +12,7 @@ public class Stats {
     }
 
     public void store(Set<Main.SlotWithVoivodeship> results) {
-        results.stream()
-            .collect(Collectors.groupingBy(Main.SlotWithVoivodeship::voivodeship));
+//        results.stream()
+//            .collect(Collectors.counting(Main.SlotWithVoivodeship::voivodeship));
     }
 }
