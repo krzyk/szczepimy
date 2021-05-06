@@ -32,6 +32,7 @@ public class ServicePointFinder {
         Map.entry(295348, "123491500"), // Kraków, Lema 7
         Map.entry(303154, "507816804 503893600"), // Broniewskiego 14
         Map.entry(273956, "486797157"),
+        Map.entry(303509, "587270505"), // d199b3c1-d47c-45c2-be41-34d1133f404c, Dębowa 21, Gdańsk
         Map.entry(273238, "566100488"),
         Map.entry(283722, "616771011"),
         Map.entry(281259, "222992406"),

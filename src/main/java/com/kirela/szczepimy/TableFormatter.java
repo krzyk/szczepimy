@@ -235,8 +235,8 @@ public class TableFormatter {
                             """.formatted(URLEncoder.encode(voivodeship.name(), StandardCharsets.UTF_8), maybe.map(ExtendedServicePoint::id).map(String::valueOf).orElse(slot.servicePoint().id().toString())),
                         getAddress(slot, maybe),
                         """
-                            <div class="bug"><a href="https://github.com/szczepienia/szczepienia.github.io/issues/new?labels=incorrect_phone&title=[%s]+Z%%C5%%82y+number+telefonu+do+plac%%C3%%B3wki+(id=%s)" title="Zgłoś błąd">Zgłoś</a></div>
-                            """.formatted(URLEncoder.encode(voivodeship.name(), StandardCharsets.UTF_8), maybe.map(ExtendedServicePoint::id).map(String::valueOf).orElse(slot.servicePoint().id().toString())),
+                            <div class="bug"><a href="https://github.com/szczepienia/szczepienia.github.io/issues/new?labels=incorrect_phone&title=[%s]+Z%%C5%%82y+number+telefonu+do+plac%%C3%%B3wki+(id=%s, uuid=%s)" title="Zgłoś błąd">Zgłoś</a></div>
+                            """.formatted(URLEncoder.encode(voivodeship.name(), StandardCharsets.UTF_8), maybe.map(ExtendedServicePoint::id).map(String::valueOf).orElse(slot.servicePoint().id().toString()), slot.servicePoint().id()),
                         getPhone(slot, maybe)
                         ),
                         StandardOpenOption.APPEND, StandardOpenOption.CREATE
