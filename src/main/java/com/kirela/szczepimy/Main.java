@@ -74,7 +74,8 @@ public class Main {
     public static record Search(
         DateRange dayRange,
         TimeRange hourRange,
-        String prescriptionId, List<VaccineType> vaccineTypes, Voivodeship voiId, String geoId, UUID servicePointId
+        String prescriptionId, List<VaccineType> vaccineTypes, Voivodeship voiId, String geoId, UUID servicePointId,
+        List<String> mobilities
     ) {
         public Search withNewDateRange(DateRange newDateRange) {
             return new Search(
@@ -84,7 +85,8 @@ public class Main {
                 vaccineTypes,
                 voiId,
                 geoId,
-                servicePointId
+                servicePointId,
+                mobilities
             );
         }
     }
@@ -310,6 +312,7 @@ public class Main {
 
 
             new SearchCity("Białystok", Voivodeship.PODLASKIE, 1),
+            new SearchCity("Białystok", Voivodeship.PODLASKIE, 1, UUID.fromString("48324f72-a003-438a-90a1-b5f4c887f2de")), // Broniewskiego 14
             new SearchCity("Łomża", Voivodeship.PODLASKIE, 1),
             new SearchCity("Suwałki", Voivodeship.PODLASKIE, 1),
             new SearchCity("Grajewo", Voivodeship.PODLASKIE, 1),
@@ -399,6 +402,7 @@ public class Main {
                             List.of(vaccine),
                             searchCity.voivodeship(),
                             gmina.map(Gmina::terc).orElse(null),
+                            searchCity.servicePointId(),
                             null
                         );
                         searchCount++;
@@ -530,9 +534,13 @@ public class Main {
         }
     }
 
-    record SearchCity(String name, Voivodeship voivodeship, int days, Set<VaccineType> vaccines) {
+    record SearchCity(String name, Voivodeship voivodeship, int days, Set<VaccineType> vaccines, UUID servicePointId) {
         public SearchCity(String name, Voivodeship voivodeship, int days) {
-            this(name, voivodeship, days, Arrays.stream(VaccineType.values()).collect(Collectors.toSet()));
+            this(name, voivodeship, days, Arrays.stream(VaccineType.values()).collect(Collectors.toSet()), null);
+        }
+
+        public SearchCity(String name, Voivodeship voivodeship, int days, UUID servicePointId) {
+            this(name, voivodeship, days, Arrays.stream(VaccineType.values()).collect(Collectors.toSet()), servicePointId);
         }
     }
 }

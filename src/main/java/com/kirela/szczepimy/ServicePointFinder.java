@@ -76,6 +76,7 @@ public class ServicePointFinder {
             .replace("UL. ", "")
             .replace("AL. ", "")
             .replace("Al. ", "")
+            .replace("Krasienin-Kolonia", "Krasienin Kolonia")
             .replace("al. ", "")
             .replace("Aleja ", "")
             .replace("ALEJA ", "")

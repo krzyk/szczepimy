@@ -17,6 +17,8 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -325,11 +327,13 @@ public class TableFormatter {
             phoneList = List.of(dirtyPhone);
         }
 
-        return phoneList.stream()
+        List<String> shuffledPhoneList = new ArrayList<>(phoneList);
+        Collections.shuffle(shuffledPhoneList);
+        return shuffledPhoneList.stream()
             .map(this::cleanupPhone)
             .filter(Predicate.not(String::isBlank))
             .map(p -> """
-                <a href="tel:%s" title="Zadzwoń do punktu szczepień">📞<strong>&nbsp;%s</strong></a><br/>
+                <a href="tel:+48%s" title="Zadzwoń do punktu szczepień">📞<strong>&nbsp;%s</strong></a><br/>
                 """.formatted(p.replace(" ", ""), p.replace(" ", "&nbsp;")))
             .collect(Collectors.joining());
     }
