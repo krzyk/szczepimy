@@ -390,7 +390,6 @@ public class Main {
 //                    final LocalDateTime endDate = LocalDateTime.of(2021, 5, 31, 23, 59);
                     int tries = 0;
                     while (startDate.isBefore(endDate)) {
-                        Thread.sleep(900);
                         LOG.info("city={}, vaccine={}: try={}, start={}, end={}, pointId={}", searchCity.name(), vaccine, tries, startDate, endDate, searchCity.servicePointId());
                         var search = new Search(
                             new DateRange(startDate.toLocalDate(), endDate.toLocalDate()),
@@ -448,6 +447,7 @@ public class Main {
         SearchCity searchCity, VaccineType vaccine, Search search) throws IOException, InterruptedException {
         String searchStr = mapper.writeValueAsString(search);
         int retryCount = 0;
+        Thread.sleep(options.wait);
         try {
             for (int i = 0; i < options.retries; i++) {
                 HttpResponse<String> out = client.send(
