@@ -40,6 +40,7 @@ public class TableFormatter {
     private final PlaceFinder placeFinder;
 
     private final Map<UUID, String> phoneCorrections = Map.of(
+        UUID.fromString("3e91cfb4-9d77-40e9-bdce-dacdc14b71b6"), "664067606", // Szpitalna 2, Oborniki
         UUID.fromString("d199b3c1-d47c-45c2-be41-34d1133f404c"), "587270505", // d199b3c1-d47c-45c2-be41-34d1133f404c, Dębowa 21, Gdańsk
         UUID.fromString("48324f72-a003-438a-90a1-b5f4c887f2de"), "507816804 503893600", // Broniewskiego 14
         UUID.fromString("b0408af7-d22b-45af-9aab-0dfc61816483"), "124003305, 124003306",

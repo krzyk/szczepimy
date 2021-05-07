@@ -41,6 +41,7 @@ import picocli.CommandLine;
 
 public class Main {
     private static final Logger LOG = LogManager.getLogger(Main.class);
+    private static final Logger STATS = LogManager.getLogger("STATS");
     // https://www.gov.pl/api/data/covid-vaccination-point   -> service-points.json
 
     // punkty adresowe z https://eteryt.stat.gov.pl/eTeryt/rejestr_teryt/udostepnianie_danych/baza_teryt/uzytkownicy_indywidualni/pobieranie/pliki_pelne.aspx?contrast=default
@@ -95,6 +96,7 @@ public class Main {
     private static final String USER_AGENT = "User-Agent";
 
     public static void main(String[] args) throws IOException, InterruptedException {
+        long start = System.currentTimeMillis();
 
         Options options = CommandLine.populateCommand(new Options(), args);
         if (options.usageHelpRequested) {
@@ -377,8 +379,12 @@ public class Main {
         );
         Set<SlotWithVoivodeship> results = new HashSet<>();
 
+
+        STATS.info("Preparation time: {}", System.currentTimeMillis() - start);
+        start = System.currentTimeMillis();
         int searchCount = 0;
         try {
+            start = System.currentTimeMillis();
             for (SearchCity searchCity : Stream.concat(findVoi.stream(), find.stream())
                 .filter(s -> options.voivodeships.contains(s.voivodeship()))
                 .toList()) {
@@ -431,6 +437,8 @@ public class Main {
                     }
                 }
             }
+            STATS.info("Search time: {}, time/search: {}", System.currentTimeMillis() - start, (System.currentTimeMillis() - start)/searchCount);
+            start = System.currentTimeMillis();
         } catch (Exception ex) {
             LOG.error("Exception", ex);
             StringWriter writer = new StringWriter();
@@ -439,7 +447,9 @@ public class Main {
         } finally {
             LOG.info("Search count = {}, results = {}, results/count = {}", searchCount, results.size(), results.size()/searchCount);
         }
+        start = System.currentTimeMillis();
         new TableFormatter(options.output, mapper, find, Instant.now(), placeFinder).store(results);
+        STATS.info("Formatter time: {}, time/result: {}", System.currentTimeMillis() - start, (System.currentTimeMillis() - start)/results.size());
         new Stats(mapper).store(results);
     }
 
