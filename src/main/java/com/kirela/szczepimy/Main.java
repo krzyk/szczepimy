@@ -348,6 +348,7 @@ public class Main {
             new SearchCity("Pszczyna", Voivodeship.ŚLĄSKIE, 1),
             new SearchCity("Tarnowskie Góry", Voivodeship.ŚLĄSKIE, 1),
             new SearchCity("Tychy", Voivodeship.ŚLĄSKIE, 1),
+            new SearchCity("Mikołów", Voivodeship.ŚLĄSKIE, 1),
 
             new SearchCity("Kielce", Voivodeship.ŚWIĘTOKRZYSKIE, 1),
             new SearchCity("Ostrowiec Świętokrzyski", Voivodeship.ŚWIĘTOKRZYSKIE, 1),
