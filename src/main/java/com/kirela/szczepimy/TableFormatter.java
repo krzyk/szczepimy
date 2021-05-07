@@ -42,10 +42,9 @@ public class TableFormatter {
     private final Map<UUID, String> phoneCorrections = Map.ofEntries(
         Map.entry(UUID.fromString("7c6bccd4-8a99-4b47-8a1b-eb3ef6f33258"), "123797167 123797115"),
         Map.entry(UUID.fromString("02acf6e8-047a-4665-83bc-a33b0ad9b112"), "884955678"),
-        Map.entry(UUID.fromString("d199b3c1-d47c-45c2-be41-34d1133f404c"), "587270505"), // (potem wewnętrzny 4)
+        Map.entry(UUID.fromString("d199b3c1-d47c-45c2-be41-34d1133f404c"), "587270505"), // (potem wewnętrzny 4), Dębowa 21, Gdańsk
         Map.entry(UUID.fromString("98d02de7-2c97-48ba-a0dd-2586bac96146"), "222990354"), //
         Map.entry(UUID.fromString("3e91cfb4-9d77-40e9-bdce-dacdc14b71b6"), "664067606"), // Szpitalna 2, Oborniki
-        Map.entry(UUID.fromString("d199b3c1-d47c-45c2-be41-34d1133f404c"), "587270505"), // d199b3c1-d47c-45c2-be41-34d1133f404c, Dębowa 21, Gdańsk
         Map.entry(UUID.fromString("48324f72-a003-438a-90a1-b5f4c887f2de"), "507816804 503893600"), // Broniewskiego 14
         Map.entry(UUID.fromString("b0408af7-d22b-45af-9aab-0dfc61816483"), "124003305 124003306"),
         Map.entry(UUID.fromString("22cd6a69-a441-40fc-b974-053a92a785ff"), "124003305 124003306"),
