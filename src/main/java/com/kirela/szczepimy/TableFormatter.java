@@ -39,17 +39,19 @@ public class TableFormatter {
     private final Instant now;
     private final PlaceFinder placeFinder;
 
-    private final Map<UUID, String> phoneCorrections = Map.of(
-        UUID.fromString("d199b3c1-d47c-45c2-be41-34d1133f404c"), "587270505", // (potem wewnętrzny 4)
-        UUID.fromString("98d02de7-2c97-48ba-a0dd-2586bac96146"), "222990354", //
-        UUID.fromString("3e91cfb4-9d77-40e9-bdce-dacdc14b71b6"), "664067606", // Szpitalna 2, Oborniki
-        UUID.fromString("d199b3c1-d47c-45c2-be41-34d1133f404c"), "587270505", // d199b3c1-d47c-45c2-be41-34d1133f404c, Dębowa 21, Gdańsk
-        UUID.fromString("48324f72-a003-438a-90a1-b5f4c887f2de"), "507816804 503893600", // Broniewskiego 14
-        UUID.fromString("b0408af7-d22b-45af-9aab-0dfc61816483"), "124003305, 124003306",
-        UUID.fromString("22cd6a69-a441-40fc-b974-053a92a785ff"), "124003305, 124003306",
-        UUID.fromString("81a97b5e-6159-4844-b1d9-c81e7f6d644e"), "690694186",
-        UUID.fromString("966e6b13-d82f-452c-9bec-53b284f9f83f"), "126372791", // Podchorążych 3, Kraków
-        UUID.fromString("c841eda9-ee36-46f6-8332-f451727edd26"), "123491500" // Lema 7, Kraków
+    private final Map<UUID, String> phoneCorrections = Map.ofEntries(
+        Map.entry(UUID.fromString("7c6bccd4-8a99-4b47-8a1b-eb3ef6f33258"), "123797167 123797115"),
+        Map.entry(UUID.fromString("02acf6e8-047a-4665-83bc-a33b0ad9b112"), "884955678"),
+        Map.entry(UUID.fromString("d199b3c1-d47c-45c2-be41-34d1133f404c"), "587270505"), // (potem wewnętrzny 4)
+        Map.entry(UUID.fromString("98d02de7-2c97-48ba-a0dd-2586bac96146"), "222990354"), //
+        Map.entry(UUID.fromString("3e91cfb4-9d77-40e9-bdce-dacdc14b71b6"), "664067606"), // Szpitalna 2, Oborniki
+        Map.entry(UUID.fromString("d199b3c1-d47c-45c2-be41-34d1133f404c"), "587270505"), // d199b3c1-d47c-45c2-be41-34d1133f404c, Dębowa 21, Gdańsk
+        Map.entry(UUID.fromString("48324f72-a003-438a-90a1-b5f4c887f2de"), "507816804 503893600"), // Broniewskiego 14
+        Map.entry(UUID.fromString("b0408af7-d22b-45af-9aab-0dfc61816483"), "124003305 124003306"),
+        Map.entry(UUID.fromString("22cd6a69-a441-40fc-b974-053a92a785ff"), "124003305 124003306"),
+        Map.entry(UUID.fromString("81a97b5e-6159-4844-b1d9-c81e7f6d644e"), "690694186"),
+        Map.entry(UUID.fromString("966e6b13-d82f-452c-9bec-53b284f9f83f"), "126372791"), // Podchorążych 3, Kraków
+        Map.entry(UUID.fromString("c841eda9-ee36-46f6-8332-f451727edd26"), "123491500") // Lema 7, Kraków
     );
 
     private final Map<UUID, Coordinates> coordsCorrections = Map.of(
