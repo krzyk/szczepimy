@@ -41,7 +41,6 @@ public class TableFormatter {
 
     private final Map<UUID, String> phoneCorrections = Map.ofEntries(
         Map.entry(UUID.fromString("7c6bccd4-8a99-4b47-8a1b-eb3ef6f33258"), "123797167 123797115"),
-        Map.entry(UUID.fromString("02acf6e8-047a-4665-83bc-a33b0ad9b112"), "884955678"),
         Map.entry(UUID.fromString("d199b3c1-d47c-45c2-be41-34d1133f404c"), "587270505"), // (potem wewnętrzny 4), Dębowa 21, Gdańsk
         Map.entry(UUID.fromString("98d02de7-2c97-48ba-a0dd-2586bac96146"), "222990354"), //
         Map.entry(UUID.fromString("3e91cfb4-9d77-40e9-bdce-dacdc14b71b6"), "664067606"), // Szpitalna 2, Oborniki
@@ -242,11 +241,11 @@ public class TableFormatter {
                         slot.vaccineType().ordinal(),
                         slot.vaccineType().readable(),
                         """
-                            <div class="bug" style="visibility: hidden"><a href="https://github.com/szczepienia/szczepienia.github.io/issues/new?labels=incorrect_address&title=[%s]+Z%%C5%%82y+adres+plac%%C3%%B3wki+(id=%s)" title="Zgłoś błąd">Zgłoś</a></div>
+                            <div class="bug" style="visibility: hidden"><a href="https://github.com/szczepienia/szczepienia.github.io/issues/new?labels=incorrect_address&title=[%s]+Z%%C5%%82y+adres+plac%%C3%%B3wki+(id=%s)" title="Zgłoś błąd">Błąd?</a></div>
                             """.formatted(URLEncoder.encode(voivodeship.name(), StandardCharsets.UTF_8), maybe.map(ExtendedServicePoint::id).map(String::valueOf).orElse(slot.servicePoint().id().toString())),
                         getAddress(slot, maybe),
                         """
-                            <div class="bug"><a href="https://github.com/szczepienia/szczepienia.github.io/issues/new?labels=incorrect_phone&title=[%s]+Z%%C5%%82y+number+telefonu+do+plac%%C3%%B3wki+(uuid=%s)" title="Zgłoś błąd">Zgłoś</a></div>
+                            <div class="bug"><a href="https://github.com/szczepienia/szczepienia.github.io/issues/new?labels=incorrect_phone&title=[%s]+Z%%C5%%82y+number+telefonu+do+plac%%C3%%B3wki+(uuid=%s)" title="Zgłoś błąd">Błąd?</a></div>
                             """.formatted(URLEncoder.encode(voivodeship.name(), StandardCharsets.UTF_8), slot.servicePoint().id()),
                         getPhone(slot, maybe)
                         ),
