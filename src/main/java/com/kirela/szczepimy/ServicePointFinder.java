@@ -189,14 +189,14 @@ public class ServicePointFinder {
     private Optional<ServicePoint> findByAddressInternal(ExtendedResult.ServicePoint servicePoint) {
         String address = normalize(servicePoint.addressText()).toLowerCase();
         if (!grouped.containsKey(address)) {
-            LOG.warn("Did not find address '{}' '{}' ({}) in {}", address, servicePoint.place(), servicePoint.name(), servicePoint.voivodeship());
+            LOG.warn("Did not find address '{}' '{}' ({}) in {}: {}", address, servicePoint.place(), servicePoint.name(), servicePoint.voivodeship(), servicePoint.id());
             return Optional.empty();
         }
         List<ServicePoint> found = grouped.get(address).stream()
             .filter(p -> p.voivodeship() == servicePoint.voivodeship())
             .toList();
         if (found.isEmpty()) {
-            LOG.warn("Did not find address in list for '{}' '{}' in {}", address, servicePoint.place(), servicePoint.voivodeship());
+            LOG.warn("Did not find address in list for '{}' '{}' in {}: {}", address, servicePoint.place(), servicePoint.voivodeship(), servicePoint.id());
             return Optional.empty();
         }
         if (found.size() > 1) {
@@ -205,7 +205,7 @@ public class ServicePointFinder {
                 .filter(f -> f.place().equalsIgnoreCase(place))
                 .collect(Collectors.groupingBy(ServicePoint::lat));
             if (placeFind.isEmpty()) {
-                LOG.warn("Did not find address in placed list for '{}' '{}' in {}", address, servicePoint.place(), servicePoint.voivodeship());
+                LOG.warn("Did not find address in placed list for '{}' '{}' in {}: {}", address, servicePoint.place(), servicePoint.voivodeship(), servicePoint.id());
                 return Optional.empty();
             }
             if (placeFind.size() > 1) {
@@ -217,11 +217,11 @@ public class ServicePointFinder {
                     return Optional.of(facilityFind.values().stream().findFirst().get().get(0));
                 }
                 if (facilityFind.isEmpty()) {
-                    LOG.warn("Did not find address in facility list for '{}' '{}' in {}", address, servicePoint.place(), servicePoint.voivodeship());
+                    LOG.warn("Did not find address in facility list for '{}' '{}' in {}: {}", address, servicePoint.place(), servicePoint.voivodeship(), servicePoint.id());
                     return Optional.empty();
                 }
                 if (found.size() > 1) {
-                    LOG.warn("Too many addresses in facility list for '{}' '{}' in {}", address, servicePoint.place(), servicePoint.voivodeship());
+                    LOG.warn("Too many addresses in facility list for '{}' '{}' in {}: {}", address, servicePoint.place(), servicePoint.voivodeship(), servicePoint.id());
                     return Optional.empty();
                 }
                 return Optional.empty();
