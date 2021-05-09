@@ -33,6 +33,7 @@ import org.apache.logging.log4j.Logger;
 public class TableFormatter {
     private static final Logger LOG = LogManager.getLogger(TableFormatter.class);
     private static final ZoneId ZONE = ZoneId.of("Europe/Warsaw");
+    private static final int LARGE_SLOT_START = 4;
     private final String outputDirectory;
     private final ServicePointFinder servicePointFinder;
     private final List<Main.SearchCity> searchCities;
@@ -54,7 +55,6 @@ public class TableFormatter {
 
     private final Map<UUID, Coordinates> coordsCorrections = Map.of(
     );
-    private final PlaceCoords placeCoords;
 
     public TableFormatter(String outputDirectory, ObjectMapper mapper,
         List<Main.SearchCity> searchCities, Instant now, PlaceFinder placeFinder) {
@@ -63,7 +63,6 @@ public class TableFormatter {
         this.servicePointFinder = new ServicePointFinder(mapper, phoneCorrections);
         this.now = now;
         this.placeFinder = placeFinder;
-        this.placeCoords = new PlaceCoords();
     }
 
     public void store(Set<Main.SlotWithVoivodeship> results)
@@ -78,13 +77,6 @@ public class TableFormatter {
                     .thenComparing(ExtendedResult.Slot::startAt)
             ).toList();
 
-        record PlaceLocation(String name, Coordinates coords){};
-
-        List<PlaceLocation> coords = sorted.stream()
-            .distinct()
-            .map(s -> new PlaceLocation(s.servicePoint().place(), placeCoords.find(s.servicePoint().simc(), s.servicePoint())))
-            .filter(s -> s.coords != null)
-            .toList();
         Map<Voivodeship, Map<LocalDate, Map<ExtendedResult.ServicePoint, List<ExtendedResult.Slot>>>> groupByVoi =
             sorted.stream()
                 .collect(
@@ -163,7 +155,7 @@ public class TableFormatter {
                     String times;
 
                     // https://github.com/szczepienia/szczepienia.github.io/issues/new?labels=incorrect_phone&title=Z%C5%82y+number+telefonu+do+plac%C3%B3wki+(id=1234)
-                    if (slots.size() >= 4) {
+                    if (slots.size() > LARGE_SLOT_START) {
 //                        List<TimeRange> ranges = getRanges(slots, slot);
 //                        List<TimeRange> incorrect = ranges.stream()
 //                            .filter(r -> r.start() == r.end())
@@ -204,7 +196,7 @@ public class TableFormatter {
                         .orElse(coordsCorrections.getOrDefault(slot.servicePoint().id(), new Coordinates("", "")));
 
                     Files.writeString(voiFile, """
-                                    <tr data-lat="%s" data-lon="%s" data-service-point-id="%s" data-service-point-uuid="%s">
+                                    <tr %s data-lat="%s" data-lon="%s" data-service-point-id="%s" data-service-point-uuid="%s">
                                         <td>%s</td>
                                         <td data-order="%d">%s</td>
                                         <td class="dt-body-center times">%s</td>
@@ -222,6 +214,7 @@ public class TableFormatter {
                                     </tr>
                                                 
                             """.formatted(
+                        slots.size() > LARGE_SLOT_START ? "class=\"large-slot\"" : "",
                         cords.lat(), cords.lon(),
                         maybe.map(ExtendedServicePoint::id).map(String::valueOf).orElse(""),
                         slot.servicePoint().id(),
@@ -258,20 +251,6 @@ public class TableFormatter {
                         <tbody>
                     </table>
                     """,
-                StandardOpenOption.APPEND, StandardOpenOption.CREATE
-            );
-            Files.writeString(voiFile, """
-                    <ul id="locations" hidden>
-                    %s
-                    </ul>
-                    """.formatted(
-                        coords.stream()
-                            .map(
-                                l -> """
-                                     <li data-lat="%s" data-lon="%s">%s</li>
-                                     """.formatted(l.coords().lat(), l.coords().lon(), l.name())
-                            ).collect(Collectors.joining())
-                ),
                 StandardOpenOption.APPEND, StandardOpenOption.CREATE
             );
         }
