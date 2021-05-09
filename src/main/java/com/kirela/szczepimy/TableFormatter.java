@@ -156,25 +156,6 @@ public class TableFormatter {
 
                     // https://github.com/szczepienia/szczepienia.github.io/issues/new?labels=incorrect_phone&title=Z%C5%82y+number+telefonu+do+plac%C3%B3wki+(id=1234)
                     if (slots.size() > LARGE_SLOT_START) {
-//                        List<TimeRange> ranges = getRanges(slots, slot);
-//                        List<TimeRange> incorrect = ranges.stream()
-//                            .filter(r -> r.start() == r.end())
-//                            .toList();
-//                        if (!incorrect.isEmpty()) {
-//                            LOG.error("Ranges are incorrect (%s) input: %s".formatted(incorrect, slots));
-//                        }
-//                        times = """
-//                                <small class="smaller">(liczba = %d)</small>
-//                                <small class="smaller">(co&nbsp;%s&nbsp;min)</small>
-//                                %s
-//                                <br/>
-//                                """.formatted(
-//                            slots.size(),
-//                            slot.duration(),
-//                            ranges.stream()
-//                                .map(this::rangeToDisplay)
-//                                .collect(Collectors.joining())
-
                         times = """
                             <div class="slot-count">(terminów: <strong>%d</strong>)</div>
                             <div class="toggle-times">%s</div>
@@ -195,55 +176,8 @@ public class TableFormatter {
                     Coordinates cords = maybe.map(e -> new Coordinates(e.lat(), e.lon()))
                         .orElse(coordsCorrections.getOrDefault(slot.servicePoint().id(), new Coordinates("", "")));
 
-                    Files.writeString(voiFile, """
-                                    <tr %s data-lat="%s" data-lon="%s" data-service-point-id="%s" data-service-point-uuid="%s">
-                                        <td>%s</td>
-                                        <td data-order="%d">%s</td>
-                                        <td class="dt-body-center times">%s</td>
-                                        <td class="dt-body-center" data-order="%d">%s</td>
-                                        <td class="address">
-                                        %s
-                                        %s
-                                        </td>
-                                        <td>
-                                            %s
-                                            %s
-                                            <a href="tel:989" title="Zadwoń na infolinię i umów się na ten termin">📞</img>&nbsp;989</a><br/>
-                                            <a target="_blank" title="Skorzystaj z profilu zaufanego i umów się przez internet" href="https://pacjent.erejestracja.ezdrowie.gov.pl/wizyty">🔗</img>&nbsp;e-rejestracja</a><br/>
-                                        </td>
-                                    </tr>
-                                                
-                            """.formatted(
-                        slots.size() > LARGE_SLOT_START ? "class=\"large-slot\"" : "",
-                        cords.lat(), cords.lon(),
-                        maybe.map(ExtendedServicePoint::id).map(String::valueOf).orElse(""),
-                        slot.servicePoint().id(),
-                        slot.servicePoint().place(),
-                        slot.startAt().getEpochSecond(),
-                        DateTimeFormatter.ofPattern("d MMMM;EEEE|", Locale.forLanguageTag("pl")).format(
-                            LocalDateTime.ofInstant(slot.startAt(), ZONE)
-                        )
-                            .replace(";", "<br/><small>")
-                            .replace("|", "</small>")
-                            .replace(" ", "&nbsp;"),
-                        times,
-
-                        //                    slot.startAt().getEpochSecond(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(
-                        //                        LocalDateTime.ofInstant(slot.startAt(), ZoneId.of("Europe/Warsaw"))
-                        //                    ),
-                        slot.vaccineType().ordinal(),
-                        slot.vaccineType().readable(),
-                        """
-                            <div class="bug" style="visibility: hidden"><a href="https://github.com/szczepienia/szczepienia.github.io/issues/new?labels=incorrect_address&title=[%s]+Z%%C5%%82y+adres+plac%%C3%%B3wki+(id=%s)" title="Zgłoś błąd">Błąd?</a></div>
-                            """.formatted(URLEncoder.encode(voivodeship.name(), StandardCharsets.UTF_8), maybe.map(ExtendedServicePoint::id).map(String::valueOf).orElse(slot.servicePoint().id().toString())),
-                        getAddress(slot, maybe),
-                        """
-                            <div class="bug"><a href="https://github.com/szczepienia/szczepienia.github.io/issues/new?labels=incorrect_phone&title=[%s]+Z%%C5%%82y+number+telefonu+do+plac%%C3%%B3wki+(uuid=%s)" title="Zgłoś błąd">Błąd?</a></div>
-                            """.formatted(URLEncoder.encode(voivodeship.name(), StandardCharsets.UTF_8), slot.servicePoint().id()),
-                        getPhone(slot, maybe)
-                        ),
-                        StandardOpenOption.APPEND, StandardOpenOption.CREATE
-                    );
+                    final String slotRow = slotRow(voivodeship, slots, slot, times, maybe, cords);
+                    Files.writeString(voiFile, slotRow, StandardOpenOption.APPEND, StandardOpenOption.CREATE);
                 }
             }
 
@@ -254,6 +188,61 @@ public class TableFormatter {
                 StandardOpenOption.APPEND, StandardOpenOption.CREATE
             );
         }
+    }
+
+    private String slotRow(Voivodeship voivodeship, List<ExtendedResult.Slot> slots, ExtendedResult.Slot slot,
+        String times, Optional<ExtendedServicePoint> maybe, Coordinates cords) {
+        return """
+            <tr %s data-lat="%s" data-lon="%s" data-service-point-id="%s" data-service-point-uuid="%s">
+                <td>%s</td>
+                <td data-order="%d">%s</td>
+                <td class="dt-body-center times">%s</td>
+                <td class="dt-body-center" data-order="%d">%s</td>
+                <td class="address">
+                %s
+                %s
+                </td>
+                <td>
+                    %s
+                    %s
+                    <a href="tel:989" title="Zadwoń na infolinię i umów się na ten termin">📞</img>&nbsp;989</a><br/>
+                    <a target="_blank" title="Skorzystaj z profilu zaufanego i umów się przez internet" href="https://pacjent.erejestracja.ezdrowie.gov.pl/wizyty">🔗</img>&nbsp;e-rejestracja</a><br/>
+                </td>
+            </tr>
+            """.formatted(
+            slots.size() > LARGE_SLOT_START ? "class=\"large-slot\"" : "",
+            cords.lat(),
+            cords.lon(),
+            maybe.map(ExtendedServicePoint::id).map(String::valueOf).orElse(""),
+            slot.servicePoint().id(),
+            slot.servicePoint().place(),
+            slot.startAt().getEpochSecond(),
+            DateTimeFormatter.ofPattern("d MMMM;EEEE|", Locale.forLanguageTag("pl")).format(
+                LocalDateTime.ofInstant(slot.startAt(), ZONE)
+            )
+                .replace(";", "<br/><small>")
+                .replace("|", "</small>")
+                .replace(" ", "&nbsp;"),
+            times,
+            slot.vaccineType().ordinal(),
+            slot.vaccineType().readable(),
+            """
+                <div class="bug" style="visibility: hidden"><a href="https://github.com/szczepienia/szczepienia.github.io/issues/new?labels=incorrect_address&title=[%s]+Z%%C5%%82y+adres+plac%%C3%%B3wki+(id=%s)" title="Zgłoś błąd">Błąd?</a></div>
+                """.formatted(
+                URLEncoder.encode(voivodeship.name(), StandardCharsets.UTF_8),
+                maybe.map(ExtendedServicePoint::id)
+                    .map(String::valueOf)
+                    .orElse(slot.servicePoint().id().toString())
+            ),
+            getAddress(slot, maybe),
+            """
+                <div class="bug"><a href="https://github.com/szczepienia/szczepienia.github.io/issues/new?labels=incorrect_phone&title=[%s]+Z%%C5%%82y+number+telefonu+do+plac%%C3%%B3wki+(uuid=%s)" title="Zgłoś błąd">Błąd?</a></div>
+                """.formatted(
+                URLEncoder.encode(voivodeship.name(), StandardCharsets.UTF_8),
+                slot.servicePoint().id()
+            ),
+            getPhone(slot, maybe)
+        );
     }
 
     private ZonedDateTime calculateNextRun() {

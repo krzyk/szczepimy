@@ -47,7 +47,7 @@ class ServicePointFinderTest {
         max.put(Voivodeship.DOLNOŚLĄSKIE, 9);
         max.put(Voivodeship.KUJAWSKO_POMORSKIE, 9);
         max.put(Voivodeship.WARMIŃSKO_MAZURSKIE, 5);
-        max.put(Voivodeship.LUBELSKIE, 7);
+        max.put(Voivodeship.LUBELSKIE, 5);
         max.put(Voivodeship.ŁÓDZKIE, 8);
         max.put(Voivodeship.MAŁOPOLSKIE, 5);
         max.put(Voivodeship.MAZOWIECKIE, 6);

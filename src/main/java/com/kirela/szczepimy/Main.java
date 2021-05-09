@@ -270,6 +270,10 @@ public class Main {
             new SearchCity("Chełm", Voivodeship.LUBELSKIE, 1),
             new SearchCity("Puławy", Voivodeship.LUBELSKIE, 1),
             new SearchCity("Łuków", Voivodeship.LUBELSKIE, 1),
+            new SearchCity("Kraśnik", Voivodeship.LUBELSKIE, 1),
+            new SearchCity("Świdnik", Voivodeship.LUBELSKIE, 1),
+            new SearchCity("Biłgoraj", Voivodeship.LUBELSKIE, 1),
+            new SearchCity("Łęczna", Voivodeship.LUBELSKIE, 1),
 
 
             new SearchCity("Zielona Góra", Voivodeship.LUBUSKIE, 1),
@@ -392,7 +396,7 @@ public class Main {
                 Optional<Gmina> gmina = Optional.ofNullable(searchCity.name())
                     .map(n -> gminaFinder.find(n, searchCity.voivodeship));
                 for (VaccineType vaccine : options.vaccineTypes) {
-                    LocalDateTime startDate = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
+                    LocalDateTime startDate = LocalDateTime.now().withHour(1).withMinute(0).withSecond(0).withNano(0);
                     final LocalDateTime endDate = startDate.plusWeeks(4).withHour(23).withMinute(59);
 //                    final LocalDateTime endDate = LocalDateTime.of(2021, 5, 31, 23, 59);
                     int tries = 0;
