@@ -262,6 +262,8 @@ public class Main {
             new SearchCity("Grudziądz", Voivodeship.KUJAWSKO_POMORSKIE, 1),
             new SearchCity("Włocławek", Voivodeship.KUJAWSKO_POMORSKIE, 1),
             new SearchCity("Żnin", Voivodeship.KUJAWSKO_POMORSKIE, 1),
+            
+            new SearchCity("Kcynia", Voivodeship.KUJAWSKO_POMORSKIE, 1),
 
 
             new SearchCity("Lublin", Voivodeship.LUBELSKIE, 1),
