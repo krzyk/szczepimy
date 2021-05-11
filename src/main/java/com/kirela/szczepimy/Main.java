@@ -400,7 +400,7 @@ public class Main {
                 Optional<Gmina> gmina = Optional.ofNullable(searchCity.name())
                     .map(n -> gminaFinder.find(n, searchCity.voivodeship));
                 for (List<VaccineType> vaccines : vaccineSets(options)) {
-                    LocalDateTime startDate = LocalDateTime.now().withHour(1).withMinute(0).withSecond(0).withNano(0);
+                    LocalDateTime startDate = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
                     final LocalDateTime endDate = startDate.plusWeeks(4).withHour(23).withMinute(59);
 //                    final LocalDateTime endDate = LocalDateTime.of(2021, 5, 31, 23, 59);
                     int tries = 0;
