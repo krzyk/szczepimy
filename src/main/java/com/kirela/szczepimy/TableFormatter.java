@@ -345,6 +345,8 @@ public class TableFormatter {
             phoneList = Arrays.asList(dirtyPhone.split(","));
         } else if (dirtyPhone.length() > 9 && dirtyPhone.indexOf(' ') == 9) {
             phoneList = Arrays.asList(dirtyPhone.split(" "));
+        } else if (dirtyPhone.isBlank()) {
+            phoneList = List.of();
         } else {
             phoneList = List.of(dirtyPhone);
         }
