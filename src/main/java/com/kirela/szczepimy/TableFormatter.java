@@ -42,6 +42,7 @@ public class TableFormatter {
     private final PlaceFinder placeFinder;
 
     private final Map<UUID, String> phoneCorrections = Map.ofEntries(
+        Map.entry(UUID.fromString("5e5d3118-2bab-466d-8546-649d4dc11471"), ""),
         Map.entry(UUID.fromString("7c6bccd4-8a99-4b47-8a1b-eb3ef6f33258"), "123797167 123797115"),
         Map.entry(UUID.fromString("d199b3c1-d47c-45c2-be41-34d1133f404c"), "587270505"), // (potem wewnętrzny 4), Dębowa 21, Gdańsk
         Map.entry(UUID.fromString("98d02de7-2c97-48ba-a0dd-2586bac96146"), "222990354"), //
