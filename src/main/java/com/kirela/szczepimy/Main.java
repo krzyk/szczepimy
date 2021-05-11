@@ -334,7 +334,6 @@ public class Main {
             new SearchCity("Przemyśl", Voivodeship.PODKARPACKIE, 1),
             new SearchCity("Jasło", Voivodeship.PODKARPACKIE, 1),
             new SearchCity("Tarnobrzeg", Voivodeship.PODKARPACKIE, 1),
-            new SearchCity("Zgłobień", Voivodeship.PODKARPACKIE, 1),
 
 
             new SearchCity("Gdańsk", Voivodeship.POMORSKIE, 1),
@@ -470,7 +469,7 @@ public class Main {
                 System.currentTimeMillis() - start,
                 (System.currentTimeMillis() - start) / results.size()
             );
-            new Stats(mapper, options.output).store(results);
+            new Stats(options.output).store(results);
         } catch (Exception ex) {
             LOG.error("Received error in formatter/stats", ex);
             telegram("Error in formatter (%s)".formatted(ex.getMessage()));

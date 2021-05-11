@@ -12,11 +12,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Stats {
-    private final ObjectMapper mapper;
     private final String outputDirectory;
 
-    public Stats(ObjectMapper mapper, String outputDirectory) {
-        this.mapper = mapper;
+    public Stats(String outputDirectory) {
         this.outputDirectory = outputDirectory;
     }
 
