@@ -334,6 +334,7 @@ public class Main {
             new SearchCity("Przemyśl", Voivodeship.PODKARPACKIE, 1),
             new SearchCity("Jasło", Voivodeship.PODKARPACKIE, 1),
             new SearchCity("Tarnobrzeg", Voivodeship.PODKARPACKIE, 1),
+            new SearchCity("Boguchwała", Voivodeship.PODKARPACKIE, 1),
 
 
             new SearchCity("Gdańsk", Voivodeship.POMORSKIE, 1),
