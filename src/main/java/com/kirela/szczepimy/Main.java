@@ -60,7 +60,7 @@ public class Main {
 //    }
 
 
-    record SlotWithVoivodeship(Result.BasicSlot slot, Voivodeship voivodeship) {};
+    record SlotWithVoivodeship(BasicSlotWithSearch slot, Voivodeship voivodeship) {};
     public static record DateRange(LocalDate from, LocalDate to) {}
 
     public static record TimeRange(
@@ -75,7 +75,7 @@ public class Main {
     public static record Search(
         DateRange dayRange,
         TimeRange hourRange,
-        String prescriptionId, List<VaccineType> vaccineTypes, Voivodeship voiId, String geoId, UUID servicePointId,
+        String prescriptionId, List<VaccineType> vaccineTypes, Voivodeship voiId, Gmina geoId, UUID servicePointId,
         List<String> mobilities
     ) {
         public Search withNewDateRange(DateRange newDateRange) {
@@ -262,7 +262,7 @@ public class Main {
             new SearchCity("Grudziądz", Voivodeship.KUJAWSKO_POMORSKIE, 1),
             new SearchCity("Włocławek", Voivodeship.KUJAWSKO_POMORSKIE, 1),
             new SearchCity("Żnin", Voivodeship.KUJAWSKO_POMORSKIE, 1),
-            
+
             new SearchCity("Kcynia", Voivodeship.KUJAWSKO_POMORSKIE, 1),
 
 
@@ -413,16 +413,16 @@ public class Main {
                             creds.prescriptionId(),
                             List.of(vaccine),
                             searchCity.voivodeship(),
-                            gmina.map(Gmina::terc).orElse(null),
+                            gmina.orElse(null),
                             searchCity.servicePointId(),
                             null
                         );
                         searchCount++;
-                        final Set<Result.BasicSlot> list =
+                        final Set<BasicSlotWithSearch> list =
                             webSearch(options, creds, client, mapper, searchCity, vaccine, search);
                         LOG.info("Found for {}, {}: {} slots", searchCity.name, vaccine, list.size());
                         startDate = list.stream()
-                            .map(Result.BasicSlot::startAt)
+                            .map(BasicSlotWithSearch::startAt)
                             .map(s -> s.atZone(ZoneId.of("Europe/Warsaw")))
                             .map(ZonedDateTime::toLocalDateTime)
                             //.map(s -> s.plusDays(1))
@@ -437,14 +437,14 @@ public class Main {
                                 .collect(Collectors.toSet())
                         );
                         tries++;
-                        if (tries >= 9 || vaccine == VaccineType.AZ || (searchCity.name() != null && !voiCities.contains(searchCity.name()))) {
+                        if (tries >= 10 || vaccine == VaccineType.AZ || (searchCity.name() != null && !voiCities.contains(searchCity.name()))) {
+                            LOG.info("More data exists for {}, {}, {}", searchCity.voivodeship(), searchCity.name(), searchCity.vaccines());
                             break;
                         }
                     }
                 }
             }
             STATS.info("Search time: {}, time/search: {}", System.currentTimeMillis() - start, (System.currentTimeMillis() - start)/searchCount);
-            start = System.currentTimeMillis();
         } catch (Exception ex) {
             LOG.error("Exception", ex);
             StringWriter writer = new StringWriter();
@@ -469,7 +469,7 @@ public class Main {
     }
 
 
-    private static Set<Result.BasicSlot> webSearch(Options options, Creds creds, HttpClient client, ObjectMapper mapper,
+    private static Set<BasicSlotWithSearch> webSearch(Options options, Creds creds, HttpClient client, ObjectMapper mapper,
         SearchCity searchCity, VaccineType vaccine, Search search) throws IOException, InterruptedException {
         String searchStr = mapper.writeValueAsString(search);
         int retryCount = 0;
@@ -506,9 +506,8 @@ public class Main {
                     }
                 }
 
-                return new HashSet<>(
-                    Optional.ofNullable(mapper.readValue(out.body(), Result.class).list()).orElse(List.of())
-                );
+                return Optional.ofNullable(mapper.readValue(out.body(), Result.class).list()).orElse(List.of()).stream()
+                    .map(s -> new BasicSlotWithSearch(s, search)).collect(Collectors.toSet());
             }
 
             throw new IllegalArgumentException("Exceeded retry count");

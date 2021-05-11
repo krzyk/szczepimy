@@ -1,7 +1,8 @@
 package com.kirela.szczepimy;
 
-import java.text.Normalizer;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+@JsonSerialize(using = GminaSerializer.class)
 public record Gmina(String name, String terc, int population) {
     // duze miasta mają 011 na końcu, tj. 1261 - Kraków (+ 011)
 

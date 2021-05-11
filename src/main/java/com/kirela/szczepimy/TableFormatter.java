@@ -15,6 +15,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -193,7 +194,7 @@ public class TableFormatter {
     private String slotRow(Voivodeship voivodeship, List<ExtendedResult.Slot> slots, ExtendedResult.Slot slot,
         String times, Optional<ExtendedServicePoint> maybe, Coordinates cords) {
         return """
-            <tr %s data-lat="%s" data-lon="%s" data-service-point-id="%s" data-service-point-uuid="%s">
+            <tr %s %s data-lat="%s" data-lon="%s" data-service-point-id="%s" data-service-point-uuid="%s">
                 <td>%s</td>
                 <td data-order="%d">%s</td>
                 <td class="dt-body-center times">%s</td>
@@ -211,6 +212,7 @@ public class TableFormatter {
             </tr>
             """.formatted(
             slots.size() > LARGE_SLOT_START ? "class=\"large-slot\"" : "",
+            searchMeta(slot.search()),
             cords.lat(),
             cords.lon(),
             maybe.map(ExtendedServicePoint::id).map(String::valueOf).orElse(""),
@@ -243,6 +245,33 @@ public class TableFormatter {
             ),
             getPhone(slot, maybe)
         );
+    }
+
+    private String searchMeta(Main.Search search) {
+        List<String> datas = new ArrayList<>();
+        datas.add("data-search-date-from=\"%s\"".formatted(search.dayRange().from()));
+        datas.add("data-search-date-to=\"%s\"".formatted(search.dayRange().to()));
+        datas.add("data-search-voivodeship=\"%s\"".formatted(search.voiId().readable()));
+        datas.add(
+            "data-search-vaccines=\"%s\"".formatted(
+                search.vaccineTypes().stream().map(VaccineType::readable).collect(Collectors.joining(", ")))
+        );
+        if (search.hourRange() != null) {
+            // wszystko - 0:00 - 23:59
+            // 8:00 - 12:00
+            // 12:00 - 16:00
+            // 16:00 - 20:00
+            // 20:00 - 23:59
+            String from = search.hourRange().from().truncatedTo(ChronoUnit.MINUTES).toString();
+            String to = search.hourRange().to().truncatedTo(ChronoUnit.MINUTES).toString();
+            datas.add("data-search-hour-from=\"%s\"".formatted(from));
+            datas.add("data-search-hour-to=\"%s\"".formatted(to));
+        }
+        if (search.geoId() != null) {
+            datas.add("data-search-city=\"%s\"".formatted(search.geoId().name()));
+        }
+//         datas.add("data-search-service-point=\"%s\"".formatted(search.servicePointId()));
+        return datas.stream().collect(Collectors.joining(" "));
     }
 
     private ZonedDateTime calculateNextRun() {

@@ -119,6 +119,7 @@ class TableFormatterTest {
             ),
             VaccineType.PFIZER,
             1,
+            null,
             null
         );
     }
