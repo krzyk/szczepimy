@@ -431,14 +431,13 @@ public class Main {
                             .max(Comparator.naturalOrder())
                             .orElse(endDate);
 
-                        results.addAll(
-                            list.stream()
-                                .map(s -> new SlotWithVoivodeship(s, searchCity.voivodeship()))
-                                .collect(Collectors.toSet())
-                        );
+                        final Set<SlotWithVoivodeship> lastResults = list.stream()
+                            .map(s -> new SlotWithVoivodeship(s, searchCity.voivodeship()))
+                            .collect(Collectors.toSet());
+                        results.addAll(lastResults);
                         tries++;
-                        if (tries >= 10 || unwantedVaccines(vaccines) || (searchCity.name() != null && !voiCities.contains(searchCity.name()))) {
-                            if (!unwantedVaccines(vaccines) && tries > 1) {
+                        if (lastResults.isEmpty() || tries >= 10 || unwantedVaccines(vaccines) || (searchCity.name() != null && !voiCities.contains(searchCity.name()))) {
+                            if (!unwantedVaccines(vaccines) && tries > 1 && !lastResults.isEmpty()) {
                                 LOG.info(
                                     "More data exists for {}, {}, {}, last startDate={}",
                                     searchCity.voivodeship(),
