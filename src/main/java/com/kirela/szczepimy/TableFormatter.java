@@ -194,6 +194,7 @@ public class TableFormatter {
 
     private String slotRow(Voivodeship voivodeship, List<ExtendedResult.Slot> slots, ExtendedResult.Slot slot,
         String times, Optional<ExtendedServicePoint> maybe, Coordinates cords) {
+        final ExtendedResult.Slot middleSlot = slots.get(slots.size() / 2);
         return """
             <tr %s %s data-lat="%s" data-lon="%s" data-service-point-id="%s" data-service-point-uuid="%s">
                 <td>%s</td>
@@ -207,13 +208,13 @@ public class TableFormatter {
                 <td>
                     %s
                     %s
-                    <a href="tel:989" title="Zadwoń na infolinię i umów się na ten termin">📞</img>&nbsp;989</a><br/>
+                    <a href="tel:989" title="Zadwoń na infolinię i umów się na ten termin">📞</img>&nbsp;989</a> (<a class="data-989" href="#">Dane</a>)<br/>
                     <a target="_blank" title="Skorzystaj z profilu zaufanego i umów się przez internet" href="https://pacjent.erejestracja.ezdrowie.gov.pl/wizyty">🔗</img>&nbsp;e-rejestracja</a><br/>
                 </td>
             </tr>
             """.formatted(
             slots.size() > LARGE_SLOT_START ? "class=\"large-slot\"" : "",
-            searchMeta(slot.search()),
+            searchMeta(middleSlot.search(), middleSlot.startAt()),
             cords.lat(),
             cords.lon(),
             maybe.map(ExtendedServicePoint::id).map(String::valueOf).orElse(""),
@@ -248,8 +249,9 @@ public class TableFormatter {
         );
     }
 
-    private String searchMeta(Main.Search search) {
+    private String searchMeta(Main.Search search, Instant startAt) {
         List<String> datas = new ArrayList<>();
+        datas.add("data-search-slot-time=\"%s\"".formatted(LocalTime.ofInstant(startAt, ZONE).truncatedTo(ChronoUnit.MINUTES)));
         datas.add("data-search-date-from=\"%s\"".formatted(search.dayRange().from()));
         datas.add("data-search-date-to=\"%s\"".formatted(search.dayRange().to()));
         datas.add("data-search-voivodeship=\"%s\"".formatted(search.voiId().readable()));
