@@ -33,7 +33,7 @@ import org.apache.logging.log4j.Logger;
 
 public class TableFormatter {
     private static final Logger LOG = LogManager.getLogger(TableFormatter.class);
-    private static final ZoneId ZONE = ZoneId.of("Europe/Warsaw");
+    public static final ZoneId ZONE = ZoneId.of("Europe/Warsaw");
     private static final int LARGE_SLOT_START = 4;
     private final String outputDirectory;
     private final ServicePointFinder servicePointFinder;

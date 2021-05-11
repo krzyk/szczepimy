@@ -87,6 +87,14 @@ class ServicePointFinderTest {
     }
 
     @Test
+    public void bbb() {
+        Arrays.stream(Voivodeship.values())
+            .map(Voivodeship::urlName)
+            .map(v -> "{%% include stats/%s.html %%}".formatted(v))
+            .forEach(System.out::println);
+    }
+
+    @Test
     public void aaa() {
         var mapper = Main.getMapper();
         var finder = new ServicePointFinder(mapper, Map.of());

@@ -468,7 +468,7 @@ public class Main {
                 System.currentTimeMillis() - start,
                 (System.currentTimeMillis() - start) / results.size()
             );
-            new Stats(mapper).store(results);
+            new Stats(mapper, options.output).store(results);
         } catch (Exception ex) {
             LOG.error("Received error in formatter/stats", ex);
             telegram("Error in formatter (%s)".formatted(ex.getMessage()));
