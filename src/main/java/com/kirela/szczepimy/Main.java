@@ -328,11 +328,13 @@ public class Main {
 
 
             new SearchCity("Rzeszów", Voivodeship.PODKARPACKIE, 1),
+            new SearchCity("Rzeszów", Voivodeship.PODKARPACKIE, 1, UUID.fromString("7760b351-dcd8-4919-b2de-745b9219f9f1")), // Graniczna 4b/2b
             new SearchCity("Mielec", Voivodeship.PODKARPACKIE, 1),
             new SearchCity("Krosno", Voivodeship.PODKARPACKIE, 1),
             new SearchCity("Przemyśl", Voivodeship.PODKARPACKIE, 1),
             new SearchCity("Jasło", Voivodeship.PODKARPACKIE, 1),
             new SearchCity("Tarnobrzeg", Voivodeship.PODKARPACKIE, 1),
+            new SearchCity("Zgłobień", Voivodeship.PODKARPACKIE, 1),
 
 
             new SearchCity("Gdańsk", Voivodeship.POMORSKIE, 1),
