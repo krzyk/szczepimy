@@ -397,13 +397,13 @@ public class Main {
                 LOG.info("Processing {}", searchCity);
                 Optional<Gmina> gmina = Optional.ofNullable(searchCity.name())
                     .map(n -> gminaFinder.find(n, searchCity.voivodeship));
-                for (VaccineType vaccine : options.vaccineTypes) {
+                for (List<VaccineType> vaccines : vaccineSets(options)) {
                     LocalDateTime startDate = LocalDateTime.now().withHour(1).withMinute(0).withSecond(0).withNano(0);
                     final LocalDateTime endDate = startDate.plusWeeks(4).withHour(23).withMinute(59);
 //                    final LocalDateTime endDate = LocalDateTime.of(2021, 5, 31, 23, 59);
                     int tries = 0;
                     while (startDate.isBefore(endDate)) {
-                        LOG.info("city={}, vaccine={}: try={}, start={}, end={}, pointId={}", searchCity.name(), vaccine, tries, startDate, endDate, searchCity.servicePointId());
+                        LOG.info("city={}, vaccine={}: try={}, start={}, end={}, pointId={}", searchCity.name(), vaccines, tries, startDate, endDate, searchCity.servicePointId());
                         var search = new Search(
                             new DateRange(startDate.toLocalDate(), endDate.toLocalDate()),
                             new TimeRange(
@@ -411,7 +411,7 @@ public class Main {
                                 endDate.toLocalTime()
                             ),
                             creds.prescriptionId(),
-                            List.of(vaccine),
+                            vaccines,
                             searchCity.voivodeship(),
                             gmina.orElse(null),
                             searchCity.servicePointId(),
@@ -419,8 +419,8 @@ public class Main {
                         );
                         searchCount++;
                         final Set<BasicSlotWithSearch> list =
-                            webSearch(options, creds, client, mapper, searchCity, vaccine, search);
-                        LOG.info("Found for {}, {}: {} slots", searchCity.name, vaccine, list.size());
+                            webSearch(options, creds, client, mapper, searchCity, vaccines, search);
+                        LOG.info("Found for {}, {}: {} slots", searchCity.name, vaccines, list.size());
                         startDate = list.stream()
                             .map(BasicSlotWithSearch::startAt)
                             .map(s -> s.atZone(ZoneId.of("Europe/Warsaw")))
@@ -437,8 +437,16 @@ public class Main {
                                 .collect(Collectors.toSet())
                         );
                         tries++;
-                        if (tries >= 10 || vaccine == VaccineType.AZ || (searchCity.name() != null && !voiCities.contains(searchCity.name()))) {
-                            LOG.info("More data exists for {}, {}, {}", searchCity.voivodeship(), searchCity.name(), searchCity.vaccines());
+                        if (tries >= 10 || unwantedVaccines(vaccines) || (searchCity.name() != null && !voiCities.contains(searchCity.name()))) {
+                            if (!unwantedVaccines(vaccines) && tries > 1) {
+                                LOG.info(
+                                    "More data exists for {}, {}, {}, last startDate={}",
+                                    searchCity.voivodeship(),
+                                    searchCity.name(),
+                                    vaccines,
+                                    startDate
+                                );
+                            }
                             break;
                         }
                     }
@@ -468,9 +476,18 @@ public class Main {
         }
     }
 
+    private static boolean unwantedVaccines(List<VaccineType> vaccines) {
+        return vaccines.equals(List.of(VaccineType.AZ));
+    }
+
+    private static Set<List<VaccineType>> vaccineSets(Options options) {
+        return options.vaccineTypes.stream()
+            .map(List::of)
+            .collect(Collectors.toSet());
+    }
 
     private static Set<BasicSlotWithSearch> webSearch(Options options, Creds creds, HttpClient client, ObjectMapper mapper,
-        SearchCity searchCity, VaccineType vaccine, Search search) throws IOException, InterruptedException {
+        SearchCity searchCity, List<VaccineType> vaccines, Search search) throws IOException, InterruptedException {
         String searchStr = mapper.writeValueAsString(search);
         int retryCount = 0;
         Thread.sleep(options.wait);
@@ -489,7 +506,7 @@ public class Main {
                         Paths.get(
                             options.output,
                             "logs",
-                            "%s_%s.%s.json".formatted(searchCity.name(), vaccine, Instant.now())
+                            "%s_%s.%s.json".formatted(searchCity.name(), vaccines, Instant.now())
                         ),
                         out.body(),
                         StandardOpenOption.CREATE_NEW
@@ -499,7 +516,7 @@ public class Main {
                     if (out.body().contains("ERR_RATE_LIMITED")) {
                         LOG.warn("retrying");
                         retryCount++;
-                        Thread.sleep(500 + new Random().nextInt(500));
+                        Thread.sleep(300 + new Random().nextInt(300));
                         continue;
                     } else {
                         throw new IllegalArgumentException("Received error: %s".formatted(out.body()));

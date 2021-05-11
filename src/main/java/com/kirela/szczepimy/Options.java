@@ -32,7 +32,7 @@ public class Options {
     boolean storeLogs = false;
 
     @CommandLine.Option(names = "-m", description = "Max retries if limited (default: ${DEFAULT-VALUE})")
-    int retries = 20;
+    int retries = 30;
 
     @CommandLine.Option(names = "--wait", description = "Wait time between searches (default: ${DEFAULT-VALUE})")
     int wait = 900;
