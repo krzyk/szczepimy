@@ -214,7 +214,7 @@ public class TableFormatter {
             </tr>
             """.formatted(
             slots.size() > LARGE_SLOT_START ? "class=\"large-slot\"" : "",
-            searchMeta(middleSlot.search(), middleSlot.startAt()),
+            searchMeta(middleSlot.search(), middleSlot.startAt(), slot.servicePoint().place()),
             cords.lat(),
             cords.lon(),
             maybe.map(ExtendedServicePoint::id).map(String::valueOf).orElse(""),
@@ -249,8 +249,9 @@ public class TableFormatter {
         );
     }
 
-    private String searchMeta(Main.Search search, Instant startAt) {
+    private String searchMeta(Main.Search search, Instant startAt, String place) {
         List<String> datas = new ArrayList<>();
+        datas.add("data-place=\"%s\"".formatted(place));
         datas.add("data-search-slot-time=\"%s\"".formatted(LocalTime.ofInstant(startAt, ZONE).truncatedTo(ChronoUnit.MINUTES)));
         datas.add("data-search-date-from=\"%s\"".formatted(search.dayRange().from()));
         datas.add("data-search-date-to=\"%s\"".formatted(search.dayRange().to()));
