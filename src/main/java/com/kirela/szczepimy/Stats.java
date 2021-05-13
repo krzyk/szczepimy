@@ -90,7 +90,7 @@ public class Stats {
                     VoivodeshipWithDate::voivodeship,
                     Collectors.groupingBy(
                         VoivodeshipWithDate::vaccineType,
-                        Collectors.maxBy(Comparator.comparingLong(v -> v.date().toEpochDay()))
+                        Collectors.minBy(Comparator.comparingLong(v -> v.date().toEpochDay()))
                     )
                 )
             );
