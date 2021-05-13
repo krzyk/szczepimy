@@ -84,7 +84,8 @@ public class ServicePointFinder {
     private static ServicePoint correctData(ServicePoint point) {
         String address = normalize(point.address())
             .trim()
-            .replaceAll("^NA ([0-9])", point.place() + " $1");
+            .replaceAll("^NA ([0-9])", point.place() + " $1")
+            .replaceAll("^brak ([0-9])", point.place() + " $1");
         String place = point.place()
             .replaceAll("DZIEGOWICE", "DZIERGOWICE");
         if (point.place().equals("SĘDZISZÓW MŁP.") && point.address().equals("3-GO MAJA 2")) {
