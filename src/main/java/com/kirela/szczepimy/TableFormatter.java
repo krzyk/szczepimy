@@ -42,7 +42,8 @@ public class TableFormatter {
     private final PlaceFinder placeFinder;
 
     private final Map<UUID, String> phoneCorrections = Map.ofEntries(
-        Map.entry(UUID.fromString("5e5d3118-2bab-466d-8546-649d4dc11471"), ""),
+        Map.entry(UUID.fromString("6b416e04-cd63-4164-b74b-7a5da39aee4e"), "616771011"),
+        Map.entry(UUID.fromString("5e5d3118-2bab-466d-8546-649d4dc11471"), ""), // bo nie chcą odbierać, kierują na 989
         Map.entry(UUID.fromString("7c6bccd4-8a99-4b47-8a1b-eb3ef6f33258"), "123797167 123797115"),
         Map.entry(UUID.fromString("d199b3c1-d47c-45c2-be41-34d1133f404c"), "587270505"), // (potem wewnętrzny 4), Dębowa 21, Gdańsk
         Map.entry(UUID.fromString("98d02de7-2c97-48ba-a0dd-2586bac96146"), "222990354"), //
@@ -79,19 +80,23 @@ public class TableFormatter {
                     .thenComparing(ExtendedResult.Slot::startAt)
             ).toList();
 
-        Map<Voivodeship, Map<LocalDate, Map<ExtendedResult.ServicePoint, List<ExtendedResult.Slot>>>> groupByVoi =
-            sorted.stream()
-                .collect(
+//        Map<Voivodeship, Map<LocalDate, Map<ExtendedResult.ServicePoint, List<ExtendedResult.Slot>>>> groupByVoi =
+        Map<Voivodeship, Map<LocalDate, Map<VaccineType, Map<ExtendedResult.ServicePoint, List<ExtendedResult.Slot>>>>>
+            groupByVoi = sorted.stream()
+            .collect(
+                Collectors.groupingBy(
+                    k -> k.servicePoint().voivodeship(),
                     Collectors.groupingBy(
-                        k -> k.servicePoint().voivodeship(),
+                        k -> LocalDate.ofInstant(k.startAt(), ZONE),
                         Collectors.groupingBy(
-                            k -> LocalDate.ofInstant(k.startAt(), ZONE),
+                            ExtendedResult.Slot::vaccineType,
                             Collectors.groupingBy(ExtendedResult.Slot::servicePoint)
                         )
                     )
-                );
+                )
+            );
 
-        for (Map.Entry<Voivodeship, Map<LocalDate, Map<ExtendedResult.ServicePoint, List<ExtendedResult.Slot>>>> entry : groupByVoi
+        for (Map.Entry<Voivodeship, Map<LocalDate, Map<VaccineType, Map<ExtendedResult.ServicePoint, List<ExtendedResult.Slot>>>>> entry : groupByVoi
             .entrySet()) {
             Voivodeship voivodeship = entry.getKey();
             var voiFile = Paths.get(outputDirectory, "%s.html".formatted(voivodeship.urlName()));
@@ -138,48 +143,52 @@ public class TableFormatter {
                 StandardOpenOption.CREATE_NEW
             );
 
-            for (Map.Entry<LocalDate, Map<ExtendedResult.ServicePoint, List<ExtendedResult.Slot>>> mapEntry : entry.getValue()
+            for (Map.Entry<LocalDate, Map<VaccineType, Map<ExtendedResult.ServicePoint, List<ExtendedResult.Slot>>>> mapEntry : entry.getValue()
                 .entrySet()) {
                 LocalDate date = mapEntry.getKey();
-                for (Map.Entry<ExtendedResult.ServicePoint, List<ExtendedResult.Slot>> listEntry : mapEntry.getValue()
-                    .entrySet()) {
-                    ExtendedResult.ServicePoint servicePoint = listEntry.getKey();
-                    List<ExtendedResult.Slot> slots = listEntry.getValue();
-                    ExtendedResult.Slot slot = slots.get(0);
-                    List<String> slotTimes = slots.stream()
-                        .map(s -> LocalTime.ofInstant(s.startAt(), ZONE))
-                        .sorted()
-                        .distinct()
-                        .map(t -> DateTimeFormatter.ofPattern("HH:mm", Locale.forLanguageTag("pl")).format(t))
-                        .toList();
-//                        .collect(Collectors.joining("<br/>"));
+                for (Map.Entry<VaccineType, Map<ExtendedResult.ServicePoint, List<ExtendedResult.Slot>>> typeMapEntry : mapEntry
+                    .getValue().entrySet()) {
 
-                    String times;
+                    for (Map.Entry<ExtendedResult.ServicePoint, List<ExtendedResult.Slot>> listEntry : typeMapEntry.getValue()
+                        .entrySet()) {
+                        ExtendedResult.ServicePoint servicePoint = listEntry.getKey();
+                        List<ExtendedResult.Slot> slots = listEntry.getValue();
+                        ExtendedResult.Slot slot = slots.get(0);
+                        List<String> slotTimes = slots.stream()
+                            .map(s -> LocalTime.ofInstant(s.startAt(), ZONE))
+                            .sorted()
+                            .distinct()
+                            .map(t -> DateTimeFormatter.ofPattern("HH:mm", Locale.forLanguageTag("pl")).format(t))
+                            .toList();
+                        //                        .collect(Collectors.joining("<br/>"));
 
-                    // https://github.com/szczepienia/szczepienia.github.io/issues/new?labels=incorrect_phone&title=Z%C5%82y+number+telefonu+do+plac%C3%B3wki+(id=1234)
-                    if (slots.size() > LARGE_SLOT_START) {
-                        times = """
-                            <div class="slot-count">(terminów: <strong>%d</strong>)</div>
-                            <div class="toggle-times">%s</div>
-                            <div class="extended-times">
-                            %s
-                            </div>
-                            <br/>
-                            """.formatted(
-                            slots.size(),
-                            slotTimes.get(0),
-                            String.join("<br/>", slotTimes.subList(1, slotTimes.size()))
-                        );
-                    } else {
-                        times = String.join("<br/>", slotTimes);
+                        String times;
+
+                        // https://github.com/szczepienia/szczepienia.github.io/issues/new?labels=incorrect_phone&title=Z%C5%82y+number+telefonu+do+plac%C3%B3wki+(id=1234)
+                        if (slots.size() > LARGE_SLOT_START) {
+                            times = """
+                                <div class="slot-count">(terminów: <strong>%d</strong>)</div>
+                                <div class="toggle-times">%s</div>
+                                <div class="extended-times">
+                                %s
+                                </div>
+                                <br/>
+                                """.formatted(
+                                slots.size(),
+                                slotTimes.get(0),
+                                String.join("<br/>", slotTimes.subList(1, slotTimes.size()))
+                            );
+                        } else {
+                            times = String.join("<br/>", slotTimes);
+                        }
+
+                        Optional<ExtendedServicePoint> maybe = servicePointFinder.findByAddress(slot.servicePoint());
+                        Coordinates cords = maybe.map(e -> new Coordinates(e.lat(), e.lon()))
+                            .orElse(coordsCorrections.getOrDefault(slot.servicePoint().id(), new Coordinates("", "")));
+
+                        final String slotRow = slotRow(voivodeship, slots, slot, times, maybe, cords);
+                        Files.writeString(voiFile, slotRow, StandardOpenOption.APPEND, StandardOpenOption.CREATE);
                     }
-
-                    Optional<ExtendedServicePoint> maybe = servicePointFinder.findByAddress(slot.servicePoint());
-                    Coordinates cords = maybe.map(e -> new Coordinates(e.lat(), e.lon()))
-                        .orElse(coordsCorrections.getOrDefault(slot.servicePoint().id(), new Coordinates("", "")));
-
-                    final String slotRow = slotRow(voivodeship, slots, slot, times, maybe, cords);
-                    Files.writeString(voiFile, slotRow, StandardOpenOption.APPEND, StandardOpenOption.CREATE);
                 }
             }
 
