@@ -478,8 +478,8 @@ public class Main {
     }
 
     private static boolean unwantedVaccines(List<VaccineType> vaccines) {
-//        return vaccines.equals(List.of(VaccineType.AZ));
-        return false;
+        return vaccines.equals(List.of(VaccineType.AZ));
+//        return false;
     }
 
     private static Set<List<VaccineType>> vaccineSets(Options options) {
