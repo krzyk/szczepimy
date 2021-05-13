@@ -484,7 +484,7 @@ public class Main {
     private static boolean finishLoop(Set<String> voiCities, SearchCity searchCity, List<VaccineType> vaccines,
         int tries, Set<SlotWithVoivodeship> lastResults, int wantedTries, int unwantedTries) {
 
-        if (unwantedVaccines(vaccines) || lastResults.isEmpty() || tries >= wantedTries  || (tries >= unwantedTries && searchCity.name() != null && !voiCities.contains(searchCity.name()))) {
+        if ((unwantedVaccines(vaccines) && tries >= unwantedTries) || lastResults.isEmpty() || tries >= wantedTries  || (tries >= unwantedTries && searchCity.name() != null && !voiCities.contains(searchCity.name()))) {
             return true;
         }
         return false;
@@ -502,7 +502,8 @@ public class Main {
 //            List.of(VaccineType.MODERNA, VaccineType.JJ),
 //            List.of(VaccineType.AZ)
             List.of(VaccineType.PFIZER),
-            List.of(VaccineType.MODERNA, VaccineType.JJ, VaccineType.AZ)
+            List.of(VaccineType.MODERNA, VaccineType.JJ),
+            List.of(VaccineType.AZ)
         );
 //        return options.vaccineTypes.stream()
 //            .map(List::of)
