@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -47,9 +48,9 @@ public class Stats {
                 voiFile.toFile().delete();
             }
             Files.writeString(voiFile, """
-                <tr>
+                <tr data-date="%s">
                     <td>%s</td>
-                """.formatted(voivodeship.readable()),
+                """.formatted(LocalDateTime.now(), voivodeship.readable()),
                 StandardOpenOption.CREATE_NEW
             );
             for (VaccineType vaccine : List.of(VaccineType.PFIZER, VaccineType.MODERNA, VaccineType.JJ, VaccineType.AZ)) {
@@ -104,9 +105,9 @@ public class Stats {
                 voiFile.toFile().delete();
             }
             Files.writeString(voiFile, """
-                <tr>
+                <tr data-date="%s">
                     <td>%s</td>
-                """.formatted(voivodeship.readable()),
+                """.formatted(LocalDateTime.now(), voivodeship.readable()),
                 StandardOpenOption.CREATE_NEW
             );
             for (VaccineType vaccine : List.of(VaccineType.PFIZER, VaccineType.MODERNA, VaccineType.JJ, VaccineType.AZ)) {
