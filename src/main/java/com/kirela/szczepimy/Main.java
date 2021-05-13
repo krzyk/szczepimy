@@ -438,8 +438,10 @@ public class Main {
                             .collect(Collectors.toSet());
                         results.addAll(lastResults);
                         tries++;
-                        if (lastResults.isEmpty() || tries >= 10 || unwantedVaccines(vaccines) || (searchCity.name() != null && !voiCities.contains(searchCity.name()))) {
-                            if (!unwantedVaccines(vaccines) && tries > 1 && !lastResults.isEmpty()) {
+                        final int unwantedTries = 2;
+                        final int wantedTries = 10;
+                        if (lastResults.isEmpty() || tries >= wantedTries || (unwantedVaccines(vaccines) && tries >= unwantedTries) || (searchCity.name() != null && !voiCities.contains(searchCity.name()))) {
+                            if (!unwantedVaccines(vaccines) && tries > unwantedTries && !lastResults.isEmpty()) {
                                 LOG.info(
                                     "More data exists for {}, {}, {}, last startDate={}",
                                     searchCity.voivodeship(),

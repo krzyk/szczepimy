@@ -42,6 +42,8 @@ public class TableFormatter {
     private final PlaceFinder placeFinder;
 
     private final Map<UUID, String> phoneCorrections = Map.ofEntries(
+        Map.entry(UUID.fromString("b0408af7-d22b-45af-9aab-0dfc61816483"), "124248600"),
+        Map.entry(UUID.fromString("7760b351-dcd8-4919-b2de-745b9219f9f1"), "517177267"),
         Map.entry(UUID.fromString("6b416e04-cd63-4164-b74b-7a5da39aee4e"), "616771011"),
         Map.entry(UUID.fromString("5e5d3118-2bab-466d-8546-649d4dc11471"), ""), // bo nie chcą odbierać, kierują na 989
         Map.entry(UUID.fromString("7c6bccd4-8a99-4b47-8a1b-eb3ef6f33258"), "123797167 123797115"),
