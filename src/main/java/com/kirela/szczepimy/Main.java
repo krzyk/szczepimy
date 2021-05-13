@@ -440,7 +440,7 @@ public class Main {
                             .collect(Collectors.toSet());
                         results.addAll(lastResults);
                         tries++;
-                        final int unwantedTries = 3;
+                        final int unwantedTries = 1;
                         final int wantedTries = 12;
                         if (finishLoop(voiCities, searchCity, vaccines, tries, lastResults, wantedTries, unwantedTries)) {
                             if (!unwantedVaccines(vaccines) && tries > unwantedTries && !lastResults.isEmpty()) {
@@ -496,18 +496,18 @@ public class Main {
     }
 
     private static Set<List<VaccineType>> vaccineSets(Options options) {
-        return Set.of(
+//        return Set.of(
 //            List.of(VaccineType.MODERNA),
 //            List.of(VaccineType.JJ)
 //            List.of(VaccineType.MODERNA, VaccineType.JJ),
 //            List.of(VaccineType.AZ)
-            List.of(VaccineType.PFIZER),
-            List.of(VaccineType.MODERNA, VaccineType.JJ),
-            List.of(VaccineType.AZ)
-        );
-//        return options.vaccineTypes.stream()
-//            .map(List::of)
-//            .collect(Collectors.toSet());
+//            List.of(VaccineType.PFIZER),
+//            List.of(VaccineType.MODERNA, VaccineType.JJ),
+//            List.of(VaccineType.AZ)
+//        );
+        return options.vaccineTypes.stream()
+            .map(List::of)
+            .collect(Collectors.toSet());
     }
 
     private static Set<BasicSlotWithSearch> webSearch(Options options, Creds creds, HttpClient client, ObjectMapper mapper,
