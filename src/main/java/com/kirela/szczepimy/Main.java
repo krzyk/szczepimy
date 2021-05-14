@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.github.mizosoft.methanol.MoreBodyHandlers;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -111,7 +112,7 @@ public class Main {
 
         var creds = new Creds(options.csrf, options.sid, options.prescriptionId);
         HttpClient client = HttpClient.newBuilder()
-            .version(HttpClient.Version.HTTP_1_1)
+//            .version(HttpClient.Version.HTTP_1_1)
             .followRedirects(HttpClient.Redirect.ALWAYS)
             .build();
 
@@ -389,10 +390,10 @@ public class Main {
 
 
         STATS.info("Preparation time: {}", System.currentTimeMillis() - start);
-        start = System.currentTimeMillis();
         int searchCount = 0;
         try {
             start = System.currentTimeMillis();
+            long lastSearchTime = 0;
             for (SearchCity searchCity : Stream.concat(findVoi.stream(), find.stream())
                 .filter(s -> options.voivodeships.contains(s.voivodeship()))
                 .toList()) {
@@ -404,7 +405,6 @@ public class Main {
                     final LocalDateTime endDate = startDate.plusWeeks(4).withHour(23).withMinute(59);
 //                    final LocalDateTime endDate = LocalDateTime.of(2021, 5, 31, 23, 59);
                     int tries = 0;
-                    long lastSearchTime = System.currentTimeMillis();
                     while (startDate.isBefore(endDate)) {
                         LOG.info("city={}, vaccine={}: try={}, start={}, end={}, pointId={}", searchCity.name(), vaccines, tries, startDate, endDate, searchCity.servicePointId());
                         var search = new Search(
@@ -421,9 +421,16 @@ public class Main {
                             null
                         );
                         searchCount++;
-                        final Set<BasicSlotWithSearch> list =
-                            webSearch(options, creds, client, mapper, searchCity, vaccines, search, lastSearchTime);
+                        long now = System.currentTimeMillis();
+                        LOG.info("time since last search = {}", now - lastSearchTime);
+                        if (now - lastSearchTime < options.wait) {
+                            Thread.sleep(options.wait - (now - lastSearchTime));
+                        }
                         lastSearchTime = System.currentTimeMillis();
+                        String body = webSearch(options, creds, client, mapper, searchCity, vaccines, search);
+
+                        final Set<BasicSlotWithSearch> list = Optional.ofNullable(mapper.readValue(body, Result.class).list()).orElse(List.of()).stream()
+                            .map(s -> new BasicSlotWithSearch(s, search)).collect(Collectors.toSet());
                         startDate = list.stream()
                             .map(BasicSlotWithSearch::startAt)
                             .map(s -> s.atZone(ZoneId.of("Europe/Warsaw")))
@@ -510,13 +517,11 @@ public class Main {
             .collect(Collectors.toSet());
     }
 
-    private static Set<BasicSlotWithSearch> webSearch(Options options, Creds creds, HttpClient client, ObjectMapper mapper,
-        SearchCity searchCity, List<VaccineType> vaccines, Search search, long lastSearchTime) throws IOException, InterruptedException {
+    private static String webSearch(Options options, Creds creds, HttpClient client, ObjectMapper mapper,
+        SearchCity searchCity, List<VaccineType> vaccines, Search search) throws IOException, InterruptedException {
         String searchStr = mapper.writeValueAsString(search);
         int retryCount = 0;
         long now = System.currentTimeMillis();
-        LOG.info("time since last search = {}", now - lastSearchTime);
-        Thread.sleep(options.wait - (now - lastSearchTime));
         try {
             for (int i = 0; i < options.retries; i++) {
                 long searchStart = System.currentTimeMillis();
@@ -524,8 +529,7 @@ public class Main {
                     requestBuilder(creds).uri(URI.create(
                         "https://pacjent.erejestracja.ezdrowie.gov.pl/api/calendarSlots/find"))
                         .POST(HttpRequest.BodyPublishers.ofString(searchStr)).build(),
-
-                    HttpResponse.BodyHandlers.ofString()
+                    MoreBodyHandlers.decoding(HttpResponse.BodyHandlers.ofString())
                 );
                 STATS.info("time per search: {}, size: {}", System.currentTimeMillis() - searchStart, out.body().length());
                 if (options.storeLogs) {
@@ -550,9 +554,7 @@ public class Main {
                         throw new IllegalArgumentException("Received error: %s".formatted(out.body()));
                     }
                 }
-
-                return Optional.ofNullable(mapper.readValue(out.body(), Result.class).list()).orElse(List.of()).stream()
-                    .map(s -> new BasicSlotWithSearch(s, search)).collect(Collectors.toSet());
+                return out.body();
             }
 
             throw new IllegalArgumentException("Exceeded retry count");
@@ -560,7 +562,7 @@ public class Main {
             if (retryCount > 0) {
                 LOG.error("Retries count = {}", retryCount);
             }
-            STATS.info("total search time: {}", System.currentTimeMillis() - now);
+            STATS.info("total search time: {} (retries = {})", System.currentTimeMillis() - now, retryCount);
         }
     }
 
@@ -575,14 +577,16 @@ public class Main {
         return HttpRequest.newBuilder()
             .header(USER_AGENT, CHROME)
             .header("Accept", "application/json, text/plain, */*")
+            .header("Accept-Encoding", "gzip")
             .header("Referer", "https://pacjent.erejestracja.ezdrowie.gov.pl/wizyty")
             .header("Cookie", "patient_sid=%s".formatted(creds.sid()))
             .header("X-Csrf-Token", creds.csrf())
             .header("Sec-Fetch-Dest", "empty")
             .header("Sec-Fetch-Mode", "cors")
             .header("Sec-Fetch-Site", "same-origin")
-            .header("TE", "Trailers")
-            .header("Upgrade-Insecure-Requests", "1");
+//            .header("TE", "Trailers")  // breaks http 2
+            .header("Upgrade-Insecure-Requests", "1")
+                    ;
     }
 
     private static void telegram(String msg) {

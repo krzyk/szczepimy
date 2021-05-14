@@ -35,5 +35,5 @@ public class Options {
     int retries = 50;
 
     @CommandLine.Option(names = "--wait", description = "Wait time between searches (default: ${DEFAULT-VALUE})")
-    int wait = 900;
+    int wait = 1000;
 }
