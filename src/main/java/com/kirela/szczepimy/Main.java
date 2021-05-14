@@ -440,7 +440,7 @@ public class Main {
                             .collect(Collectors.toSet());
                         results.addAll(lastResults);
                         tries++;
-                        final int unwantedTries = 1;
+                        final int unwantedTries = 2;
                         final int wantedTries = 12;
                         if (finishLoop(voiCities, searchCity, vaccines, tries, lastResults, wantedTries, unwantedTries)) {
                             if (!unwantedVaccines(vaccines) && tries > unwantedTries && !lastResults.isEmpty()) {
