@@ -206,7 +206,7 @@ public class TableFormatter {
         String times, Optional<ExtendedServicePoint> maybe, Coordinates cords) {
         final ExtendedResult.Slot middleSlot = slots.get(slots.size() / 2);
         return """
-            <tr %s %s data-lat="%s" data-lon="%s" data-service-point-id="%s" data-service-point-uuid="%s">
+            <tr %s data-dow="%s" data-slots="%d" data-lat="%s" data-lon="%s" data-service-point-id="%s" data-service-point-uuid="%s">
                 <td>%s</td>
                 <td data-order="%d">%s</td>
                 <td class="dt-body-center times">%s</td>
@@ -223,8 +223,9 @@ public class TableFormatter {
                 </td>
             </tr>
             """.formatted(
-            slots.size() > LARGE_SLOT_START ? "class=\"large-slot\"" : "",
             searchMeta(middleSlot.search(), middleSlot.startAt(), slot.servicePoint().place()),
+            LocalDate.ofInstant(middleSlot.startAt(), ZONE).getDayOfWeek().name(),
+            slots.size(),
             cords.lat(),
             cords.lon(),
             maybe.map(ExtendedServicePoint::id).map(String::valueOf).orElse(""),

@@ -519,6 +519,7 @@ public class Main {
         Thread.sleep(options.wait - (now - lastSearchTime));
         try {
             for (int i = 0; i < options.retries; i++) {
+                long searchStart = System.currentTimeMillis();
                 HttpResponse<String> out = client.send(
                     requestBuilder(creds).uri(URI.create(
                         "https://pacjent.erejestracja.ezdrowie.gov.pl/api/calendarSlots/find"))
@@ -526,6 +527,7 @@ public class Main {
 
                     HttpResponse.BodyHandlers.ofString()
                 );
+                STATS.info("time per search: {}, size: {}", System.currentTimeMillis() - searchStart, out.body().length());
                 if (options.storeLogs) {
                     Paths.get(options.output, "logs").toFile().mkdirs();
                     Files.writeString(
@@ -558,6 +560,7 @@ public class Main {
             if (retryCount > 0) {
                 LOG.error("Retries count = {}", retryCount);
             }
+            STATS.info("total search time: {}", System.currentTimeMillis() - now);
         }
     }
 
