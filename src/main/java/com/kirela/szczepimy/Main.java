@@ -338,6 +338,9 @@ public class Main {
             new SearchCity("Jasło", Voivodeship.PODKARPACKIE, 1),
             new SearchCity("Tarnobrzeg", Voivodeship.PODKARPACKIE, 1),
             new SearchCity("Boguchwała", Voivodeship.PODKARPACKIE, 1),
+            new SearchCity("Ropczyce", Voivodeship.PODKARPACKIE, 1),
+            new SearchCity("Wielopole Skrzyńskie", Voivodeship.PODKARPACKIE, 1),
+
 
 
             new SearchCity("Gdańsk", Voivodeship.POMORSKIE, 1),
