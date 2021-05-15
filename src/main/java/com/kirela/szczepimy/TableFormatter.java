@@ -41,6 +41,15 @@ public class TableFormatter {
     private final Instant now;
     private final PlaceFinder placeFinder;
 
+    private final Map<UUID, String> addressCorrections = Map.ofEntries(
+        Map.entry(UUID.fromString("1f5a0ccb-6f8c-41cc-b173-b1d629de9d5f"), "Dębowa 23")
+    );
+
+
+    private final Map<UUID, Coordinates> coordsCorrections = Map.ofEntries(
+        Map.entry(UUID.fromString("1f5a0ccb-6f8c-41cc-b173-b1d629de9d5f"), new Coordinates("51.39519", "21.12633"))
+    );
+
     private final Map<UUID, String> phoneCorrections = Map.ofEntries(
         Map.entry(UUID.fromString("b0408af7-d22b-45af-9aab-0dfc61816483"), "124248600"),
         Map.entry(UUID.fromString("7760b351-dcd8-4919-b2de-745b9219f9f1"), "517177267"),
@@ -55,9 +64,6 @@ public class TableFormatter {
         Map.entry(UUID.fromString("81a97b5e-6159-4844-b1d9-c81e7f6d644e"), "690694186"),
         Map.entry(UUID.fromString("966e6b13-d82f-452c-9bec-53b284f9f83f"), "126372791"), // Podchorążych 3, Kraków
         Map.entry(UUID.fromString("c841eda9-ee36-46f6-8332-f451727edd26"), "123491500") // Lema 7, Kraków
-    );
-
-    private final Map<UUID, Coordinates> coordsCorrections = Map.of(
     );
 
     public TableFormatter(String outputDirectory, ObjectMapper mapper,
@@ -184,7 +190,8 @@ public class TableFormatter {
                         }
 
                         Optional<ExtendedServicePoint> maybe = servicePointFinder.findByAddress(slot.servicePoint());
-                        Coordinates cords = maybe.map(e -> new Coordinates(e.lat(), e.lon()))
+                        Coordinates cords = Optional.ofNullable(coordsCorrections.get(slot.servicePoint().id()))
+                            .or(() -> maybe.map(e -> new Coordinates(e.lat(), e.lon())))
                             .orElse(coordsCorrections.getOrDefault(slot.servicePoint().id(), new Coordinates("", "")));
 
                         final String slotRow = slotRow(voivodeship, slots, slot, times, maybe, cords);
@@ -399,7 +406,7 @@ public class TableFormatter {
     private String getAddress(ExtendedResult.Slot slot, Optional<ExtendedServicePoint> maybe) {
         final String address = "<div class=\"point-description\">%s</div><div class=\"point-address\">%s</div>".formatted(
             slot.servicePoint().name(),
-            slot.servicePoint().addressText()
+            addressCorrections.getOrDefault(slot.servicePoint().id(), slot.servicePoint().addressText())
         );
         if (maybe.isEmpty()) {
             return """
