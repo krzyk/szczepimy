@@ -437,8 +437,8 @@ public class Main {
                         final Set<BasicSlotWithSearch> list = Optional.ofNullable(mapper.readValue(body, Result.class).list()).orElse(List.of()).stream()
                             .map(s -> new BasicSlotWithSearch(s, search)).collect(Collectors.toSet());
 
-                        startDate = startDateFromMissingDates(startDate, endDate, list);
-//                        startDate = startDateFromLastFoundDate(endDate, list);
+//                        startDate = startDateFromMissingDates(startDate, endDate, list);
+                        startDate = startDateFromLastFoundDate(endDate, list);
                         LOG.info("Found for {}, {}: {} slots, nextDate = {}", searchCity.name, vaccines, list.size(), startDate);
 
                         final Set<SlotWithVoivodeship> lastResults = list.stream()
@@ -447,7 +447,7 @@ public class Main {
                         results.addAll(lastResults);
                         tries++;
                         final int unwantedTries = 1;
-                        final int wantedTries = 9;
+                        final int wantedTries = 13;
                         if (finishLoop(voiCities, searchCity, vaccines, tries, lastResults, wantedTries, unwantedTries)) {
                             if (!unwantedVaccines(vaccines) && tries > unwantedTries && !lastResults.isEmpty()) {
                                 LOG.info(
