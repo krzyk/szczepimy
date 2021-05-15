@@ -618,6 +618,7 @@ public class Main {
             .header("Sec-Fetch-Mode", "cors")
             .header("Sec-Fetch-Site", "same-origin")
 //            .header("TE", "Trailers")  // breaks http 2
+            .header("TE", "trailers")
             .header("Upgrade-Insecure-Requests", "1")
                     ;
     }
