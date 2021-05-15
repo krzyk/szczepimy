@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -34,6 +35,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
@@ -431,16 +433,10 @@ public class Main {
 
                         final Set<BasicSlotWithSearch> list = Optional.ofNullable(mapper.readValue(body, Result.class).list()).orElse(List.of()).stream()
                             .map(s -> new BasicSlotWithSearch(s, search)).collect(Collectors.toSet());
-                        startDate = list.stream()
-                            .map(BasicSlotWithSearch::startAt)
-                            .map(s -> s.atZone(ZoneId.of("Europe/Warsaw")))
-                            .map(ZonedDateTime::toLocalDateTime)
-                            //.map(s -> s.plusDays(1))
-                            .map(s -> s.plusMinutes(1))
-                            .distinct()
-                            .max(Comparator.naturalOrder())
-                            .orElse(endDate);
-                        LOG.info("Found for {}, {}: {} slots, lastDate = {}", searchCity.name, vaccines, list.size(), startDate);
+
+                        startDate = startDateFromMissingDates(startDate, endDate, list);
+//                        startDate = startDateFromLastFoundDate(endDate, list);
+                        LOG.info("Found for {}, {}: {} slots, nextDate = {}", searchCity.name, vaccines, list.size(), startDate);
 
                         final Set<SlotWithVoivodeship> lastResults = list.stream()
                             .map(s -> new SlotWithVoivodeship(s, searchCity.voivodeship()))
@@ -486,6 +482,40 @@ public class Main {
             LOG.error("Received error in formatter/stats", ex);
             telegram("Error in formatter (%s)".formatted(ex.getMessage()));
         }
+    }
+
+    private static LocalDateTime startDateFromLastFoundDate(LocalDateTime endDate, Set<BasicSlotWithSearch> list) {
+        LocalDateTime startDate;
+        startDate = list.stream()
+            .map(BasicSlotWithSearch::startAt)
+            .map(s -> s.atZone(ZoneId.of("Europe/Warsaw")))
+            .map(ZonedDateTime::toLocalDateTime)
+            //.map(s -> s.plusDays(1))
+            .map(s -> s.plusMinutes(1))
+            .distinct()
+            .max(Comparator.naturalOrder())
+            .orElse(endDate);
+        return startDate;
+    }
+
+    private static LocalDateTime startDateFromMissingDates(LocalDateTime startDate, LocalDateTime endDate,
+        Set<BasicSlotWithSearch> list) {
+        List<LocalDate> allDates = Stream.iterate(startDate.toLocalDate(), d -> d.plusDays(1))
+            .limit(ChronoUnit.DAYS.between(startDate, endDate))
+            .toList();
+        List<LocalDate> foundDates = list.stream()
+            .map(BasicSlotWithSearch::startAt)
+            .map(s -> s.atZone(ZoneId.of("Europe/Warsaw")))
+            .map(ZonedDateTime::toLocalDate)
+            .distinct()
+            .toList();
+        startDate = allDates.stream()
+            .filter(Predicate.not(foundDates::contains))
+            .map(LocalDate::atStartOfDay)
+            .sorted()
+            .findFirst()
+            .orElse(startDate.plusDays(1));
+        return startDate;
     }
 
     private static boolean finishLoop(Set<String> voiCities, SearchCity searchCity, List<VaccineType> vaccines,
