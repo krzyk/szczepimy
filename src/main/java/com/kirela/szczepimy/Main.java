@@ -447,7 +447,7 @@ public class Main {
                         results.addAll(lastResults);
                         tries++;
                         final int unwantedTries = 1;
-                        final int wantedTries = 13;
+                        final int wantedTries = 9;
                         if (finishLoop(voiCities, searchCity, vaccines, tries, lastResults, wantedTries, unwantedTries)) {
                             if (!unwantedVaccines(vaccines) && tries > unwantedTries && !lastResults.isEmpty()) {
                                 LOG.info(
