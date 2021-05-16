@@ -47,7 +47,8 @@ public class TableFormatter {
 
 
     private final Map<UUID, Coordinates> coordsCorrections = Map.ofEntries(
-        Map.entry(UUID.fromString("1f5a0ccb-6f8c-41cc-b173-b1d629de9d5f"), new Coordinates("51.39519", "21.12633"))
+        Map.entry(UUID.fromString("1f5a0ccb-6f8c-41cc-b173-b1d629de9d5f"), new Coordinates("51.39519", "21.12633")),
+        Map.entry(UUID.fromString("61d17a49-f298-4c46-937b-83dd1c53d31e"), new Coordinates("52.23744", "19.49534"))
     );
 
     private final Map<UUID, String> phoneCorrections = Map.ofEntries(
