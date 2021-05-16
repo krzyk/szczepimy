@@ -1,47 +1,46 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 set -x
 
-#      WIELKOPOLSKIE,DOLNOŚLĄSKIE,
-#      WARMIŃSKO_MAZURSKIE,KUJAWSKO_POMORSKIE,
-#      LUBELSKIE,LUBUSKIE,
-#      MAŁOPOLSKIE,PODKARPACKIE,
-#      OPOLSKIE,ŚLĄSKIE,
-#      PODLASKIE,MAZOWIECKIE,
-#      ŁÓDZKIE,ŚWIĘTOKRZYSKIE,
-#      POMORSKIE,ZACHODNIOPOMORSKIE,
-# 7 14 21 28 35 42 49 56 
-VOI=$1
+ALL_VOIS="WIELKOPOLSKIE DOLNOŚLĄSKIE WARMIŃSKO_MAZURSKIE KUJAWSKO_POMORSKIE LUBELSKIE LUBUSKIE MAŁOPOLSKIE PODKARPACKIE OPOLSKIE ŚLĄSKIE PODLASKIE MAZOWIECKIE ŁÓDZKIE ŚWIĘTOKRZYSKIE POMORSKIE ZACHODNIOPOMORSKIE"
+
+USER_ID=$1
+USER_COUNT=$2
 CLONE_DIR=$(mktemp -d)
 OUTPUT=$(pwd)/output
 
+echo "USER_ID=$USER_ID, USER_COUNT=$USER_COUNT"
 
-echo HOST=$HOST
+VOIS=$(echo $ALL_VOIS | awk '{for (i = '$USER_ID'; i <= NF; i+='$USER_COUNT') {print $i}}')
+#VOIS=$ALL_VOIS
 
-rm -rf $CLONE_DIR/*
+echo "VOIS = $VOIS";
 
-echo "Building"
-mvn -B clean package -DskipTests -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+source ~/.erejEnv
 
-echo "Generating new data"
-mkdir -p $OUTPUT
-java -jar target/szczepimy-1.0-SNAPSHOT.jar -p $EREJ_PID_PLUTA -s $EREJ_SID -c $EREJ_CSRF -t $OUTPUT -v $VOI
+P=$EREJ_PID_STASZEK
+S=$EREJ_SID
+C=$EREJ_CSRF
 
+for VOI in $VOIS; do
+    rm -rf $OUTPUT
+    mkdir -p $OUTPUT
+    java -jar /home/kkrason/dev/moje/szczepimy/target/szczepimy-1.0-SNAPSHOT.jar -p $P -s $S -c $C -t $OUTPUT -v $VOI --wait 900
 
-echo "Cloning destination git repository"
-git clone --single-branch --branch main "https://szczepienia:$PAT@github.com/szczepienia/szczepienia.github.io.git" "$CLONE_DIR"
-cd "$CLONE_DIR"
+    git pull --rebase --prune --tags
 
-echo "Adding git commit"
-git config user.email "82411728+szczepienia@users.noreply.github.com"
-git config user.name "szczepienia"
-cp $OUTPUT/*.html .
-git add *.html
-if git status | grep -q "Changes to be committed"
-then
-    git commit --message "remote update"
-    echo "Pushing git commit"
-    git push -u origin HEAD:main
-else
-    echo "No changes detected"
-fi
+    rsync -av $OUTPUT/ .
+    git add -v -A
+    git add _includes/stats
+
+    if git status | grep -q "Changes to be committed"
+    then
+        git commit --message "remote update"
+        echo "Pushing git commit"
+        git push -u origin HEAD:main || git pull --rebase --prune --tags &&  git push -u origin HEAD:main || git pull --rebase --prune --tags &&  git push -u origin HEAD:main
+    else
+        echo "No changes detected"
+    fi
+
+done
+

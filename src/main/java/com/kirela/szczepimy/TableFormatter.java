@@ -51,6 +51,7 @@ public class TableFormatter {
     );
 
     private final Map<UUID, String> phoneCorrections = Map.ofEntries(
+        Map.entry(UUID.fromString("4946ac25-d078-4942-8aa9-1137d10678e4"), "517177267"), // NZOZ Sokrates w Zgłobniu
         Map.entry(UUID.fromString("b0408af7-d22b-45af-9aab-0dfc61816483"), "124248600"),
         Map.entry(UUID.fromString("7760b351-dcd8-4919-b2de-745b9219f9f1"), "517177267"),
         Map.entry(UUID.fromString("6b416e04-cd63-4164-b74b-7a5da39aee4e"), "616771011"),
