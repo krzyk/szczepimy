@@ -295,6 +295,7 @@ public class Main {
             new SearchCity("Kutno", Voivodeship.ŁÓDZKIE, 1),
             new SearchCity("Pabianice", Voivodeship.ŁÓDZKIE, 1),
             new SearchCity("Zduńska Wola", Voivodeship.ŁÓDZKIE, 1),
+            new SearchCity("Łęczyca", Voivodeship.ŁÓDZKIE, 1),
 
 
             new SearchCity("Kraków", Voivodeship.MAŁOPOLSKIE, 1),
