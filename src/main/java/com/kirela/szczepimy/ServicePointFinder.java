@@ -48,7 +48,8 @@ public class ServicePointFinder {
         try {
             HttpResponse<String> out = client.send(
                 requestBuilder().uri(
-                    URI.create("https://www.gov.pl/api/data/covid-vaccination-point")
+//                    URI.create("https://www.gov.pl/api/data/covid-vaccination-point")
+                    URI.create("https://t1.kirela.com/vac.json")
                 ).GET().build(),
                 HttpResponse.BodyHandlers.ofString()
             );
