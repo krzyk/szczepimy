@@ -1,14 +1,12 @@
 package com.kirela.szczepimy;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.mizosoft.methanol.MoreBodyHandlers;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -21,20 +19,25 @@ import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashSet;
+import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -45,6 +48,7 @@ import picocli.CommandLine;
 public class Main {
     private static final Logger LOG = LogManager.getLogger(Main.class);
     private static final Logger STATS = LogManager.getLogger("STATS");
+    private static final int WANTED_TRIES = 13;
     // https://www.gov.pl/api/data/covid-vaccination-point   -> service-points.json
 
     // punkty adresowe z https://eteryt.stat.gov.pl/eTeryt/rejestr_teryt/udostepnianie_danych/baza_teryt/uzytkownicy_indywidualni/pobieranie/pliki_pelne.aspx?contrast=default
@@ -53,7 +57,6 @@ public class Main {
 
     // https://pacjent.erejestracja.ezdrowie.gov.pl/api/servicePoints/find
     // "{"voiID":"12","geoID":"1261011"}
-    private static final ExecutorService exec = Executors.newFixedThreadPool(1);
 
 //    public static record FoundAppointment(String id, LocalDateTime date, Specialization specialization, Clinic clinic, String  doctor) implements Comparable<FoundAppointment> {
 //        @Override
@@ -64,36 +67,8 @@ public class Main {
 
 
     record SlotWithVoivodeship(BasicSlotWithSearch slot, Voivodeship voivodeship) {};
-    public static record DateRange(LocalDate from, LocalDate to) {}
-
-    public static record TimeRange(
-        @JsonSerialize(using = LocalTimeSerializer.class)
-        LocalTime from,
-        @JsonSerialize(using = LocalTimeSerializer.class)
-        LocalTime to
-    ) {}
 
     private static record Creds(String csrf, String sid, String prescriptionId) {}
-
-    public static record Search(
-        DateRange dayRange,
-        TimeRange hourRange,
-        String prescriptionId, List<VaccineType> vaccineTypes, Voivodeship voiId, Gmina geoId, UUID servicePointId,
-        List<String> mobilities
-    ) {
-        public Search withNewDateRange(DateRange newDateRange) {
-            return new Search(
-                newDateRange,
-                hourRange,
-                prescriptionId,
-                vaccineTypes,
-                voiId,
-                geoId,
-                servicePointId,
-                mobilities
-            );
-        }
-    }
 
     private static final String CHROME = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36";
     private static final String USER_AGENT = "User-Agent";
@@ -114,367 +89,281 @@ public class Main {
 
         var creds = new Creds(options.csrf, options.sid, options.prescriptionId);
         HttpClient client = HttpClient.newBuilder()
-//            .version(HttpClient.Version.HTTP_1_1)
             .followRedirects(HttpClient.Redirect.ALWAYS)
             .build();
 
         ObjectMapper mapper = getMapper();
 
-        //        mapper.setDefaultSetterInfo(JsonSetter.Value.forContentNulls(Nulls.AS_EMPTY));
-
-//        for (City city : Set.of(City.KRAKÓW, City.RZESZÓW)) {
-
-        Set<String> voiCities = Set.of(
-            "Wrocław",
-            "Bydgoszcz",
-            "Toruń",
-            "Lublin",
-            "Zielona Góra",
-            "Gorzów Wielkopolski",
-            "Łódź",
-            "Kraków",
-            "Warszawa",
-            "Opole",
-            "Białystok",
-            "Rzeszów",
-            "Gdańsk",
-            "Gdynia",
-            "Katowice",
-            "Kielce",
-            "Olsztyn",
-            "Poznań",
-            "Szczecin"
-        );
         List<SearchCity> findVoi = Arrays.stream(Voivodeship.values())
-            .map(v -> new SearchCity(null, v, 10))
+            .map(v -> new SearchCity(null, v, WANTED_TRIES))
             .toList();
 
-//        List<SearchCity> findVoi = List.of();
         List<SearchCity> find = List.of(
-//            new SearchCity("Rzeszów", Voivodeship.PODKARPACKIE, 7),
-//            new SearchCity("Mielec", Voivodeship.PODKARPACKIE, 7),
-//            new SearchCity("Tarnobrzeg", Voivodeship.PODKARPACKIE, 7),
-//            new SearchCity("Przemyśl", Voivodeship.PODKARPACKIE, 7),
-//            new SearchCity("Krosno", Voivodeship.PODKARPACKIE, 7),
-//            new SearchCity("Kraków", Voivodeship.MAŁOPOLSKIE, 7),
-//            new SearchCity("Tarnów", Voivodeship.MAŁOPOLSKIE, 28),
-//            new SearchCity("Nowy Sącz", Voivodeship.MAŁOPOLSKIE, 55),
-//            new SearchCity("Wadowice", Voivodeship.MAŁOPOLSKIE, 55),
-//            new SearchCity("Rabka-Zdrój", Voivodeship.MAŁOPOLSKIE, 55),
-//            new SearchCity("Krzeszowice", Voivodeship.MAŁOPOLSKIE, 55),
-//            new SearchCity("Warszawa", Voivodeship.MAZOWIECKIE, 7),
-//            new SearchCity("Radom", Voivodeship.MAZOWIECKIE, 7),
-//            new SearchCity("Ciechanów", Voivodeship.MAZOWIECKIE, 7),
-//            new SearchCity("Piaseczno", Voivodeship.MAZOWIECKIE, 7),
-//            new SearchCity("Konstancin-Jeziorna", Voivodeship.MAZOWIECKIE, 7),
-//            new SearchCity("Solec nad Wisłą", Voivodeship.MAZOWIECKIE, 7),
-//            new SearchCity("Mińsk Mazowiecki", Voivodeship.MAZOWIECKIE, 7),
-//            new SearchCity("Otwock", Voivodeship.MAZOWIECKIE, 7),
-//            new SearchCity("Serock", Voivodeship.MAZOWIECKIE, 7),
-//            new SearchCity("Legionowo", Voivodeship.MAZOWIECKIE, 7),
-//            new SearchCity("Pułtusk", Voivodeship.MAZOWIECKIE, 7),
-//            new SearchCity("Lublin", Voivodeship.LUBELSKIE, 7),
-//            new SearchCity("Zamość", Voivodeship.LUBELSKIE, 7),
-//            new SearchCity("Świdnik", Voivodeship.LUBELSKIE, 7),
-//            new SearchCity("Łuków", Voivodeship.LUBELSKIE, 7),
-//            new SearchCity("Biłgoraj", Voivodeship.LUBELSKIE, 7),
-//            new SearchCity("Szczecin", Voivodeship.ZACHODNIOPOMORSKIE, 7),
-//            new SearchCity("Koszalin", Voivodeship.ZACHODNIOPOMORSKIE, 7),
-//            new SearchCity("Opole", Voivodeship.OPOLSKIE, 7),
-//            new SearchCity("Olesno", Voivodeship.OPOLSKIE, 7),
-//            new SearchCity("Kluczbork", Voivodeship.OPOLSKIE, 7),
-//            new SearchCity("Wrocław", Voivodeship.DOLNOŚLĄSKIE, 7),
-//            new SearchCity("Kłodzko", Voivodeship.DOLNOŚLĄSKIE, 7),
-//            new SearchCity("Katowice", Voivodeship.ŚLĄSKIE, 7),
-//            new SearchCity("Częstochowa", Voivodeship.ŚLĄSKIE, 7),
-//            new SearchCity("Gliwice", Voivodeship.ŚLĄSKIE, 7),
-//            new SearchCity("Czechowice-Dziedzice", Voivodeship.ŚLĄSKIE, 7),
-//            new SearchCity("Dąbrowa Górnicza", Voivodeship.ŚLĄSKIE, 7),
-//            new SearchCity("Sosnowiec", Voivodeship.ŚLĄSKIE, 7),
-//            new SearchCity("Bielsko-Biała", Voivodeship.ŚLĄSKIE, 7),
-//            new SearchCity("Pszczyna", Voivodeship.ŚLĄSKIE, 7),
-//            new SearchCity("Chorzów", Voivodeship.ŚLĄSKIE, 7),
-//            new SearchCity("Kielce", Voivodeship.ŚWIĘTOKRZYSKIE, 7),
-//            new SearchCity("Bydgoszcz", Voivodeship.KUJAWSKO_POMORSKIE, 7),
-//            new SearchCity("Toruń", Voivodeship.KUJAWSKO_POMORSKIE, 7),
-//            new SearchCity("Inowrocław", Voivodeship.KUJAWSKO_POMORSKIE, 7),
-//            new SearchCity("Włocławek", Voivodeship.KUJAWSKO_POMORSKIE, 7),
-//            new SearchCity("Grudziądz", Voivodeship.KUJAWSKO_POMORSKIE, 7),
-//            new SearchCity("Świecie", Voivodeship.KUJAWSKO_POMORSKIE, 7),
-//            new SearchCity("Wąbrzeźno", Voivodeship.KUJAWSKO_POMORSKIE, 7),
-//            new SearchCity("Ciechocinek", Voivodeship.KUJAWSKO_POMORSKIE, 7),
-//            new SearchCity("Kowalewo Pomorskie", Voivodeship.KUJAWSKO_POMORSKIE, 7),
-//            new SearchCity("Chełmża", Voivodeship.KUJAWSKO_POMORSKIE, 7),
-//            new SearchCity("Chełmno", Voivodeship.KUJAWSKO_POMORSKIE, 7),
-//            new SearchCity("Zielona Góra", Voivodeship.LUBUSKIE, 7),
-//            new SearchCity("Gorzów Wielkopolski", Voivodeship.LUBUSKIE, 7),
-//            new SearchCity("Łódź", Voivodeship.ŁÓDZKIE, 7),
-//            new SearchCity("Piotrków Trybunalski", Voivodeship.ŁÓDZKIE, 7),
-//            new SearchCity("Białystok", Voivodeship.PODLASKIE, 7),
-//            new SearchCity("Łomża", Voivodeship.PODLASKIE, 7),
-//            new SearchCity("Jedwabne", Voivodeship.PODLASKIE, 7),
-//            new SearchCity("Piątnica", Voivodeship.PODLASKIE, 7),
-//            new SearchCity("Gdańsk", Voivodeship.POMORSKIE, 7),
-//            new SearchCity("Sopot", Voivodeship.POMORSKIE, 7),
-//            new SearchCity("Gdynia", Voivodeship.POMORSKIE, 7),
-//            new SearchCity("Tczew", Voivodeship.POMORSKIE, 7),
-//            new SearchCity("Olsztyn", Voivodeship.WARMIŃSKO_MAZURSKIE, 7),
-//            new SearchCity("Elbląg", Voivodeship.WARMIŃSKO_MAZURSKIE, 7),
-//            new SearchCity("Dobre Miasto", Voivodeship.WARMIŃSKO_MAZURSKIE, 7),
-//            new SearchCity("Giżycko", Voivodeship.WARMIŃSKO_MAZURSKIE, 7),
-//            new SearchCity("Poznań", Voivodeship.WIELKOPOLSKIE, 7),
-//            new SearchCity("Jarocin", Voivodeship.WIELKOPOLSKIE, 55),
-//            new SearchCity("Ostrów Wielkopolski", Voivodeship.WIELKOPOLSKIE, 55),
-//            new SearchCity("Oborniki", Voivodeship.WIELKOPOLSKIE, 7),
-//            new SearchCity("Gniezno", Voivodeship.WIELKOPOLSKIE, 7),
-//            new SearchCity("Kalisz", Voivodeship.WIELKOPOLSKIE, 28)
-//        );
+            new SearchCity("Wrocław", Voivodeship.DOLNOŚLĄSKIE, WANTED_TRIES),
+            new SearchCity("Jelenia Góra", Voivodeship.DOLNOŚLĄSKIE),
+            new SearchCity("Lubin", Voivodeship.DOLNOŚLĄSKIE),
+            new SearchCity("Wałbrzych", Voivodeship.DOLNOŚLĄSKIE),
+            new SearchCity("Głogów", Voivodeship.DOLNOŚLĄSKIE),
 
-            //            new SearchCity("Piaseczno", Voivodeship.MAZOWIECKIE, 7),
-            //            new SearchCity("Konstancin-Jeziorna", Voivodeship.MAZOWIECKIE, 7),
-            //            new SearchCity("Solec nad Wisłą", Voivodeship.MAZOWIECKIE, 7),
-            //            new SearchCity("Świdnik", Voivodeship.LUBELSKIE, 7),
-            //            new SearchCity("Łuków", Voivodeship.LUBELSKIE, 7),
-            //            new SearchCity("Biłgoraj", Voivodeship.LUBELSKIE, 7),
-            //            new SearchCity("Czechowice-Dziedzice", Voivodeship.ŚLĄSKIE, 7),
-            //            new SearchCity("Inowrocław", Voivodeship.KUJAWSKO_POMORSKIE, 7),
-            //            new SearchCity("Kowalewo Pomorskie", Voivodeship.KUJAWSKO_POMORSKIE, 7),
-            //            new SearchCity("Chełmża", Voivodeship.KUJAWSKO_POMORSKIE, 7),
-            //            new SearchCity("Chełmno", Voivodeship.KUJAWSKO_POMORSKIE, 7),
-            //            new SearchCity("Sopot", Voivodeship.POMORSKIE, 7),
-            //            new SearchCity("Dobre Miasto", Voivodeship.WARMIŃSKO_MAZURSKIE, 7),
-            //            new SearchCity("Oborniki", Voivodeship.WIELKOPOLSKIE, 7),
-            //            new SearchCity("Świecie", Voivodeship.KUJAWSKO_POMORSKIE, 7),
-            //            new SearchCity("Wąbrzeźno", Voivodeship.KUJAWSKO_POMORSKIE, 7),
-            //            new SearchCity("Olesno", Voivodeship.OPOLSKIE, 7),
-            //            new SearchCity("Pułtusk", Voivodeship.MAZOWIECKIE, 7),
+            new SearchCity("Bydgoszcz", Voivodeship.KUJAWSKO_POMORSKIE, WANTED_TRIES),
+            new SearchCity("Toruń", Voivodeship.KUJAWSKO_POMORSKIE, WANTED_TRIES),
+            new SearchCity("Inowrocław", Voivodeship.KUJAWSKO_POMORSKIE),
+            new SearchCity("Grudziądz", Voivodeship.KUJAWSKO_POMORSKIE),
+            new SearchCity("Włocławek", Voivodeship.KUJAWSKO_POMORSKIE),
+            new SearchCity("Żnin", Voivodeship.KUJAWSKO_POMORSKIE),
+
+            new SearchCity("Kcynia", Voivodeship.KUJAWSKO_POMORSKIE),
 
 
-            // old list:
-
-            //
-            new SearchCity("Wrocław", Voivodeship.DOLNOŚLĄSKIE, 1),
-            new SearchCity("Jelenia Góra", Voivodeship.DOLNOŚLĄSKIE, 1),
-            new SearchCity("Lubin", Voivodeship.DOLNOŚLĄSKIE, 1),
-            new SearchCity("Wałbrzych", Voivodeship.DOLNOŚLĄSKIE, 1),
-            new SearchCity("Głogów", Voivodeship.DOLNOŚLĄSKIE, 1),
-
-            new SearchCity("Bydgoszcz", Voivodeship.KUJAWSKO_POMORSKIE, 1),
-            new SearchCity("Toruń", Voivodeship.KUJAWSKO_POMORSKIE, 1),
-            new SearchCity("Inowrocław", Voivodeship.KUJAWSKO_POMORSKIE, 1),
-            new SearchCity("Grudziądz", Voivodeship.KUJAWSKO_POMORSKIE, 1),
-            new SearchCity("Włocławek", Voivodeship.KUJAWSKO_POMORSKIE, 1),
-            new SearchCity("Żnin", Voivodeship.KUJAWSKO_POMORSKIE, 1),
-
-            new SearchCity("Kcynia", Voivodeship.KUJAWSKO_POMORSKIE, 1),
+            new SearchCity("Lublin", Voivodeship.LUBELSKIE, WANTED_TRIES),
+            new SearchCity("Zamość", Voivodeship.LUBELSKIE),
+            new SearchCity("Biała Podlaska", Voivodeship.LUBELSKIE),
+            new SearchCity("Chełm", Voivodeship.LUBELSKIE),
+            new SearchCity("Puławy", Voivodeship.LUBELSKIE),
+            new SearchCity("Łuków", Voivodeship.LUBELSKIE),
+            new SearchCity("Kraśnik", Voivodeship.LUBELSKIE),
+            new SearchCity("Świdnik", Voivodeship.LUBELSKIE),
+            new SearchCity("Biłgoraj", Voivodeship.LUBELSKIE),
+            new SearchCity("Łęczna", Voivodeship.LUBELSKIE),
 
 
-            new SearchCity("Lublin", Voivodeship.LUBELSKIE, 1),
-            new SearchCity("Zamość", Voivodeship.LUBELSKIE, 1),
-            new SearchCity("Biała Podlaska", Voivodeship.LUBELSKIE, 1),
-            new SearchCity("Chełm", Voivodeship.LUBELSKIE, 1),
-            new SearchCity("Puławy", Voivodeship.LUBELSKIE, 1),
-            new SearchCity("Łuków", Voivodeship.LUBELSKIE, 1),
-            new SearchCity("Kraśnik", Voivodeship.LUBELSKIE, 1),
-            new SearchCity("Świdnik", Voivodeship.LUBELSKIE, 1),
-            new SearchCity("Biłgoraj", Voivodeship.LUBELSKIE, 1),
-            new SearchCity("Łęczna", Voivodeship.LUBELSKIE, 1),
+            new SearchCity("Zielona Góra", Voivodeship.LUBUSKIE, WANTED_TRIES),
+            new SearchCity("Gorzów Wielkopolski", Voivodeship.LUBUSKIE, WANTED_TRIES),
+            new SearchCity("Nowa Sól", Voivodeship.LUBUSKIE),
+            new SearchCity("Świebodzin", Voivodeship.LUBUSKIE),
+            //            new SearchCity("Żary", Voivodeship.LUBUSKIE),
 
 
-            new SearchCity("Zielona Góra", Voivodeship.LUBUSKIE, 1),
-            new SearchCity("Gorzów Wielkopolski", Voivodeship.LUBUSKIE, 1),
-            new SearchCity("Nowa Sól", Voivodeship.LUBUSKIE, 1),
-            new SearchCity("Świebodzin", Voivodeship.LUBUSKIE, 1),
-            //            new SearchCity("Żary", Voivodeship.LUBUSKIE, 1),
+            new SearchCity("Łódź", Voivodeship.ŁÓDZKIE, WANTED_TRIES),
+            new SearchCity("Piotrków Trybunalski", Voivodeship.ŁÓDZKIE),
+            new SearchCity("Łowicz", Voivodeship.ŁÓDZKIE),
+            new SearchCity("Skierniewice", Voivodeship.ŁÓDZKIE),
+            new SearchCity("Kutno", Voivodeship.ŁÓDZKIE),
+            new SearchCity("Pabianice", Voivodeship.ŁÓDZKIE),
+            new SearchCity("Zduńska Wola", Voivodeship.ŁÓDZKIE),
+            new SearchCity("Łęczyca", Voivodeship.ŁÓDZKIE),
 
 
-            new SearchCity("Łódź", Voivodeship.ŁÓDZKIE, 1),
-            new SearchCity("Piotrków Trybunalski", Voivodeship.ŁÓDZKIE, 1),
-            new SearchCity("Łowicz", Voivodeship.ŁÓDZKIE, 1),
-            new SearchCity("Skierniewice", Voivodeship.ŁÓDZKIE, 1),
-            new SearchCity("Kutno", Voivodeship.ŁÓDZKIE, 1),
-            new SearchCity("Pabianice", Voivodeship.ŁÓDZKIE, 1),
-            new SearchCity("Zduńska Wola", Voivodeship.ŁÓDZKIE, 1),
-            new SearchCity("Łęczyca", Voivodeship.ŁÓDZKIE, 1),
+            new SearchCity("Kraków", Voivodeship.MAŁOPOLSKIE, WANTED_TRIES),
+            new SearchCity("Tarnów", Voivodeship.MAŁOPOLSKIE),
+            new SearchCity("Nowy Targ", Voivodeship.MAŁOPOLSKIE),
+            new SearchCity("Chrzanów", Voivodeship.MAŁOPOLSKIE),
+            new SearchCity("Nowy Sącz", Voivodeship.MAŁOPOLSKIE),
+            new SearchCity("Wieliczka", Voivodeship.MAŁOPOLSKIE),
+            new SearchCity("Olkusz", Voivodeship.MAŁOPOLSKIE),
+
+            new SearchCity("Warszawa", Voivodeship.MAZOWIECKIE, WANTED_TRIES),
+            new SearchCity("Radom", Voivodeship.MAZOWIECKIE),
+            new SearchCity("Płock", Voivodeship.MAZOWIECKIE),
+            new SearchCity("Ostrołęka", Voivodeship.MAZOWIECKIE),
+            new SearchCity("Siedlce", Voivodeship.MAZOWIECKIE),
+            new SearchCity("Wyszków", Voivodeship.MAZOWIECKIE),
+            new SearchCity("Płońsk", Voivodeship.MAZOWIECKIE),
+            new SearchCity("Nowy Dwór Mazowiecki", Voivodeship.MAZOWIECKIE),
 
 
-            new SearchCity("Kraków", Voivodeship.MAŁOPOLSKIE, 1),
-            new SearchCity("Tarnów", Voivodeship.MAŁOPOLSKIE, 28),
-            new SearchCity("Nowy Targ", Voivodeship.MAŁOPOLSKIE, 55),
-            new SearchCity("Chrzanów", Voivodeship.MAŁOPOLSKIE, 55),
-            new SearchCity("Nowy Sącz", Voivodeship.MAŁOPOLSKIE, 55),
-            new SearchCity("Wieliczka", Voivodeship.MAŁOPOLSKIE, 1),
-            new SearchCity("Olkusz", Voivodeship.MAŁOPOLSKIE, 1),
-
-            new SearchCity("Warszawa", Voivodeship.MAZOWIECKIE, 1),
-            new SearchCity("Radom", Voivodeship.MAZOWIECKIE, 1),
-            new SearchCity("Płock", Voivodeship.MAZOWIECKIE, 1),
-            new SearchCity("Ostrołęka", Voivodeship.MAZOWIECKIE, 1),
-            new SearchCity("Siedlce", Voivodeship.MAZOWIECKIE, 1),
-            new SearchCity("Wyszków", Voivodeship.MAZOWIECKIE, 1),
-            new SearchCity("Płońsk", Voivodeship.MAZOWIECKIE, 1),
-            new SearchCity("Nowy Dwór Mazowiecki", Voivodeship.MAZOWIECKIE, 1),
+            new SearchCity("Opole", Voivodeship.OPOLSKIE, WANTED_TRIES),
+            new SearchCity("Kędzierzyn-Koźle", Voivodeship.OPOLSKIE),
+            new SearchCity("Kluczbork", Voivodeship.OPOLSKIE),
+            new SearchCity("Krapkowice", Voivodeship.OPOLSKIE),
+            new SearchCity("Nysa", Voivodeship.OPOLSKIE),
 
 
-            new SearchCity("Opole", Voivodeship.OPOLSKIE, 1),
-            new SearchCity("Kędzierzyn-Koźle", Voivodeship.OPOLSKIE, 1),
-            new SearchCity("Kluczbork", Voivodeship.OPOLSKIE, 1),
-            new SearchCity("Krapkowice", Voivodeship.OPOLSKIE, 1),
-            new SearchCity("Nysa", Voivodeship.OPOLSKIE, 1),
-
-
-            new SearchCity("Białystok", Voivodeship.PODLASKIE, 1),
+            new SearchCity("Białystok", Voivodeship.PODLASKIE, WANTED_TRIES),
             new SearchCity("Białystok", Voivodeship.PODLASKIE, 1, UUID.fromString("48324f72-a003-438a-90a1-b5f4c887f2de")), // Broniewskiego 14
-            new SearchCity("Łomża", Voivodeship.PODLASKIE, 1),
-            new SearchCity("Suwałki", Voivodeship.PODLASKIE, 1),
-            new SearchCity("Grajewo", Voivodeship.PODLASKIE, 1),
-            new SearchCity("Wysokie Mazowieckie", Voivodeship.PODLASKIE, 1),
+            new SearchCity("Łomża", Voivodeship.PODLASKIE),
+            new SearchCity("Suwałki", Voivodeship.PODLASKIE),
+            new SearchCity("Grajewo", Voivodeship.PODLASKIE),
+            new SearchCity("Wysokie Mazowieckie", Voivodeship.PODLASKIE),
 
 
-            new SearchCity("Rzeszów", Voivodeship.PODKARPACKIE, 1),
+            new SearchCity("Rzeszów", Voivodeship.PODKARPACKIE, WANTED_TRIES),
             new SearchCity("Rzeszów", Voivodeship.PODKARPACKIE, 1, UUID.fromString("7760b351-dcd8-4919-b2de-745b9219f9f1")), // Graniczna 4b/2b
-            new SearchCity("Mielec", Voivodeship.PODKARPACKIE, 1),
-            new SearchCity("Krosno", Voivodeship.PODKARPACKIE, 1),
-            new SearchCity("Przemyśl", Voivodeship.PODKARPACKIE, 1),
-            new SearchCity("Jasło", Voivodeship.PODKARPACKIE, 1),
-            new SearchCity("Tarnobrzeg", Voivodeship.PODKARPACKIE, 1),
-            new SearchCity("Boguchwała", Voivodeship.PODKARPACKIE, 1),
-            new SearchCity("Ropczyce", Voivodeship.PODKARPACKIE, 1),
-            new SearchCity("Wielopole Skrzyńskie", Voivodeship.PODKARPACKIE, 1),
+            new SearchCity("Mielec", Voivodeship.PODKARPACKIE),
+            new SearchCity("Krosno", Voivodeship.PODKARPACKIE),
+            new SearchCity("Przemyśl", Voivodeship.PODKARPACKIE),
+            new SearchCity("Jasło", Voivodeship.PODKARPACKIE),
+            new SearchCity("Tarnobrzeg", Voivodeship.PODKARPACKIE),
+            new SearchCity("Boguchwała", Voivodeship.PODKARPACKIE),
+            new SearchCity("Ropczyce", Voivodeship.PODKARPACKIE),
+            new SearchCity("Wielopole Skrzyńskie", Voivodeship.PODKARPACKIE),
 
 
 
-            new SearchCity("Gdańsk", Voivodeship.POMORSKIE, 1),
-            new SearchCity("Gdynia", Voivodeship.POMORSKIE, 1),
-            new SearchCity("Słupsk", Voivodeship.POMORSKIE, 1),
-            new SearchCity("Chojnice", Voivodeship.POMORSKIE, 1),
-            new SearchCity("Wejherowo", Voivodeship.POMORSKIE, 1),
-            new SearchCity("Hel", Voivodeship.POMORSKIE, 1),
+            new SearchCity("Gdańsk", Voivodeship.POMORSKIE, WANTED_TRIES),
+            new SearchCity("Gdynia", Voivodeship.POMORSKIE, WANTED_TRIES),
+            new SearchCity("Słupsk", Voivodeship.POMORSKIE),
+            new SearchCity("Chojnice", Voivodeship.POMORSKIE),
+            new SearchCity("Wejherowo", Voivodeship.POMORSKIE),
+            new SearchCity("Hel", Voivodeship.POMORSKIE),
 
 
-            new SearchCity("Katowice", Voivodeship.ŚLĄSKIE, 1),
-            new SearchCity("Bielsko-Biała", Voivodeship.ŚLĄSKIE, 1),
-            new SearchCity("Częstochowa", Voivodeship.ŚLĄSKIE, 1),
-            new SearchCity("Ruda Śląska", Voivodeship.ŚLĄSKIE, 1),
-            new SearchCity("Zabrze", Voivodeship.ŚLĄSKIE, 1),
-            new SearchCity("Gliwice", Voivodeship.ŚLĄSKIE, 1),
-            new SearchCity("Sosnowiec", Voivodeship.ŚLĄSKIE, 1),
-            new SearchCity("Bytom", Voivodeship.ŚLĄSKIE, 1),
-            new SearchCity("Chorzów", Voivodeship.ŚLĄSKIE, 1),
-            new SearchCity("Jaworzno", Voivodeship.ŚLĄSKIE, 1),
-            new SearchCity("Pszczyna", Voivodeship.ŚLĄSKIE, 1),
-            new SearchCity("Tarnowskie Góry", Voivodeship.ŚLĄSKIE, 1),
-            new SearchCity("Tychy", Voivodeship.ŚLĄSKIE, 1),
-            new SearchCity("Mikołów", Voivodeship.ŚLĄSKIE, 1),
+            new SearchCity("Katowice", Voivodeship.ŚLĄSKIE, WANTED_TRIES),
+            new SearchCity("Bielsko-Biała", Voivodeship.ŚLĄSKIE),
+            new SearchCity("Częstochowa", Voivodeship.ŚLĄSKIE),
+            new SearchCity("Ruda Śląska", Voivodeship.ŚLĄSKIE),
+            new SearchCity("Zabrze", Voivodeship.ŚLĄSKIE),
+            new SearchCity("Gliwice", Voivodeship.ŚLĄSKIE),
+            new SearchCity("Sosnowiec", Voivodeship.ŚLĄSKIE),
+            new SearchCity("Bytom", Voivodeship.ŚLĄSKIE),
+            new SearchCity("Chorzów", Voivodeship.ŚLĄSKIE),
+            new SearchCity("Jaworzno", Voivodeship.ŚLĄSKIE),
+            new SearchCity("Pszczyna", Voivodeship.ŚLĄSKIE),
+            new SearchCity("Tarnowskie Góry", Voivodeship.ŚLĄSKIE),
+            new SearchCity("Tychy", Voivodeship.ŚLĄSKIE),
+            new SearchCity("Mikołów", Voivodeship.ŚLĄSKIE),
 
-            new SearchCity("Kielce", Voivodeship.ŚWIĘTOKRZYSKIE, 1),
-            new SearchCity("Ostrowiec Świętokrzyski", Voivodeship.ŚWIĘTOKRZYSKIE, 1),
-            new SearchCity("Skarżysko-Kamienna", Voivodeship.ŚWIĘTOKRZYSKIE, 1),
-            new SearchCity("Jędrzejów", Voivodeship.ŚWIĘTOKRZYSKIE, 1),
-            new SearchCity("Sandomierz", Voivodeship.ŚWIĘTOKRZYSKIE, 1),
+            new SearchCity("Kielce", Voivodeship.ŚWIĘTOKRZYSKIE, WANTED_TRIES),
+            new SearchCity("Ostrowiec Świętokrzyski", Voivodeship.ŚWIĘTOKRZYSKIE),
+            new SearchCity("Skarżysko-Kamienna", Voivodeship.ŚWIĘTOKRZYSKIE),
+            new SearchCity("Jędrzejów", Voivodeship.ŚWIĘTOKRZYSKIE),
+            new SearchCity("Sandomierz", Voivodeship.ŚWIĘTOKRZYSKIE),
 
 
-            new SearchCity("Olsztyn", Voivodeship.WARMIŃSKO_MAZURSKIE, 1),
-            new SearchCity("Elbląg", Voivodeship.WARMIŃSKO_MAZURSKIE, 1),
-            new SearchCity("Ełk", Voivodeship.WARMIŃSKO_MAZURSKIE, 1),
-            new SearchCity("Szczytno", Voivodeship.WARMIŃSKO_MAZURSKIE, 1),
-            new SearchCity("Giżycko", Voivodeship.WARMIŃSKO_MAZURSKIE, 1),
+            new SearchCity("Olsztyn", Voivodeship.WARMIŃSKO_MAZURSKIE, WANTED_TRIES),
+            new SearchCity("Elbląg", Voivodeship.WARMIŃSKO_MAZURSKIE),
+            new SearchCity("Ełk", Voivodeship.WARMIŃSKO_MAZURSKIE),
+            new SearchCity("Szczytno", Voivodeship.WARMIŃSKO_MAZURSKIE),
+            new SearchCity("Giżycko", Voivodeship.WARMIŃSKO_MAZURSKIE),
 
-            new SearchCity("Poznań", Voivodeship.WIELKOPOLSKIE, 1),
-            new SearchCity("Konin", Voivodeship.WIELKOPOLSKIE, 1),
-            new SearchCity("Gniezno", Voivodeship.WIELKOPOLSKIE, 1),
-            new SearchCity("Piła", Voivodeship.WIELKOPOLSKIE, 1),
-            new SearchCity("Kalisz", Voivodeship.WIELKOPOLSKIE, 1),
+            new SearchCity("Poznań", Voivodeship.WIELKOPOLSKIE, WANTED_TRIES),
+            new SearchCity("Konin", Voivodeship.WIELKOPOLSKIE),
+            new SearchCity("Gniezno", Voivodeship.WIELKOPOLSKIE),
+            new SearchCity("Piła", Voivodeship.WIELKOPOLSKIE),
+            new SearchCity("Kalisz", Voivodeship.WIELKOPOLSKIE),
 
-            new SearchCity("Szczecin", Voivodeship.ZACHODNIOPOMORSKIE, 1),
-            new SearchCity("Koszalin", Voivodeship.ZACHODNIOPOMORSKIE, 1),
-            new SearchCity("Szczecinek", Voivodeship.ZACHODNIOPOMORSKIE, 1),
-            new SearchCity("Kołobrzeg", Voivodeship.ZACHODNIOPOMORSKIE, 1),
-            new SearchCity("Stargard", Voivodeship.ZACHODNIOPOMORSKIE, 1)
+            new SearchCity("Szczecin", Voivodeship.ZACHODNIOPOMORSKIE, WANTED_TRIES),
+            new SearchCity("Koszalin", Voivodeship.ZACHODNIOPOMORSKIE),
+            new SearchCity("Szczecinek", Voivodeship.ZACHODNIOPOMORSKIE),
+            new SearchCity("Kołobrzeg", Voivodeship.ZACHODNIOPOMORSKIE),
+            new SearchCity("Stargard", Voivodeship.ZACHODNIOPOMORSKIE)
         );
-        Set<SlotWithVoivodeship> results = new HashSet<>();
-
-
-        STATS.info("Preparation time: {}", System.currentTimeMillis() - start);
-        int searchCount = 0;
-        try {
-            start = System.currentTimeMillis();
-            long lastSearchTime = 0;
-            for (SearchCity searchCity : Stream.concat(findVoi.stream(), find.stream())
+        LocalDateTime startDate = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
+        LocalDateTime endDate = startDate.plusWeeks(4).withHour(23).withMinute(59);
+        Deque<Search> input = new ConcurrentLinkedDeque<>(
+            Stream.concat(findVoi.stream(), find.stream())
                 .filter(s -> options.voivodeships.contains(s.voivodeship()))
-                .toList()) {
-                LOG.info("Processing {}", searchCity);
-                Optional<Gmina> gmina = Optional.ofNullable(searchCity.name())
-                    .map(n -> gminaFinder.find(n, searchCity.voivodeship));
-                for (List<VaccineType> vaccines : vaccineSets(options)) {
-                    LocalDateTime startDate = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
-                    final LocalDateTime endDate = startDate.plusWeeks(4).withHour(23).withMinute(59);
-//                    final LocalDateTime endDate = LocalDateTime.of(2021, 5, 31, 23, 59);
-                    int tries = 0;
-                    while (startDate.isBefore(endDate)) {
-                        LOG.info("city={}, vaccine={}: try={}, start={}, end={}, pointId={}", searchCity.name(), vaccines, tries, startDate, endDate, searchCity.servicePointId());
-                        var search = new Search(
+                .flatMap(
+                    s -> Arrays.stream(VaccineType.values()).map(
+                        v -> new Search(
                             new DateRange(startDate.toLocalDate(), endDate.toLocalDate()),
                             new TimeRange(
                                 startDate.toLocalTime(),
                                 endDate.toLocalTime()
                             ),
                             creds.prescriptionId(),
-                            vaccines,
-                            searchCity.voivodeship(),
-                            gmina.orElse(null),
-                            searchCity.servicePointId(),
-                            null
-                        );
-                        searchCount++;
-                        long now = System.currentTimeMillis();
-                        LOG.info("time since last search = {}", now - lastSearchTime);
-                        if (now - lastSearchTime < options.wait) {
-                            Thread.sleep(options.wait - (now - lastSearchTime));
-                        }
-                        lastSearchTime = System.currentTimeMillis();
-                        String body = webSearch(options, creds, client, mapper, searchCity, vaccines, search);
+                            List.of(v),
+                            s.voivodeship(),
+                            Optional.ofNullable(s.name())
+                                .map(n -> gminaFinder.find(n, s.voivodeship))
+                                .orElse(null),
+                            s.servicePointId(),
+                            null,
+                            0, s.tries()
+                        )
+                    )
+                ).toList()
+        );
 
-                        final Set<BasicSlotWithSearch> list = Optional.ofNullable(mapper.readValue(body, Result.class).list()).orElse(List.of()).stream()
-                            .map(s -> new BasicSlotWithSearch(s, search)).collect(Collectors.toSet());
+        STATS.info("Preparation time: {}", System.currentTimeMillis() - start);
+        ScheduledExecutorService exec = Executors.newScheduledThreadPool(10);
+        AtomicInteger searchCount = new AtomicInteger(0);
+        AtomicInteger retryCount = new AtomicInteger(0);
+        Queue<BasicSlotWithSearch> output = new ConcurrentLinkedQueue<>();
+        CountDownLatch end = new CountDownLatch(1);
+        exec.scheduleAtFixedRate(() -> queueSearch(creds, client, mapper, input, output, searchCount, endDate, end, retryCount), 0, 1075, TimeUnit.MILLISECONDS);
 
-//                        startDate = startDateFromMissingDates(startDate, endDate, list);
-                        startDate = startDateFromLastFoundDate(endDate, list);
-                        LOG.info("Found for {}, {}: {} slots, nextDate = {}", searchCity.name, vaccines, list.size(), startDate);
+        start = System.currentTimeMillis();
+        end.await();
+        LOG.info("*********** Finished search ***********");
+        exec.shutdown();
+        final long searchTime = System.currentTimeMillis() - start;
+        STATS.info("Waited for search: {}", searchTime);
 
-                        final Set<SlotWithVoivodeship> lastResults = list.stream()
-                            .map(s -> new SlotWithVoivodeship(s, searchCity.voivodeship()))
-                            .collect(Collectors.toSet());
-                        results.addAll(lastResults);
-                        tries++;
-                        final int unwantedTries = 1;
-                        final int wantedTries = 13;
-                        if (finishLoop(voiCities, searchCity, vaccines, tries, lastResults, wantedTries, unwantedTries)) {
-                            if (!unwantedVaccines(vaccines) && tries > unwantedTries && !lastResults.isEmpty()) {
-                                LOG.info(
-                                    "More data exists for {}, {}, {}, last startDate={}",
-                                    searchCity.voivodeship(),
-                                    searchCity.name(),
-                                    vaccines,
-                                    startDate
-                                );
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-            STATS.info("Search time: {}, time/search: {}", System.currentTimeMillis() - start, (System.currentTimeMillis() - start)/searchCount);
-        } catch (Exception ex) {
-            LOG.error("Exception", ex);
-            StringWriter writer = new StringWriter();
-            ex.printStackTrace(new PrintWriter(writer));
-            telegram("Prawdopodobnie wygasła sesja (%s): \n ```\n%s\n```".formatted(ex.getMessage(), writer.toString()));
-        } finally {
-            LOG.info("Search count = {}, results = {}, results/count = {}", searchCount, results.size(), results.size()/searchCount);
-        }
+//        try {
+//            start = System.currentTimeMillis();
+//            long lastSearchTime = 0;
+//            for (SearchCity searchCity : Stream.concat(findVoi.stream(), find.stream())
+//                .filter(s -> options.voivodeships.contains(s.voivodeship()))
+//                .toList()) {
+//                LOG.info("Processing {}", searchCity);
+//                Optional<Gmina> gmina = Optional.ofNullable(searchCity.name())
+//                    .map(n -> gminaFinder.find(n, searchCity.voivodeship));
+//                for (List<VaccineType> vaccines : vaccineSets(options)) {
+//                    LocalDateTime startDate = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
+//                    final LocalDateTime endDate = startDate.plusWeeks(4).withHour(23).withMinute(59);
+////                    final LocalDateTime endDate = LocalDateTime.of(2021, 5, 31, 23, 59);
+//                    int tries = 0;
+//                    while (startDate.isBefore(endDate)) {
+//                        LOG.info("city={}, vaccine={}: try={}, start={}, end={}, pointId={}", searchCity.name(), vaccines, tries, startDate, endDate, searchCity.servicePointId());
+//                        var search = new Search(
+//                            new DateRange(startDate.toLocalDate(), endDate.toLocalDate()),
+//                            new TimeRange(
+//                                startDate.toLocalTime(),
+//                                endDate.toLocalTime()
+//                            ),
+//                            creds.prescriptionId(),
+//                            vaccines,
+//                            searchCity.voivodeship(),
+//                            gmina.orElse(null),
+//                            searchCity.servicePointId(),
+//                            null
+//                        );
+//                        searchCount++;
+//                        long now = System.currentTimeMillis();
+//                        LOG.info("time since last search = {}", now - lastSearchTime);
+//                        if (now - lastSearchTime < options.wait) {
+//                            Thread.sleep(options.wait - (now - lastSearchTime));
+//                        }
+//                        lastSearchTime = System.currentTimeMillis();
+//                        String body = webSearch(options, creds, client, mapper, search);
+//
+//                        final Set<BasicSlotWithSearch> list = Optional.ofNullable(mapper.readValue(body, Result.class).list()).orElse(List.of()).stream()
+//                            .map(s -> new BasicSlotWithSearch(s, search)).collect(Collectors.toSet());
+//
+////                        startDate = startDateFromMissingDates(startDate, endDate, list);
+//                        startDate = startDateFromLastFoundDate(endDate, list);
+//                        LOG.info("Found for {}, {}: {} slots, nextDate = {}", searchCity.name, vaccines, list.size(), startDate);
+//
+//                        final Set<SlotWithVoivodeship> lastResults = list.stream()
+//                            .map(s -> new SlotWithVoivodeship(s, searchCity.voivodeship()))
+//                            .collect(Collectors.toSet());
+//                        results.addAll(lastResults);
+//                        tries++;
+//                        final int unwantedTries = 1;
+//                        if (finishLoop(voiCities, searchCity, vaccines, tries, lastResults, WANTED_TRIES, unwantedTries)) {
+//                            if (!unwantedVaccines(vaccines) && tries > unwantedTries && !lastResults.isEmpty()) {
+//                                LOG.info(
+//                                    "More data exists for {}, {}, {}, last startDate={}",
+//                                    searchCity.voivodeship(),
+//                                    searchCity.name(),
+//                                    vaccines,
+//                                    startDate
+//                                );
+//                            }
+//                            break;
+//                        }
+//                    }
+//                }
+//            }
+//            STATS.info("Search time: {}, time/search: {}", System.currentTimeMillis() - start, (System.currentTimeMillis() - start)/searchCount);
+//        } catch (Exception ex) {
+//            LOG.error("Exception", ex);
+//            StringWriter writer = new StringWriter();
+//            ex.printStackTrace(new PrintWriter(writer));
+//            telegram("Prawdopodobnie wygasła sesja (%s): \n ```\n%s\n```".formatted(ex.getMessage(), writer.toString()));
+//        } finally {
+//            LOG.info("Search count = {}, results = {}, results/count = {}", searchCount, results.size(), results.size()/searchCount);
+//        }
+
         try {
             start = System.currentTimeMillis();
+            Set<SlotWithVoivodeship> results = output.stream()
+                .map(s -> new SlotWithVoivodeship(s, s.search().voiId()))
+                .collect(Collectors.toSet());
+            LOG.info(
+                "Search count = {}, results = {}, results/count = {}, time/results = {}, retries = {}",
+                searchCount.get(), results.size(), results.size()/searchCount.get(), searchTime / searchCount.get(), retryCount.get());
             new TableFormatter(options.output, mapper, find, Instant.now(), placeFinder).store(results);
             STATS.info(
                 "Formatter time: {}, time/result: {}",
@@ -552,7 +441,7 @@ public class Main {
     }
 
     private static String webSearch(Options options, Creds creds, HttpClient client, ObjectMapper mapper,
-        SearchCity searchCity, List<VaccineType> vaccines, Search search) throws IOException, InterruptedException {
+        Search search) throws IOException, InterruptedException {
         String searchStr = mapper.writeValueAsString(search);
         int retryCount = 0;
         long now = System.currentTimeMillis();
@@ -572,7 +461,7 @@ public class Main {
                         Paths.get(
                             options.output,
                             "logs",
-                            "%s_%s.%s.json".formatted(searchCity.name(), vaccines, Instant.now())
+                            "%s_%s.%s.json".formatted(search.geoId().name(), search.vaccineTypes(), Instant.now())
                         ),
                         out.body(),
                         StandardOpenOption.CREATE_NEW
@@ -611,7 +500,7 @@ public class Main {
         return HttpRequest.newBuilder()
             .header(USER_AGENT, CHROME)
             .header("Accept", "application/json, text/plain, */*")
-            .header("Accept-Encoding", "gzip")
+//            .header("Accept-Encoding", "gzip")
             .header("Referer", "https://pacjent.erejestracja.ezdrowie.gov.pl/wizyty")
             .header("Cookie", "patient_sid=%s".formatted(creds.sid()))
             .header("X-Csrf-Token", creds.csrf())
@@ -620,8 +509,7 @@ public class Main {
             .header("Sec-Fetch-Site", "same-origin")
 //            .header("TE", "Trailers")  // breaks http 2
             .header("TE", "trailers")
-            .header("Upgrade-Insecure-Requests", "1")
-                    ;
+            .header("Upgrade-Insecure-Requests", "1");
     }
 
     private static void telegram(String msg) {
@@ -645,16 +533,113 @@ public class Main {
         }
     }
 
-    record SearchCity(String name, Voivodeship voivodeship, int days, Set<VaccineType> vaccines, UUID servicePointId) {
-        public SearchCity(String name, Voivodeship voivodeship, int days) {
-            this(name, voivodeship, days, Arrays.stream(VaccineType.values()).collect(Collectors.toSet()), null);
+    record SearchCity(String name, Voivodeship voivodeship, int tries, Set<VaccineType> vaccines, UUID servicePointId) {
+        public SearchCity(String name, Voivodeship voivodeship, int maxTries) {
+            this(name, voivodeship, maxTries, Arrays.stream(VaccineType.values()).collect(Collectors.toSet()), null);
         }
 
-        public SearchCity(String name, Voivodeship voivodeship, int days, UUID servicePointId) {
-            this(name, voivodeship, days, Arrays.stream(VaccineType.values()).collect(Collectors.toSet()), servicePointId);
+        public SearchCity(String name, Voivodeship voivodeship, int tries, UUID servicePointId) {
+            this(name, voivodeship, tries, Arrays.stream(VaccineType.values()).collect(Collectors.toSet()), servicePointId);
         }
-        public SearchCity(String name, Voivodeship voivodeship, int days, Set<VaccineType> vaccines) {
-            this(name, voivodeship, days, vaccines, null);
+        public SearchCity(String name, Voivodeship voivodeship, int tries, Set<VaccineType> vaccines) {
+            this(name, voivodeship, tries, vaccines, null);
+        }
+        public SearchCity(String name, Voivodeship voivodeship) {
+            this(name, voivodeship, 1, Arrays.stream(VaccineType.values()).collect(Collectors.toSet()), null);
+        }
+    }
+
+    private static void queueSearch(Creds creds, HttpClient client, ObjectMapper mapper,
+        Queue<Search> input, Queue<BasicSlotWithSearch> output, AtomicInteger searchCount, LocalDateTime endDate,
+        CountDownLatch end, AtomicInteger retryCount) {
+        LOG.info("Starting search...");
+        Search search = input.poll();
+        if (search == null) {
+            end.countDown();
+            LOG.info("... finishing search, no more data");
+            return;
+        }
+        try {
+            String searchStr;
+            try {
+                searchStr = mapper.writeValueAsString(search);
+            } catch (JsonProcessingException e) {
+                throw new IllegalStateException(e);
+            }
+            Set<BasicSlotWithSearch> result = testWebSearch(creds, client, searchStr)
+                .map(r -> convertSearchResult(mapper, search, r))
+                .orElse(Set.of());
+            LOG.info("Found {} results", result.size());
+            output.addAll(result);
+
+            if (!result.isEmpty() && search.tries() < search.maxTries()) {
+                LOG.info("Doing {} retry", search.tries());
+                LocalDateTime newStartDate = startDateFromLastFoundDate(endDate, result);
+                input.offer(
+                    new Search(
+                        new DateRange(newStartDate.toLocalDate(), search.dayRange().to()),
+                        new TimeRange(
+                            newStartDate.toLocalTime(),
+                            search.hourRange().to()
+                        ),
+                        search.prescriptionId(),
+                        search.vaccineTypes(),
+                        search.voiId(),
+                        search.geoId(),
+                        search.servicePointId(),
+                        search.mobilities(),
+                        search.tries() + 1,
+                        search.maxTries()
+                    )
+                );
+            }
+        } catch (RateLimitException e) {
+            // try another time
+            retryCount.incrementAndGet();
+            LOG.warn("Rate limit, readding search");
+            input.offer(search);
+        } finally {
+            searchCount.incrementAndGet();
+        }
+    }
+
+    private static Set<BasicSlotWithSearch> convertSearchResult(ObjectMapper mapper, Search search, String body) {
+        try {
+            return Optional.ofNullable(
+                mapper.readValue(body, Result.class).list()
+            ).orElse(List.of())
+                .stream()
+                .map(s -> new BasicSlotWithSearch(s, search)).collect(Collectors.toSet());
+        } catch (JsonProcessingException e) {
+            LOG.error("Problem deserializing");
+            return Set.of();
+        }
+    }
+
+    private static Optional<String> testWebSearch(Creds creds, HttpClient client, String searchStr) {
+        long now = System.currentTimeMillis();
+        try {
+            HttpResponse<String> out = client.send(
+                requestBuilder(creds).uri(URI.create(
+                    "https://pacjent.erejestracja.ezdrowie.gov.pl/api/calendarSlots/find"))
+                    .POST(HttpRequest.BodyPublishers.ofString(searchStr)).build(),
+                MoreBodyHandlers.decoding(HttpResponse.BodyHandlers.ofString())
+            );
+            STATS.info("time per search: {}, size: {}", System.currentTimeMillis() - now, out.body().length());
+            if (out.body().contains("errorCode")) {
+                if (out.body().contains("ERR_RATE_LIMITED")) {
+//                    LOG.warn("*** rate limit ***");
+                    throw new RateLimitException();
+                } else {
+                    LOG.error("other error: {}", out.body());
+                }
+                return Optional.empty();
+            }
+            return Optional.of(out.body());
+        } catch (IOException | InterruptedException e) {
+            throw new IllegalStateException(e);
+        } finally {
+//            STATS.info("total search time: {}", System.currentTimeMillis() - now);
         }
     }
 }

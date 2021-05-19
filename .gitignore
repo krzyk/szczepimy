@@ -9,6 +9,7 @@ logs
 .classpath
 .settings
 *.log
+*.pdf
 /bin/
 *.iml
 *.zip

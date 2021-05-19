@@ -7,7 +7,7 @@ import java.util.UUID;
 public record ExtendedResult(String geoDepth, List<Slot> list) {
     public static record Slot(
         UUID id, Instant startAt, int duration, ServicePoint servicePoint,
-        VaccineType vaccineType, int dose, String status, Main.Search search
+        VaccineType vaccineType, int dose, String status, Search search
     ) {
         public Slot(BasicSlotWithSearch slot, ServicePoint servicePoint) {
             this(slot.id(), slot.startAt(), slot.duration(), servicePoint, slot.vaccineType(), slot.dose(), slot.status(), slot.search());

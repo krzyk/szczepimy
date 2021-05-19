@@ -42,16 +42,20 @@ public class TableFormatter {
     private final PlaceFinder placeFinder;
 
     private final Map<UUID, String> addressCorrections = Map.ofEntries(
+        Map.entry(UUID.fromString("067721f7-5933-4bb7-ad2f-3152c9200129"), "kolonia Stella 11"), // pogorzyce 19/1
         Map.entry(UUID.fromString("1f5a0ccb-6f8c-41cc-b173-b1d629de9d5f"), "Dębowa 23")
     );
 
 
     private final Map<UUID, Coordinates> coordsCorrections = Map.ofEntries(
+        Map.entry(UUID.fromString("067721f7-5933-4bb7-ad2f-3152c9200129"), new Coordinates("50.11681", "19.41331")), // pogorzyce 19/1
         Map.entry(UUID.fromString("1f5a0ccb-6f8c-41cc-b173-b1d629de9d5f"), new Coordinates("51.39519", "21.12633")),
         Map.entry(UUID.fromString("61d17a49-f298-4c46-937b-83dd1c53d31e"), new Coordinates("52.23744", "19.49534"))
     );
 
     private final Map<UUID, String> phoneCorrections = Map.ofEntries(
+        Map.entry(UUID.fromString("a33adff7-e2e1-4c62-8c50-1f84518eb4f0"), ""), // numer nieaktywny
+        Map.entry(UUID.fromString("0893961c-3134-4d46-bc1d-d4c69c03df58"), "508777223"), // siewna
         Map.entry(UUID.fromString("4946ac25-d078-4942-8aa9-1137d10678e4"), "517177267"), // NZOZ Sokrates w Zgłobniu
         Map.entry(UUID.fromString("b0408af7-d22b-45af-9aab-0dfc61816483"), "124248600"),
         Map.entry(UUID.fromString("7760b351-dcd8-4919-b2de-745b9219f9f1"), "517177267"),
@@ -269,7 +273,7 @@ public class TableFormatter {
         );
     }
 
-    private String searchMeta(Main.Search search, Instant startAt, String place) {
+    private String searchMeta(Search search, Instant startAt, String place) {
         List<String> datas = new ArrayList<>();
         datas.add("data-place=\"%s\"".formatted(place));
         datas.add("data-search-slot-time=\"%s\"".formatted(LocalTime.ofInstant(startAt, ZONE).truncatedTo(ChronoUnit.MINUTES)));

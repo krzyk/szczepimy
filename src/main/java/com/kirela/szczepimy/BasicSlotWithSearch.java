@@ -7,9 +7,9 @@ import java.util.UUID;
 public record BasicSlotWithSearch(
     UUID id, Instant startAt, int duration, Result.BasicServicePoint servicePoint,
     VaccineType vaccineType, int dose, String status, String mobility,
-    Main.Search search
+    Search search
 ) {
-    public BasicSlotWithSearch(Result.BasicSlot slot, Main.Search srh) {
+    public BasicSlotWithSearch(Result.BasicSlot slot, Search srh) {
         this(
             slot.id(),
             slot.startAt(),
