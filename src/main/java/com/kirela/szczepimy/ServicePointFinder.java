@@ -45,11 +45,17 @@ public class ServicePointFinder {
         client = HttpClient.newBuilder()
 //            .version(HttpClient.Version.HTTP_1_1)
             .build();
+        grouped = List.of("https://www.gov.pl/api/data/covid-vaccination-point", "https://t1.kirela.com/vac.json").stream()
+            .map(u -> dataFromUrl(mapper, u))
+            .findFirst()
+            .orElseThrow();
+    }
+
+    private TreeMap<String, List<ServicePoint>> dataFromUrl(ObjectMapper mapper, String url) {
         try {
             HttpResponse<String> out = client.send(
                 requestBuilder().uri(
-//                    URI.create("https://www.gov.pl/api/data/covid-vaccination-point")
-                    URI.create("https://t1.kirela.com/vac.json")
+                    URI.create(url)
                 ).GET().build(),
                 HttpResponse.BodyHandlers.ofString()
             );
@@ -57,7 +63,7 @@ public class ServicePointFinder {
                 throw new IllegalStateException("Can't read data for service points, got status %d".formatted(out.statusCode()));
             }
             List<ServicePoint> points = mapper.readValue(out.body(), new TypeReference<>() {});
-            grouped = points.stream()
+            return points.stream()
                 .map(ServicePointFinder::correctData)
                 .collect(Collectors.groupingBy(point -> point.address().toLowerCase(), TreeMap::new, Collectors.toList()));
         } catch (IOException | InterruptedException e) {
