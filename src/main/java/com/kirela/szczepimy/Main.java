@@ -572,7 +572,7 @@ public class Main {
             LOG.info("Found {} results", result.size());
             output.addAll(result);
 
-            if (!result.isEmpty() && search.tries() < search.maxTries()) {
+            if (!result.isEmpty() && !unwantedVaccines(search.vaccineTypes()) && search.tries() < search.maxTries()) {
                 LOG.info("Doing {} retry", search.tries());
                 LocalDateTime newStartDate = startDateFromLastFoundDate(endDate, result);
                 input.offer(
