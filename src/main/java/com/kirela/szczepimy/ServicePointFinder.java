@@ -42,16 +42,13 @@ public class ServicePointFinder {
 
         this.phoneCorrections = phoneCorrections;
         this.mapper = mapper;
-        client = HttpClient.newBuilder()
-//            .version(HttpClient.Version.HTTP_1_1)
-            .build();
-        grouped = List.of("https://www.gov.pl/api/data/covid-vaccination-point", "https://t1.kirela.com/vac.json").stream()
-            .map(u -> dataFromUrl(mapper, u))
-            .findFirst()
+        client = HttpClient.newBuilder().build();
+        grouped = dataFromUrl(mapper, "https://www.gov.pl/api/data/covid-vaccination-point")
+            .or(() -> dataFromUrl(mapper, "https://t1.kirela.com/vac.json"))
             .orElseThrow();
     }
 
-    private TreeMap<String, List<ServicePoint>> dataFromUrl(ObjectMapper mapper, String url) {
+    private Optional<TreeMap<String, List<ServicePoint>>> dataFromUrl(ObjectMapper mapper, String url) {
         try {
             HttpResponse<String> out = client.send(
                 requestBuilder().uri(
@@ -60,14 +57,18 @@ public class ServicePointFinder {
                 HttpResponse.BodyHandlers.ofString()
             );
             if (out.statusCode() != 200) {
-                throw new IllegalStateException("Can't read data for service points, got status %d".formatted(out.statusCode()));
+                LOG.error("Can't read data for service points, got status %d".formatted(out.statusCode()));
+                return Optional.empty();
             }
             List<ServicePoint> points = mapper.readValue(out.body(), new TypeReference<>() {});
-            return points.stream()
-                .map(ServicePointFinder::correctData)
-                .collect(Collectors.groupingBy(point -> point.address().toLowerCase(), TreeMap::new, Collectors.toList()));
+            return Optional.of(
+                points.stream()
+                    .map(ServicePointFinder::correctData)
+                    .collect(Collectors.groupingBy(point -> point.address().toLowerCase(), TreeMap::new, Collectors.toList()))
+            );
         } catch (IOException | InterruptedException e) {
-            throw new IllegalStateException(e);
+            LOG.error("Received exception", e);
+            return Optional.empty();
         }
     }
 
