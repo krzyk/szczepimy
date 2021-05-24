@@ -16,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,10 +32,16 @@ import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -68,12 +75,10 @@ public class Main {
 
     record SlotWithVoivodeship(BasicSlotWithSearch slot, Voivodeship voivodeship) {};
 
-    private static record Creds(String csrf, String sid, String prescriptionId) {}
-
     private static final String CHROME = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36";
     private static final String USER_AGENT = "User-Agent";
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws IOException, InterruptedException, ExecutionException {
         long start = System.currentTimeMillis();
 
         Options options = CommandLine.populateCommand(new Options(), args);
@@ -87,7 +92,6 @@ public class Main {
         PlaceFinder placeFinder = new PlaceFinder();
 //        System.out.println(gminaFinder.find("Rzeszów", Voivodeship.PODKARPACKIE));
 
-        var creds = new Creds(options.csrf, options.sid, options.prescriptionId);
         HttpClient client = HttpClient.newBuilder()
             .followRedirects(HttpClient.Redirect.ALWAYS)
             .build();
@@ -160,6 +164,7 @@ public class Main {
             new SearchCity("Wyszków", Voivodeship.MAZOWIECKIE),
             new SearchCity("Płońsk", Voivodeship.MAZOWIECKIE),
             new SearchCity("Nowy Dwór Mazowiecki", Voivodeship.MAZOWIECKIE),
+            new SearchCity("Mława", Voivodeship.MAZOWIECKIE),
 
 
             new SearchCity("Opole", Voivodeship.OPOLSKIE, WANTED_TRIES),
@@ -240,18 +245,17 @@ public class Main {
         );
         LocalDateTime startDate = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
         LocalDateTime endDate = startDate.plusWeeks(4).withHour(23).withMinute(59);
-        Deque<Search> input = new ConcurrentLinkedDeque<>(
+        Deque<SearchWithoutPrescription> input = new ConcurrentLinkedDeque<>(
             Stream.concat(findVoi.stream(), find.stream())
                 .filter(s -> options.voivodeships.contains(s.voivodeship()))
                 .flatMap(
                     s -> Arrays.stream(VaccineType.values()).map(
-                        v -> new Search(
+                        v -> new SearchWithoutPrescription(
                             new DateRange(startDate.toLocalDate(), endDate.toLocalDate()),
                             new TimeRange(
                                 startDate.toLocalTime(),
                                 endDate.toLocalTime()
                             ),
-                            creds.prescriptionId(),
                             List.of(v),
                             s.voivodeship(),
                             Optional.ofNullable(s.name())
@@ -266,17 +270,42 @@ public class Main {
         );
 
         STATS.info("Preparation time: {}", System.currentTimeMillis() - start);
-        ScheduledExecutorService exec = Executors.newScheduledThreadPool(10);
         AtomicInteger searchCount = new AtomicInteger(0);
         AtomicInteger retryCount = new AtomicInteger(0);
-        Queue<BasicSlotWithSearch> output = new ConcurrentLinkedQueue<>();
-        CountDownLatch end = new CountDownLatch(1);
-        exec.scheduleAtFixedRate(() -> queueSearch(creds, client, mapper, input, output, searchCount, endDate, end, retryCount), 0, 1075, TimeUnit.MILLISECONDS);
+        Duration waitTime = Duration.ofMillis(1075);
 
+        Queue<BasicSlotWithSearch> output = new ConcurrentLinkedQueue<>();
         start = System.currentTimeMillis();
-        end.await();
+
+        record SchedulerLatch(Creds creds, ScheduledExecutorService exec, CountDownLatch latch) {};
+        List<SchedulerLatch> tasks = options.credentials.stream()
+            .map(c -> new SchedulerLatch(c, Executors.newScheduledThreadPool(5), new CountDownLatch(1)))
+            .toList();
+        tasks.forEach(t ->
+            t.exec().scheduleAtFixedRate(() -> queueSearch(t.creds(), client, mapper, input, output, searchCount, endDate, t.latch(), retryCount), waitTime.toMillis() / tasks.size(), waitTime.toMillis(), TimeUnit.MILLISECONDS)
+        );
+
+        ExecutorService finisher = Executors.newSingleThreadExecutor();
+        finisher.submit(
+            () -> tasks.forEach(
+                t -> {
+                    try {
+                        t.latch().await();
+                        t.exec().shutdown();
+                        boolean result = t.exec().awaitTermination(waitTime.toMillis(), TimeUnit.MILLISECONDS);
+                        if (!result) {
+                            LOG.error("Executor did not stop correctly");
+                        }
+                        t.exec().shutdownNow();
+                    } catch (InterruptedException e) {
+                        LOG.error("Task interrupted", e);
+                    }
+                }
+            )
+        ).get();
+        finisher.shutdown();
+        finisher.shutdownNow();
         LOG.info("*********** Finished search ***********");
-        exec.shutdown();
         final long searchTime = System.currentTimeMillis() - start;
         STATS.info("Waited for search: {}", searchTime);
 
@@ -550,39 +579,34 @@ public class Main {
     }
 
     private static void queueSearch(Creds creds, HttpClient client, ObjectMapper mapper,
-        Queue<Search> input, Queue<BasicSlotWithSearch> output, AtomicInteger searchCount, LocalDateTime endDate,
+        Queue<SearchWithoutPrescription> input, Queue<BasicSlotWithSearch> output, AtomicInteger searchCount, LocalDateTime endDate,
         CountDownLatch end, AtomicInteger retryCount) {
         LOG.info("Starting search...");
-        Search search = input.poll();
-        if (search == null) {
+        SearchWithoutPrescription searchWithoutPrescription = input.poll();
+        if (searchWithoutPrescription == null) {
             end.countDown();
             LOG.info("... finishing search, no more data");
             return;
         }
         try {
-            String searchStr;
-            try {
-                searchStr = mapper.writeValueAsString(search);
-            } catch (JsonProcessingException e) {
-                throw new IllegalStateException(e);
-            }
+            Search search = searchWithoutPrescription.toSearch(creds.prescriptionId());
+            String searchStr = mapper.writeValueAsString(search);
             Set<BasicSlotWithSearch> result = testWebSearch(creds, client, searchStr)
                 .map(r -> convertSearchResult(mapper, search, r))
                 .orElse(Set.of());
-            LOG.info("Found {} results", result.size());
+            LOG.info("{} | Found {} results", creds.prescriptionId().substring(0, 2), result.size());
             output.addAll(result);
 
             if (!result.isEmpty() && !unwantedVaccines(search.vaccineTypes()) && search.tries() < search.maxTries()) {
                 LOG.info("Doing {} retry", search.tries());
                 LocalDateTime newStartDate = startDateFromLastFoundDate(endDate, result);
                 input.offer(
-                    new Search(
+                    new SearchWithoutPrescription(
                         new DateRange(newStartDate.toLocalDate(), search.dayRange().to()),
                         new TimeRange(
                             newStartDate.toLocalTime(),
                             search.hourRange().to()
                         ),
-                        search.prescriptionId(),
                         search.vaccineTypes(),
                         search.voiId(),
                         search.geoId(),
@@ -596,8 +620,10 @@ public class Main {
         } catch (RateLimitException e) {
             // try another time
             retryCount.incrementAndGet();
-            LOG.warn("Rate limit, readding search");
-            input.offer(search);
+            LOG.warn("{} | Rate limit, readding search", creds.prescriptionId().substring(0, 2));
+            input.offer(searchWithoutPrescription);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException(e);
         } finally {
             searchCount.incrementAndGet();
         }
@@ -625,7 +651,7 @@ public class Main {
                     .POST(HttpRequest.BodyPublishers.ofString(searchStr)).build(),
                 MoreBodyHandlers.decoding(HttpResponse.BodyHandlers.ofString())
             );
-            STATS.info("time per search: {}, size: {}", System.currentTimeMillis() - now, out.body().length());
+            STATS.info("{} | time per search: {}, size: {}", creds.prescriptionId().substring(0, 2), System.currentTimeMillis() - now, out.body().length());
             if (out.body().contains("errorCode")) {
                 if (out.body().contains("ERR_RATE_LIMITED")) {
 //                    LOG.warn("*** rate limit ***");

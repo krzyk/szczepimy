@@ -65,6 +65,7 @@ public class PlaceFinder {
                 .replace("krasienin kolonia", "krasienin-kolonia")
                 .replace("belchatow - szkola w dobrzelowie", "belchatow")
                 .replace("lodz - poradnie", "lodz")
+                .replace("milejow osada", "milejow")
                 .replace("mlp.", "malopolski")
                 .replace("ostrowiec sw.", "ostrowiec swietokrzyski")
                 .replaceAll(" +", " ")

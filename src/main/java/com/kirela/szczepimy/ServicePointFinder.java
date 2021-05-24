@@ -101,6 +101,10 @@ public class ServicePointFinder {
             address = point.address();
             place = "Sędziszów Małopolski";
         }
+        if (point.place().equals("Pogorzyce") && point.address().equalsIgnoreCase("pogorzyce 19/1")) {
+            address = "Kolonia Stella 19/1";
+            place = "Chrzanów";
+        }
         if (point.voivodeship() == Voivodeship.PODLASKIE && point.place().equals("PIĄTNICA")) {
             place = "Piątnica Poduchowna";
         }
