@@ -350,32 +350,27 @@ public class Main {
 
         record SchedulerLatch(Creds creds, ScheduledExecutorService exec, CountDownLatch latch) {};
         List<SchedulerLatch> tasks = options.credentials.stream()
-            .map(c -> new SchedulerLatch(c, Executors.newScheduledThreadPool(5), new CountDownLatch(1)))
+            .map(c -> new SchedulerLatch(c, Executors.newScheduledThreadPool(4), new CountDownLatch(2)))
             .toList();
         tasks.forEach(t ->
             t.exec().scheduleAtFixedRate(() -> queueSearch(t.creds(), client, mapper, input, output, searchCount, endDate, t.latch(), retryCount), new Random().nextInt((int) waitTime.toMillis()), waitTime.toMillis(), TimeUnit.MILLISECONDS)
         );
 
-        ExecutorService finisher = Executors.newSingleThreadExecutor();
-        finisher.submit(
-            () -> tasks.forEach(
-                t -> {
-                    try {
-                        t.latch().await();
-                        t.exec().shutdown();
-                        boolean result = t.exec().awaitTermination(waitTime.toMillis(), TimeUnit.MILLISECONDS);
-                        if (!result) {
-                            LOG.error("Executor did not stop correctly");
-                        }
-                        t.exec().shutdownNow();
-                    } catch (InterruptedException e) {
-                        LOG.error("Task interrupted", e);
+        tasks.forEach(
+            t -> {
+                try {
+                    t.latch().await();
+                    t.exec().shutdown();
+                    boolean result = t.exec().awaitTermination(waitTime.toMillis(), TimeUnit.MILLISECONDS);
+                    if (!result) {
+                        LOG.error("Executor did not stop correctly");
                     }
+                    t.exec().shutdownNow();
+                } catch (InterruptedException e) {
+                    LOG.error("Task interrupted", e);
                 }
-            )
-        ).get();
-        finisher.shutdown();
-        finisher.shutdownNow();
+            }
+        );
         LOG.info("*********** Finished search ***********");
         final long searchTime = System.currentTimeMillis() - start;
         STATS.info("Waited for search: {}", searchTime);
