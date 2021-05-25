@@ -647,11 +647,11 @@ public class Main {
     private static void queueSearch(Creds creds, HttpClient client, ObjectMapper mapper,
         Queue<SearchWithoutPrescription> input, Queue<BasicSlotWithSearch> output, AtomicInteger searchCount, LocalDateTime endDate,
         CountDownLatch end, AtomicInteger retryCount) {
-        LOG.info("Starting search...");
+        LOG.info("{} | Starting search...", creds.prescriptionId().substring(0, 2));
         SearchWithoutPrescription searchWithoutPrescription = input.poll();
         if (searchWithoutPrescription == null) {
             end.countDown();
-            LOG.info("... finishing search, no more data");
+            LOG.info("{} | ... finishing search, no more data", creds.prescriptionId().substring(0, 2));
             return;
         }
         try {
@@ -664,7 +664,7 @@ public class Main {
             output.addAll(result);
 
             if (!result.isEmpty() && !unwantedVaccines(search.vaccineTypes()) && search.tries() < search.maxTries()) {
-                LOG.info("Doing {} retry", search.tries());
+                LOG.info("{} | Doing {} retry", creds.prescriptionId().substring(0, 2), search.tries());
                 LocalDateTime newStartDate = startDateFromLastFoundDate(endDate, result);
                 input.offer(
                     new SearchWithoutPrescription(
@@ -723,7 +723,7 @@ public class Main {
 //                    LOG.warn("*** rate limit ***");
                     throw new RateLimitException();
                 } else {
-                    LOG.error("other error: {}", out.body());
+                    LOG.error("{} | other error: {}", creds.prescriptionId().substring(0, 2), out.body());
                 }
                 return Optional.empty();
             }
