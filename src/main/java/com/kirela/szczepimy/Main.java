@@ -353,7 +353,7 @@ public class Main {
             .map(c -> new SchedulerLatch(c, Executors.newScheduledThreadPool(5), new CountDownLatch(1)))
             .toList();
         tasks.forEach(t ->
-            t.exec().scheduleAtFixedRate(() -> queueSearch(t.creds(), client, mapper, input, output, searchCount, endDate, t.latch(), retryCount), waitTime.toMillis() / tasks.size(), waitTime.toMillis(), TimeUnit.MILLISECONDS)
+            t.exec().scheduleAtFixedRate(() -> queueSearch(t.creds(), client, mapper, input, output, searchCount, endDate, t.latch(), retryCount), new Random().nextInt((int) waitTime.toMillis()), waitTime.toMillis(), TimeUnit.MILLISECONDS)
         );
 
         ExecutorService finisher = Executors.newSingleThreadExecutor();
