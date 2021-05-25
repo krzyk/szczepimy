@@ -44,22 +44,22 @@ class ServicePointFinderTest {
 
         int sum = 0;
         Map<Voivodeship, Integer> max = new HashMap<>();
-        max.put(Voivodeship.DOLNOŚLĄSKIE, 9);
-        max.put(Voivodeship.KUJAWSKO_POMORSKIE, 9);
-        max.put(Voivodeship.WARMIŃSKO_MAZURSKIE, 5);
-        max.put(Voivodeship.LUBELSKIE, 5);
-        max.put(Voivodeship.ŁÓDZKIE, 8);
-        max.put(Voivodeship.MAŁOPOLSKIE, 5);
-        max.put(Voivodeship.MAZOWIECKIE, 6);
-        max.put(Voivodeship.OPOLSKIE, 6);
-        max.put(Voivodeship.PODKARPACKIE, 7);
-        max.put(Voivodeship.PODLASKIE, 8);
-        max.put(Voivodeship.POMORSKIE, 8);
-        max.put(Voivodeship.ŚLĄSKIE, 15);
-        max.put(Voivodeship.ŚWIĘTOKRZYSKIE, 5);
-        max.put(Voivodeship.WIELKOPOLSKIE, 9);
-        max.put(Voivodeship.ZACHODNIOPOMORSKIE, 10);
-        max.put(Voivodeship.LUBUSKIE, 5);
+        max.put(Voivodeship.DOLNOŚLĄSKIE, 5);
+        max.put(Voivodeship.KUJAWSKO_POMORSKIE, 5);
+        max.put(Voivodeship.WARMIŃSKO_MAZURSKIE, 3);
+        max.put(Voivodeship.LUBELSKIE, 3);
+        max.put(Voivodeship.ŁÓDZKIE, 3);
+        max.put(Voivodeship.MAŁOPOLSKIE, 3);
+        max.put(Voivodeship.MAZOWIECKIE, 3);
+        max.put(Voivodeship.OPOLSKIE, 3);
+        max.put(Voivodeship.PODKARPACKIE, 3);
+        max.put(Voivodeship.PODLASKIE, 3);
+        max.put(Voivodeship.POMORSKIE, 3);
+        max.put(Voivodeship.ŚLĄSKIE, 5);
+        max.put(Voivodeship.ŚWIĘTOKRZYSKIE, 3);
+        max.put(Voivodeship.WIELKOPOLSKIE, 3);
+        max.put(Voivodeship.ZACHODNIOPOMORSKIE, 5);
+        max.put(Voivodeship.LUBUSKIE, 3);
         for (Voivodeship value : Voivodeship.values()) {
             System.out.println("---");
             System.out.println(value.readable());
