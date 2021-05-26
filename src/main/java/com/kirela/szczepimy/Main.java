@@ -545,7 +545,7 @@ public class Main {
                 long searchStart = System.currentTimeMillis();
                 HttpResponse<String> out = client.send(
                     requestBuilder(creds).uri(URI.create(
-                        "https://pacjent.erejestracja.ezdrowie.gov.pl/api/calendarSlots/find"))
+                        "https://pacjent.erejestracja.ezdrowie.gov.pl/api/v2/calendarSlots/find"))
                         .POST(HttpRequest.BodyPublishers.ofString(searchStr)).build(),
                     MoreBodyHandlers.decoding(HttpResponse.BodyHandlers.ofString())
                 );
@@ -664,7 +664,7 @@ public class Main {
             output.addAll(result);
 
             if (!result.isEmpty() && !unwantedVaccines(search.vaccineTypes()) && search.tries() < search.maxTries()) {
-                LOG.info("{} | Doing {} retry", creds.prescriptionId().substring(0, 2), search.tries());
+                LOG.info("{} | Doing {} retry", creds.prescriptionId().substring(0, 2), search.tries() + 1);
                 LocalDateTime newStartDate = startDateFromLastFoundDate(endDate, result);
                 input.offer(
                     new SearchWithoutPrescription(
@@ -713,7 +713,7 @@ public class Main {
         try {
             HttpResponse<String> out = client.send(
                 requestBuilder(creds).uri(URI.create(
-                    "https://pacjent.erejestracja.ezdrowie.gov.pl/api/calendarSlots/find"))
+                    "https://pacjent.erejestracja.ezdrowie.gov.pl/api/v2/calendarSlots/find"))
                     .POST(HttpRequest.BodyPublishers.ofString(searchStr)).build(),
                 MoreBodyHandlers.decoding(HttpResponse.BodyHandlers.ofString())
             );
