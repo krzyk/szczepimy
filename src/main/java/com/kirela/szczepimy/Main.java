@@ -157,7 +157,7 @@ public class Main {
 
             new SearchCity("Łódź", Voivodeship.ŁÓDZKIE, WANTED_TRIES),
             new SearchCity("Piotrków Trybunalski", Voivodeship.ŁÓDZKIE),
-            new SearchCity("Łowicz", Voivodeship.ŁÓDZKIE),
+//            new SearchCity("Łowicz", Voivodeship.ŁÓDZKIE),
 //            new SearchCity("Skierniewice", Voivodeship.ŁÓDZKIE),
 //            new SearchCity("Kutno", Voivodeship.ŁÓDZKIE),
 //            new SearchCity("Pabianice", Voivodeship.ŁÓDZKIE),
@@ -210,7 +210,7 @@ public class Main {
             new SearchCity("Białystok", Voivodeship.PODLASKIE, WANTED_TRIES),
             new SearchCity("Białystok", Voivodeship.PODLASKIE, 1, UUID.fromString("48324f72-a003-438a-90a1-b5f4c887f2de")), // Broniewskiego 14
             new SearchCity("Łomża", Voivodeship.PODLASKIE),
-            new SearchCity("Suwałki", Voivodeship.PODLASKIE),
+//            new SearchCity("Suwałki", Voivodeship.PODLASKIE),
 //            new SearchCity("Grajewo", Voivodeship.PODLASKIE),
 //            new SearchCity("Wysokie Mazowieckie", Voivodeship.PODLASKIE),
 //            new SearchCity("Augustów", Voivodeship.PODLASKIE),
@@ -270,7 +270,7 @@ public class Main {
 
             new SearchCity("Kielce", Voivodeship.ŚWIĘTOKRZYSKIE, WANTED_TRIES),
             new SearchCity("Ostrowiec Świętokrzyski", Voivodeship.ŚWIĘTOKRZYSKIE),
-            new SearchCity("Skarżysko-Kamienna", Voivodeship.ŚWIĘTOKRZYSKIE),
+//            new SearchCity("Skarżysko-Kamienna", Voivodeship.ŚWIĘTOKRZYSKIE),
 //            new SearchCity("Jędrzejów", Voivodeship.ŚWIĘTOKRZYSKIE),
 //            new SearchCity("Sandomierz", Voivodeship.ŚWIĘTOKRZYSKIE),
 //            new SearchCity("Pińczów", Voivodeship.ŚWIĘTOKRZYSKIE),
@@ -301,7 +301,7 @@ public class Main {
 
             new SearchCity("Szczecin", Voivodeship.ZACHODNIOPOMORSKIE, WANTED_TRIES),
             new SearchCity("Koszalin", Voivodeship.ZACHODNIOPOMORSKIE),
-            new SearchCity("Szczecinek", Voivodeship.ZACHODNIOPOMORSKIE)
+//            new SearchCity("Szczecinek", Voivodeship.ZACHODNIOPOMORSKIE)
 //            new SearchCity("Kołobrzeg", Voivodeship.ZACHODNIOPOMORSKIE),
 //            new SearchCity("Stargard", Voivodeship.ZACHODNIOPOMORSKIE),
 //            new SearchCity("Świnoujście", Voivodeship.ZACHODNIOPOMORSKIE),
