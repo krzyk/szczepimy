@@ -55,7 +55,7 @@ import picocli.CommandLine;
 public class Main {
     private static final Logger LOG = LogManager.getLogger(Main.class);
     private static final Logger STATS = LogManager.getLogger("STATS");
-    private static final int WANTED_TRIES = 14;
+    private static final int WANTED_TRIES = 13;
     // https://www.gov.pl/api/data/covid-vaccination-point   -> service-points.json
 
     // punkty adresowe z https://eteryt.stat.gov.pl/eTeryt/rejestr_teryt/udostepnianie_danych/baza_teryt/uzytkownicy_indywidualni/pobieranie/pliki_pelne.aspx?contrast=default
