@@ -105,7 +105,7 @@ public class Main {
         List<SearchCity> find = List.of(
             new SearchCity("Wrocław", Voivodeship.DOLNOŚLĄSKIE, WANTED_TRIES),
             new SearchCity("Jelenia Góra", Voivodeship.DOLNOŚLĄSKIE),
-            new SearchCity("Lubin", Voivodeship.DOLNOŚLĄSKIE),
+//            new SearchCity("Lubin", Voivodeship.DOLNOŚLĄSKIE),
 //            new SearchCity("Wałbrzych", Voivodeship.DOLNOŚLĄSKIE),
 //            new SearchCity("Głogów", Voivodeship.DOLNOŚLĄSKIE),
 //            new SearchCity("Kłodzko", Voivodeship.DOLNOŚLĄSKIE),
@@ -117,7 +117,7 @@ public class Main {
 
             new SearchCity("Bydgoszcz", Voivodeship.KUJAWSKO_POMORSKIE, WANTED_TRIES),
             new SearchCity("Toruń", Voivodeship.KUJAWSKO_POMORSKIE, WANTED_TRIES),
-            new SearchCity("Inowrocław", Voivodeship.KUJAWSKO_POMORSKIE),
+//            new SearchCity("Inowrocław", Voivodeship.KUJAWSKO_POMORSKIE),
 //            new SearchCity("Grudziądz", Voivodeship.KUJAWSKO_POMORSKIE),
 //            new SearchCity("Włocławek", Voivodeship.KUJAWSKO_POMORSKIE),
 //            new SearchCity("Żnin", Voivodeship.KUJAWSKO_POMORSKIE),
@@ -131,7 +131,7 @@ public class Main {
 
             new SearchCity("Lublin", Voivodeship.LUBELSKIE, WANTED_TRIES),
             new SearchCity("Zamość", Voivodeship.LUBELSKIE),
-            new SearchCity("Biała Podlaska", Voivodeship.LUBELSKIE),
+//            new SearchCity("Biała Podlaska", Voivodeship.LUBELSKIE),
 //            new SearchCity("Chełm", Voivodeship.LUBELSKIE),
 //            new SearchCity("Puławy", Voivodeship.LUBELSKIE),
 //            new SearchCity("Łuków", Voivodeship.LUBELSKIE),
@@ -146,7 +146,7 @@ public class Main {
 
             new SearchCity("Zielona Góra", Voivodeship.LUBUSKIE, WANTED_TRIES),
             new SearchCity("Gorzów Wielkopolski", Voivodeship.LUBUSKIE, WANTED_TRIES),
-            new SearchCity("Nowa Sól", Voivodeship.LUBUSKIE),
+//            new SearchCity("Nowa Sól", Voivodeship.LUBUSKIE),
 //            new SearchCity("Świebodzin", Voivodeship.LUBUSKIE),
             //            new SearchCity("Żary", Voivodeship.LUBUSKIE),
 //            new SearchCity("Kostrzyn nad Odrą", Voivodeship.LUBUSKIE),
@@ -198,7 +198,7 @@ public class Main {
 
             new SearchCity("Opole", Voivodeship.OPOLSKIE, WANTED_TRIES),
             new SearchCity("Kędzierzyn-Koźle", Voivodeship.OPOLSKIE),
-            new SearchCity("Kluczbork", Voivodeship.OPOLSKIE),
+//            new SearchCity("Kluczbork", Voivodeship.OPOLSKIE),
 //            new SearchCity("Krapkowice", Voivodeship.OPOLSKIE),
 //            new SearchCity("Nysa", Voivodeship.OPOLSKIE),
 //            new SearchCity("Kluczbork", Voivodeship.OPOLSKIE),
@@ -238,7 +238,7 @@ public class Main {
 
             new SearchCity("Gdańsk", Voivodeship.POMORSKIE, WANTED_TRIES),
             new SearchCity("Gdynia", Voivodeship.POMORSKIE, WANTED_TRIES),
-            new SearchCity("Słupsk", Voivodeship.POMORSKIE),
+//            new SearchCity("Słupsk", Voivodeship.POMORSKIE),
 //            new SearchCity("Chojnice", Voivodeship.POMORSKIE),
 //            new SearchCity("Wejherowo", Voivodeship.POMORSKIE),
 //            new SearchCity("Hel", Voivodeship.POMORSKIE),
@@ -266,7 +266,7 @@ public class Main {
 //            new SearchCity("Dąbrowa Górnicza", Voivodeship.ŚLĄSKIE),
 //            new SearchCity("Wodzisław Śląski", Voivodeship.ŚLĄSKIE),
 //            new SearchCity("Mysłowice", Voivodeship.ŚLĄSKIE),
-            new SearchCity("Żory", Voivodeship.ŚLĄSKIE),
+//            new SearchCity("Żory", Voivodeship.ŚLĄSKIE),
 
             new SearchCity("Kielce", Voivodeship.ŚWIĘTOKRZYSKIE, WANTED_TRIES),
             new SearchCity("Ostrowiec Świętokrzyski", Voivodeship.ŚWIĘTOKRZYSKIE),
@@ -281,7 +281,7 @@ public class Main {
 
             new SearchCity("Olsztyn", Voivodeship.WARMIŃSKO_MAZURSKIE, WANTED_TRIES),
             new SearchCity("Elbląg", Voivodeship.WARMIŃSKO_MAZURSKIE),
-            new SearchCity("Ełk", Voivodeship.WARMIŃSKO_MAZURSKIE),
+//            new SearchCity("Ełk", Voivodeship.WARMIŃSKO_MAZURSKIE),
 //            new SearchCity("Szczytno", Voivodeship.WARMIŃSKO_MAZURSKIE),
 //            new SearchCity("Giżycko", Voivodeship.WARMIŃSKO_MAZURSKIE),
 //            new SearchCity("Iława", Voivodeship.WARMIŃSKO_MAZURSKIE),
@@ -291,7 +291,7 @@ public class Main {
 
             new SearchCity("Poznań", Voivodeship.WIELKOPOLSKIE, WANTED_TRIES),
             new SearchCity("Konin", Voivodeship.WIELKOPOLSKIE),
-            new SearchCity("Gniezno", Voivodeship.WIELKOPOLSKIE),
+//            new SearchCity("Gniezno", Voivodeship.WIELKOPOLSKIE),
 //            new SearchCity("Piła", Voivodeship.WIELKOPOLSKIE),
 //            new SearchCity("Kalisz", Voivodeship.WIELKOPOLSKIE),
 //            new SearchCity("Leszno", Voivodeship.WIELKOPOLSKIE),
