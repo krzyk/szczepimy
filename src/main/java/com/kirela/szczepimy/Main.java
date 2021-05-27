@@ -345,7 +345,7 @@ public class Main {
 
         record SchedulerLatch(Creds creds, ScheduledExecutorService exec, CountDownLatch latch) {};
         List<SchedulerLatch> tasks = options.credentials.stream()
-            .map(c -> new SchedulerLatch(c, Executors.newScheduledThreadPool(4), new CountDownLatch(2)))
+            .map(c -> new SchedulerLatch(c, Executors.newScheduledThreadPool(4), new CountDownLatch(1)))
             .toList();
         tasks.forEach(t ->
             t.exec().scheduleAtFixedRate(() -> queueSearch(t.creds(), client, mapper, input, output, searchCount, endDate, t.latch(), retryCount), new Random().nextInt((int) waitTime.toMillis()), waitTime.toMillis(), TimeUnit.MILLISECONDS)
