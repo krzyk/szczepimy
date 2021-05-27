@@ -170,7 +170,7 @@ public class TableFormatter {
                         List<String> slotTimes = slots.stream()
                             .map(s -> LocalTime.ofInstant(s.startAt(), ZONE))
                             .sorted()
-                            .distinct()
+//                            .distinct()
                             .map(t -> DateTimeFormatter.ofPattern("HH:mm", Locale.forLanguageTag("pl")).format(t))
                             .toList();
                         //                        .collect(Collectors.joining("<br/>"));
