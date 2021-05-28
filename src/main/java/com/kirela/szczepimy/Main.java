@@ -300,7 +300,7 @@ public class Main {
 //            new SearchCity("Gostyń", Voivodeship.WIELKOPOLSKIE),
 
             new SearchCity("Szczecin", Voivodeship.ZACHODNIOPOMORSKIE, WANTED_TRIES),
-            new SearchCity("Koszalin", Voivodeship.ZACHODNIOPOMORSKIE),
+            new SearchCity("Koszalin", Voivodeship.ZACHODNIOPOMORSKIE)
 //            new SearchCity("Szczecinek", Voivodeship.ZACHODNIOPOMORSKIE)
 //            new SearchCity("Kołobrzeg", Voivodeship.ZACHODNIOPOMORSKIE),
 //            new SearchCity("Stargard", Voivodeship.ZACHODNIOPOMORSKIE),
