@@ -101,6 +101,10 @@ public class ServicePointFinder {
             address = point.address();
             place = "Sędziszów Małopolski";
         }
+        if (point.place().equals("GIŻYCKO") && point.address().equals("3 go maja 21")) {
+            address = "3-go Maja 21A";
+            place = "Giżycko";
+        }
         if (point.place().equals("Pogorzyce") && point.address().equalsIgnoreCase("pogorzyce 19/1")) {
             address = "Kolonia Stella 19/1";
             place = "Chrzanów";

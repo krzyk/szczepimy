@@ -310,7 +310,7 @@ public class Main {
 //            new SearchCity("Police", Voivodeship.ZACHODNIOPOMORSKIE)
         );
         LocalDateTime startDate = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
-        LocalDateTime endDate = startDate.plusWeeks(4).withHour(23).withMinute(59);
+        LocalDateTime endDate = startDate.plusWeeks(3).withHour(23).withMinute(59);
         Deque<SearchWithoutPrescription> input = new ConcurrentLinkedDeque<>(
             Stream.concat(findVoi.stream(), find.stream())
                 .filter(s -> options.voivodeships.contains(s.voivodeship()))
@@ -338,7 +338,7 @@ public class Main {
         STATS.info("Preparation time: {}", System.currentTimeMillis() - start);
         AtomicInteger searchCount = new AtomicInteger(0);
         AtomicInteger retryCount = new AtomicInteger(0);
-        Duration waitTime = Duration.ofMillis(5850);
+        Duration waitTime = Duration.ofMillis(6500);
 
         Queue<BasicSlotWithSearch> output = new ConcurrentLinkedQueue<>();
         start = System.currentTimeMillis();

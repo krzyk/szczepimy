@@ -365,6 +365,7 @@ public class TableFormatter {
             dirtyPhone = found.telephone();
         }
         dirtyPhone = dirtyPhone.trim();
+        dirtyPhone = dirtyPhone.replaceAll("([0-9]{2}) ([0-9]{3})-([0-9]{2})-([0-9]{2})", "$1$2$3$4");
         List<String> phoneList;
         if (dirtyPhone.contains("/")) {
             phoneList = Arrays.asList(dirtyPhone.split("/"));

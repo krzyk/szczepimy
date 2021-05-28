@@ -72,6 +72,7 @@ public class PlaceFinder {
                 .replaceAll("([^ ]+) ?- ?([^ ]+)", "$1-$2")
                 .replaceAll("([^ ]+) [0-9]+[a-z]?$", "$1")
                 .replaceAll("czerwiensk odrzanski", "czerwiensk")
+                .replaceAll(" kolonia", "-kolonia")
                 .replaceAll("gdansk .+", "gdansk")
                 .replaceAll("krakow-.+", "krakow")
                 .replaceAll("warszawa .+", "warszawa")
