@@ -35,7 +35,10 @@ public class PlaceFinder {
 
     public RealNamePlace findInAddress(String name, Voivodeship voivodeship) {
         final String maybeCity;
-        if (name.contains(",")) {
+        if (name.startsWith("Szczytno,")) {
+            maybeCity = "Szczytno";
+        }
+        else if (name.contains(",")) {
             maybeCity = name.substring(name.lastIndexOf(',') + 1).trim();
         } else {
             maybeCity = name;
@@ -56,6 +59,9 @@ public class PlaceFinder {
         if (voivodeship.equals(Voivodeship.PODLASKIE) && name.equals("piatnica")) {
             name = "piatnica poduchowna";
         }
+        if (voivodeship.equals(Voivodeship.MAZOWIECKIE) && name.equals("")) {
+            name = "piatnica poduchowna";
+        }
         return new NormalizedPlaceVoivodeship(
             name
                 .replace("m. st. ", "")
@@ -67,10 +73,11 @@ public class PlaceFinder {
                 .replace("lodz - poradnie", "lodz")
                 .replace("milejow osada", "milejow")
                 .replace("mlp.", "malopolski")
+                .replace("wlkp.", "wielkopolski")
                 .replace("ostrowiec sw.", "ostrowiec swietokrzyski")
                 .replaceAll(" +", " ")
                 .replaceAll("([^ ]+) ?- ?([^ ]+)", "$1-$2")
-                .replaceAll("([^ ]+) [0-9]+[a-z]?$", "$1")
+                .replaceAll("([^ ]+) [0-9]+[a-z]?\\.?$", "$1")
                 .replaceAll("czerwiensk odrzanski", "czerwiensk")
                 .replaceAll(" kolonia", "-kolonia")
                 .replaceAll("gdansk .+", "gdansk")

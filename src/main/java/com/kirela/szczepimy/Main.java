@@ -338,7 +338,7 @@ public class Main {
         STATS.info("Preparation time: {}", System.currentTimeMillis() - start);
         AtomicInteger searchCount = new AtomicInteger(0);
         AtomicInteger retryCount = new AtomicInteger(0);
-        Duration waitTime = Duration.ofMillis(6500);
+        Duration waitTime = Duration.ofMillis(6600);
 
         Queue<BasicSlotWithSearch> output = new ConcurrentLinkedQueue<>();
         start = System.currentTimeMillis();
