@@ -685,7 +685,7 @@ public class Main {
             input.offer(searchWithoutPrescription);
         } catch (IllegalStateException e) {
             LOG.error("{} | other error: {}", creds.prescriptionId().substring(0, 2), out.body());
-            input.offer(searchWithoutPrescription);
+//            input.offer(searchWithoutPrescription);
         } catch (JsonProcessingException e) {
             throw new IllegalStateException(e);
         } finally {
