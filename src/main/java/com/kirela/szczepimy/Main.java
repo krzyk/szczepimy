@@ -683,9 +683,6 @@ public class Main {
             retryCount.incrementAndGet();
             LOG.warn("{} | Rate limit, readding search", creds.prescriptionId().substring(0, 2));
             input.offer(searchWithoutPrescription);
-        } catch (IllegalStateException e) {
-            LOG.error("{} | other error: {}", creds.prescriptionId().substring(0, 2), out.body());
-//            input.offer(searchWithoutPrescription);
         } catch (JsonProcessingException e) {
             throw new IllegalStateException(e);
         } finally {
@@ -721,8 +718,9 @@ public class Main {
 //                    LOG.warn("*** rate limit ***");
                     throw new RateLimitException();
                 } else {
-                    throw new IllegalStateException();
+                    LOG.error("{} | other error: {}", creds.prescriptionId().substring(0, 2), out.body());
                 }
+                return Optional.empty();
             }
             return Optional.of(out.body());
         } catch (IOException | InterruptedException e) {
