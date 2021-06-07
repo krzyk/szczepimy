@@ -75,6 +75,7 @@ public class PlaceFinder {
                 .replace("mlp.", "malopolski")
                 .replace("wlkp.", "wielkopolski")
                 .replace("ostrowiec sw.", "ostrowiec swietokrzyski")
+                .replaceAll("^wies +", "")
                 .replaceAll(" +", " ")
                 .replaceAll("([^ ]+) ?- ?([^ ]+)", "$1-$2")
                 .replaceAll("([^ ]+) [0-9]+[a-z]?\\.?$", "$1")
