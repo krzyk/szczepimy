@@ -32,4 +32,10 @@ public class Options {
 
     @CommandLine.Option(names = "--wait", description = "Wait time between searches (default: ${DEFAULT-VALUE})")
     int wait = 1000;
+
+    @CommandLine.Option(required = true, names = "--bot-key", description = "Telegram bot key (default: ${DEFAULT-VALUE})")
+    String botKey;
+
+    @CommandLine.Option(required = true, names = "--chat-id", description = "Telegram chat id (default: ${DEFAULT-VALUE})")
+    String chatId;
 }

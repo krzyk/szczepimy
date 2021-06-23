@@ -56,22 +56,6 @@ public class Main {
     private static final Logger LOG = LogManager.getLogger(Main.class);
     private static final Logger STATS = LogManager.getLogger("STATS");
     private static final int WANTED_TRIES = 13;
-    // https://www.gov.pl/api/data/covid-vaccination-point   -> service-points.json
-
-    // punkty adresowe z https://eteryt.stat.gov.pl/eTeryt/rejestr_teryt/udostepnianie_danych/baza_teryt/uzytkownicy_indywidualni/pobieranie/pliki_pelne.aspx?contrast=default
-    // albo z https://pacjent.erejestracja.ezdrowie.gov.pl/teryt/api/woj/06/simc?namePrefix=Krak
-
-
-    // https://pacjent.erejestracja.ezdrowie.gov.pl/api/servicePoints/find
-    // "{"voiID":"12","geoID":"1261011"}
-
-//    public static record FoundAppointment(String id, LocalDateTime date, Specialization specialization, Clinic clinic, String  doctor) implements Comparable<FoundAppointment> {
-//        @Override
-//        public int compareTo(FoundAppointment other) {
-//            return date.compareTo(other.date);
-//        }
-//    }
-
 
     record SlotWithVoivodeship(BasicSlotWithSearch slot, Voivodeship voivodeship) {};
 
@@ -90,7 +74,6 @@ public class Main {
 
         GminaFinder gminaFinder = new GminaFinder();
         PlaceFinder placeFinder = new PlaceFinder();
-//        System.out.println(gminaFinder.find("Rzeszów", Voivodeship.PODKARPACKIE));
 
         HttpClient client = HttpClient.newBuilder()
             .followRedirects(HttpClient.Redirect.ALWAYS)
@@ -370,82 +353,6 @@ public class Main {
         final long searchTime = System.currentTimeMillis() - start;
         STATS.info("Waited for search: {}", searchTime);
 
-//        try {
-//            start = System.currentTimeMillis();
-//            long lastSearchTime = 0;
-//            for (SearchCity searchCity : Stream.concat(findVoi.stream(), find.stream())
-//                .filter(s -> options.voivodeships.contains(s.voivodeship()))
-//                .toList()) {
-//                LOG.info("Processing {}", searchCity);
-//                Optional<Gmina> gmina = Optional.ofNullable(searchCity.name())
-//                    .map(n -> gminaFinder.find(n, searchCity.voivodeship));
-//                for (List<VaccineType> vaccines : vaccineSets(options)) {
-//                    LocalDateTime startDate = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
-//                    final LocalDateTime endDate = startDate.plusWeeks(4).withHour(23).withMinute(59);
-////                    final LocalDateTime endDate = LocalDateTime.of(2021, 5, 31, 23, 59);
-//                    int tries = 0;
-//                    while (startDate.isBefore(endDate)) {
-//                        LOG.info("city={}, vaccine={}: try={}, start={}, end={}, pointId={}", searchCity.name(), vaccines, tries, startDate, endDate, searchCity.servicePointId());
-//                        var search = new Search(
-//                            new DateRange(startDate.toLocalDate(), endDate.toLocalDate()),
-//                            new TimeRange(
-//                                startDate.toLocalTime(),
-//                                endDate.toLocalTime()
-//                            ),
-//                            creds.prescriptionId(),
-//                            vaccines,
-//                            searchCity.voivodeship(),
-//                            gmina.orElse(null),
-//                            searchCity.servicePointId(),
-//                            null
-//                        );
-//                        searchCount++;
-//                        long now = System.currentTimeMillis();
-//                        LOG.info("time since last search = {}", now - lastSearchTime);
-//                        if (now - lastSearchTime < options.wait) {
-//                            Thread.sleep(options.wait - (now - lastSearchTime));
-//                        }
-//                        lastSearchTime = System.currentTimeMillis();
-//                        String body = webSearch(options, creds, client, mapper, search);
-//
-//                        final Set<BasicSlotWithSearch> list = Optional.ofNullable(mapper.readValue(body, Result.class).list()).orElse(List.of()).stream()
-//                            .map(s -> new BasicSlotWithSearch(s, search)).collect(Collectors.toSet());
-//
-////                        startDate = startDateFromMissingDates(startDate, endDate, list);
-//                        startDate = startDateFromLastFoundDate(endDate, list);
-//                        LOG.info("Found for {}, {}: {} slots, nextDate = {}", searchCity.name, vaccines, list.size(), startDate);
-//
-//                        final Set<SlotWithVoivodeship> lastResults = list.stream()
-//                            .map(s -> new SlotWithVoivodeship(s, searchCity.voivodeship()))
-//                            .collect(Collectors.toSet());
-//                        results.addAll(lastResults);
-//                        tries++;
-//                        final int unwantedTries = 1;
-//                        if (finishLoop(voiCities, searchCity, vaccines, tries, lastResults, WANTED_TRIES, unwantedTries)) {
-//                            if (!unwantedVaccines(vaccines) && tries > unwantedTries && !lastResults.isEmpty()) {
-//                                LOG.info(
-//                                    "More data exists for {}, {}, {}, last startDate={}",
-//                                    searchCity.voivodeship(),
-//                                    searchCity.name(),
-//                                    vaccines,
-//                                    startDate
-//                                );
-//                            }
-//                            break;
-//                        }
-//                    }
-//                }
-//            }
-//            STATS.info("Search time: {}, time/search: {}", System.currentTimeMillis() - start, (System.currentTimeMillis() - start)/searchCount);
-//        } catch (Exception ex) {
-//            LOG.error("Exception", ex);
-//            StringWriter writer = new StringWriter();
-//            ex.printStackTrace(new PrintWriter(writer));
-//            telegram("Prawdopodobnie wygasła sesja (%s): \n ```\n%s\n```".formatted(ex.getMessage(), writer.toString()));
-//        } finally {
-//            LOG.info("Search count = {}, results = {}, results/count = {}", searchCount, results.size(), results.size()/searchCount);
-//        }
-
         try {
             start = System.currentTimeMillis();
             Set<SlotWithVoivodeship> results = output.stream()
@@ -463,7 +370,7 @@ public class Main {
             new Stats(options.output).store(results);
         } catch (Exception ex) {
             LOG.error("Received error in formatter/stats", ex);
-            telegram("Error in formatter (%s)".formatted(ex.getMessage()));
+            telegram("Error in formatter (%s)".formatted(ex.getMessage()), options.);
         }
     }
 
@@ -473,7 +380,7 @@ public class Main {
             .map(BasicSlotWithSearch::startAt)
             .map(s -> s.atZone(ZoneId.of("Europe/Warsaw")))
             .map(ZonedDateTime::toLocalDateTime)
-            //.map(s -> s.plusDays(1))
+            //.map(s -> s.plusDays(1))  // better?
             .map(s -> s.plusMinutes(1))
             .distinct()
             .max(Comparator.naturalOrder())
@@ -512,7 +419,6 @@ public class Main {
 
     private static boolean unwantedVaccines(List<VaccineType> vaccines) {
         return vaccines.equals(List.of(VaccineType.AZ));
-//        return false;
     }
 
     private static Set<List<VaccineType>> vaccineSets(Options options) {
@@ -590,7 +496,7 @@ public class Main {
         return HttpRequest.newBuilder()
             .header(USER_AGENT, CHROME)
             .header("Accept", "application/json, text/plain, */*")
-//            .header("Accept-Encoding", "gzip")
+//            .header("Accept-Encoding", "gzip") // doesn't help?
             .header("Referer", "https://pacjent.erejestracja.ezdrowie.gov.pl/wizyty")
             .header("Cookie", "patient_sid=%s".formatted(creds.sid()))
             .header("X-Csrf-Token", creds.csrf())
@@ -602,10 +508,7 @@ public class Main {
             .header("Upgrade-Insecure-Requests", "1");
     }
 
-    private static void telegram(String msg) {
-        // curl -v "https://api.telegram.org/bot759993662:AAFeW6xrNpgSQl1OMixkkPIujxPZU4WoS7g/sendMessage?chat_id=553846308&text=hello"
-        String botKey = "759993662:AAFeW6xrNpgSQl1OMixkkPIujxPZU4WoS7g";
-        String chatId = "553846308";
+    private static void telegram(String msg, String botKey, String chatId) {
         try {
             HttpClient.newBuilder().build().send(
                 HttpRequest.newBuilder().uri(
