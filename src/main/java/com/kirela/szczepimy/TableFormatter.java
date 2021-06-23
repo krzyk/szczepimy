@@ -54,6 +54,9 @@ public class TableFormatter {
     );
 
     private final Map<UUID, String> phoneCorrections = Map.ofEntries(
+        Map.entry(UUID.fromString("a7833a7d-2aca-4676-a5c9-3c028af3c0b5"), ""),  // zgłasza się prywatne mieszkanie?
+        Map.entry(UUID.fromString("1f912bc0-cb3b-42e6-9106-a6907f671e72"), "692733446"),
+        Map.entry(UUID.fromString("4706ce94-7dc6-4007-a84a-ffbe7e5ac058"), "585858800"),
         Map.entry(UUID.fromString("a33adff7-e2e1-4c62-8c50-1f84518eb4f0"), ""), // numer nieaktywny
         Map.entry(UUID.fromString("0893961c-3134-4d46-bc1d-d4c69c03df58"), "508777223"), // siewna
         Map.entry(UUID.fromString("4946ac25-d078-4942-8aa9-1137d10678e4"), "517177267"), // NZOZ Sokrates w Zgłobniu
