@@ -370,7 +370,7 @@ public class Main {
             new Stats(options.output).store(results);
         } catch (Exception ex) {
             LOG.error("Received error in formatter/stats", ex);
-            telegram("Error in formatter (%s)".formatted(ex.getMessage()), options.);
+            telegram("Error in formatter (%s)".formatted(ex.getMessage()), options.botKey, options.chatId);
         }
     }
 
