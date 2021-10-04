@@ -2,6 +2,7 @@ package com.kirela.szczepimy;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -488,6 +489,7 @@ public class Main {
     public static ObjectMapper getMapper() {
         var mapper = new ObjectMapper().registerModule(new JavaTimeModule());
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         return mapper;
     }
@@ -601,7 +603,7 @@ public class Main {
                 .stream()
                 .map(s -> new BasicSlotWithSearch(s, search)).collect(Collectors.toSet());
         } catch (JsonProcessingException e) {
-            LOG.error("Problem deserializing");
+            LOG.error("Problem deserializing from '{}'", body, e);
             return Set.of();
         }
     }
